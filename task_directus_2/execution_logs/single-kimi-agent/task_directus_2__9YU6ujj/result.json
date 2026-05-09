@@ -1,16 +1,16 @@
 {
-    "id": "97bbe417-e9ac-4a70-84a2-e08efc21f4f7",
-    "task_name": "swarmbench/express-async-errors",
-    "trial_name": "express-async-errors__NdUAMj4",
-    "trial_uri": "file:///W:/git/tasks/express-async-errors/execution_logs/oracle/express-async-errors__NdUAMj4",
+    "id": "b7c7f7f9-f83f-478b-9f9f-8e3672c4d363",
+    "task_name": "swarmbench/8836d4b7ec4248fe8074265d17910ac3-SWARMBENCH-FANOUT-CODESWE-DIRECTUS-BUG-FIXES",
+    "trial_name": "task_directus_2__9YU6ujj",
+    "trial_uri": "file:///W:/git/tasks/task_directus_2/execution_logs/single-kimi-agent/task_directus_2__9YU6ujj",
     "task_id": {
-        "path": "..\\tasks\\express-async-errors"
+        "path": "..\\tasks\\task_directus_2"
     },
     "source": null,
-    "task_checksum": "f78e3c0e8f5b5389083dbde7147c82ad4b9d4cd8acd9b3a1932a1fc64e22caf1",
+    "task_checksum": "cba007a1e5eee212cca15643a083c2151caa065b223ef631373eb2dd0ad99118",
     "config": {
         "task": {
-            "path": "..\\tasks\\express-async-errors",
+            "path": "..\\tasks\\task_directus_2",
             "git_url": null,
             "git_commit_id": null,
             "name": null,
@@ -19,22 +19,24 @@
             "download_dir": null,
             "source": null
         },
-        "trial_name": "express-async-errors__NdUAMj4",
-        "trials_dir": "..\\tasks\\express-async-errors\\execution_logs\\oracle",
+        "trial_name": "task_directus_2__9YU6ujj",
+        "trials_dir": "..\\tasks\\task_directus_2\\execution_logs\\single-kimi-agent",
         "timeout_multiplier": 1.0,
         "agent_timeout_multiplier": null,
         "verifier_timeout_multiplier": null,
         "agent_setup_timeout_multiplier": null,
         "environment_build_timeout_multiplier": null,
         "agent": {
-            "name": "oracle",
+            "name": "swarm-kimi-single",
             "import_path": null,
-            "model_name": null,
+            "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
             "override_timeout_sec": null,
             "override_setup_timeout_sec": null,
             "max_timeout_sec": null,
             "kwargs": {},
-            "env": {}
+            "env": {
+                "FIREWORKS_API_KEY": "${FIREWORKS_API_KEY}"
+            }
         },
         "environment": {
             "type": "docker",
@@ -59,44 +61,47 @@
             "disable": false
         },
         "artifacts": [],
-        "job_id": "861b527a-d147-49e0-99e9-4d8985da3a7f"
+        "job_id": "6f0115ce-7a83-40c4-b21e-919f54e4f4e5"
     },
     "agent_info": {
-        "name": "oracle",
-        "version": "1.0.0",
-        "model_info": null
+        "name": "swarm-kimi-single",
+        "version": "unknown",
+        "model_info": {
+            "name": "accounts/fireworks/models/kimi-k2p5",
+            "provider": "fireworks_ai"
+        }
     },
     "agent_result": {
-        "n_input_tokens": null,
-        "n_cache_tokens": null,
-        "n_output_tokens": null,
+        "n_input_tokens": 547224,
+        "n_cache_tokens": 465800,
+        "n_output_tokens": 7216,
         "cost_usd": null,
         "rollout_details": null,
         "metadata": null
     },
     "verifier_result": {
         "rewards": {
-            "reward": 1.0
+            "reward": 0.7
         }
     },
     "exception_info": null,
-    "started_at": "2026-05-07T15:45:05.596859Z",
-    "finished_at": "2026-05-07T15:45:29.781954Z",
+    "started_at": "2026-05-09T03:07:10.441321Z",
+    "finished_at": "2026-05-09T03:15:13.854032Z",
     "environment_setup": {
-        "started_at": "2026-05-07T15:45:05.899149Z",
-        "finished_at": "2026-05-07T15:45:23.105129Z"
+        "started_at": "2026-05-09T03:07:10.914239Z",
+        "finished_at": "2026-05-09T03:07:18.331245Z"
     },
     "agent_setup": {
-        "started_at": "2026-05-07T15:45:23.105175Z",
-        "finished_at": "2026-05-07T15:45:23.105255Z"
+        "started_at": "2026-05-09T03:07:18.331277Z",
+        "finished_at": "2026-05-09T03:08:14.953275Z"
     },
     "agent_execution": {
-        "started_at": "2026-05-07T15:45:23.105359Z",
-        "finished_at": "2026-05-07T15:45:24.639563Z"
+        "started_at": "2026-05-09T03:08:14.953420Z",
+        "finished_at": "2026-05-09T03:15:08.891816Z"
     },
     "verifier": {
-        "started_at": "2026-05-07T15:45:24.639862Z",
-        "finished_at": "2026-05-07T15:45:27.251861Z"
+        "started_at": "2026-05-09T03:15:08.937843Z",
+        "finished_at": "2026-05-09T03:15:10.132051Z"
     },
     "step_results": null
 }

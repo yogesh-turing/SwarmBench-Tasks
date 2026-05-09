@@ -1,0 +1,704 @@
+{
+  "schema_version": "ATIF-v1.6",
+  "session_id": "unknown",
+  "agent": {
+    "name": "swarm-kimi-single",
+    "version": "unknown",
+    "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5"
+  },
+  "steps": [
+    {
+      "step_id": 1,
+      "source": "agent",
+      "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+      "message": "I'll start by exploring the relevant files to understand the current state and what needs to be fixed.",
+      "reasoning_content": "Let me understand the task. I need to implement four fixes in the Directus codebase:\n\n1. **Bug 1** - SSR-safe shortcut listener initialization in `packages/composables/src/use-shortcut.ts`\n2. **Bug 2** - Production build excludes test-only sources in `api/tsdown.config.ts` and `api/tsconfig.prod.json`\n3. **Bug 3** - Reject collection names containing slash in `api/src/services/collections.ts`\n4. **Bug 4** - Respect collection accountability in version save in `api/src/services/versions.ts`\n\nLet me start by exploring the relevant files and understanding the current state.",
+      "tool_calls": [
+        {
+          "tool_call_id": "functions.ReadFile:0",
+          "function_name": "ReadFile",
+          "arguments": {
+            "path": "/testbed/packages/composables/src/use-shortcut.ts"
+          }
+        },
+        {
+          "tool_call_id": "functions.ReadFile:1",
+          "function_name": "ReadFile",
+          "arguments": {}
+        },
+        {
+          "tool_call_id": "functions.ReadFile:2",
+          "function_name": "ReadFile",
+          "arguments": {}
+        },
+        {
+          "tool_call_id": "functions.ReadFile:3",
+          "function_name": "ReadFile",
+          "arguments": {}
+        },
+        {
+          "tool_call_id": "functions.ReadFile:4",
+          "function_name": "ReadFile",
+          "arguments": {}
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "functions.ReadFile:0",
+            "content": "     1\timport type { ComponentPublicInstance, Ref } from 'vue';\n     2\timport { onMounted, onUnmounted, ref } from 'vue';\n     3\t\n     4\ttype ShortcutHandler = (event: KeyboardEvent, cancelNext: () => void) => void | any | boolean;\n     5\t\n     6\texport const keyMap: Record<string, string> = {\n     7\t\tControl: 'meta',\n     8\t\tCommand: 'meta',\n     9\t};\n    10\t\n    11\texport const systemKeys = ['meta', 'shift', 'alt', 'backspace', 'delete', 'tab', 'capslock', 'enter', 'home', 'end'];\n    12\t\n    13\tconst keysDown: Set<string> = new Set([]);\n    14\tconst handlers: Record<string, ShortcutHandler[]> = {};\n    15\t\n    16\tdocument.body.addEventListener('keydown', (event: KeyboardEvent) => {\n    17\t\tif (event.repeat || !event.key) return;\n    18\t\n    19\t\tkeysDown.add(mapKeys(event));\n    20\t\tcallHandlers(event);\n    21\t});\n    22\t\n    23\tdocument.body.addEventListener('keyup', (event: KeyboardEvent) => {\n    24\t\tif (event.repeat || !event.key) return;\n    25\t\tkeysDown.clear();\n    26\t});\n    27\t\n    28\texport function useShortcut(\n    29\t\tshortcuts: string | string[],\n    30\t\thandler: ShortcutHandler,\n    31\t\treference: Ref<HTMLElement | undefined> | Ref<ComponentPublicInstance | undefined> = ref(\n    32\t\t\tdocument.body,\n    33\t\t) as Ref<HTMLElement>,\n    34\t): void {\n    35\t\tconst callback: ShortcutHandler = (event, cancelNext) => {\n    36\t\t\tif (!reference.value) return;\n    37\t\t\tconst ref = reference.value instanceof HTMLElement ? reference.value : (reference.value.$el as HTMLElement);\n    38\t\n    39\t\t\tif (\n    40\t\t\t\tdocument.activeElement === ref ||\n    41\t\t\t\tref.contains(document.activeElement) ||\n    42\t\t\t\tdocument.activeElement === document.body\n    43\t\t\t) {\n    44\t\t\t\tevent.preventDefault();\n    45\t\t\t\treturn handler(event, cancelNext);\n    46\t\t\t}\n    47\t\n    48\t\t\treturn false;\n    49\t\t};\n    50\t\n    51\t\tonMounted(() => {\n    52\t\t\t[shortcuts].flat().forEach((shortcut) => {\n    53\t\t\t\tif (shortcut in handlers) {\n    54\t\t\t\t\thandlers[shortcut]?.unshift(callback);\n    55\t\t\t\t} else {\n    56\t\t\t\t\thandlers[shortcut] = [callback];\n    57\t\t\t\t}\n    58\t\t\t});\n    59\t\t});\n    60\t\n    61\t\tonUnmounted(() => {\n    62\t\t\t[shortcuts].flat().forEach((shortcut) => {\n    63\t\t\t\tconst shortcutHandler = handlers[shortcut];\n    64\t\n    65\t\t\t\tif (shortcutHandler) {\n    66\t\t\t\t\tconst filteredHandlers = shortcutHandler.filter((f) => f !== callback);\n    67\t\n    68\t\t\t\t\thandlers[shortcut] = filteredHandlers;\n    69\t\n    70\t\t\t\t\tif (filteredHandlers.length === 0) {\n    71\t\t\t\t\t\tdelete handlers[shortcut];\n    72\t\t\t\t\t}\n    73\t\t\t\t}\n    74\t\t\t});\n    75\t\t});\n    76\t}\n    77\t\n    78\tfunction mapKeys(key: KeyboardEvent) {\n    79\t\tconst isLatinAlphabet = /^[a-zA-Z0-9]*?$/g;\n    80\t\n    81\t\tlet keyString = key.key.match(isLatinAlphabet) === null ? key.code.replace(/(Key|Digit)/g, '') : key.key;\n    82\t\n    83\t\tconst keyStringInMap = keyMap[keyString];\n    84\t\n    85\t\tkeyString = keyStringInMap ?? keyString;\n    86\t\tkeyString = keyString.toLowerCase();\n    87\t\n    88\t\treturn keyString;\n    89\t}\n    90\t\n    91\tfunction callHandlers(event: KeyboardEvent) {\n    92\t\tObject.entries(handlers).forEach(([key, value]) => {\n    93\t\t\tconst keys = key.split('+');\n    94\t\n    95\t\t\tfor (key of keysDown) {\n    96\t\t\t\tif (keys.includes(key) === false) return;\n    97\t\t\t}\n    98\t\n    99\t\t\tfor (key of keys) {\n   100\t\t\t\tif (keysDown.has(key) === false) return;\n   101\t\t\t}\n   102\t\n   103\t\t\tfor (let i = 0; i < value.length; i++) {\n   104\t\t\t\tlet cancel = false;\n   105\t\n   106\t\t\t\tvalue[i]?.(event, () => {\n   107\t\t\t\t\tcancel = true;\n   108\t\t\t\t});\n   109\t\n   110\t\t\t\t// if cancelNext is called, discontinue going through the queue.\n   111\t\t\t\tif (typeof cancel === 'boolean' && cancel) break;\n   112\t\t\t}\n   113\t\t});\n   114\t}\n"
+          },
+          {
+            "source_call_id": "functions.ReadFile:1",
+            "content": "     1\timport { defineConfig } from 'tsdown';\n     2\t\n     3\texport default defineConfig({\n     4\t\tentry: ['src/**/*.ts', '!src/**/*.d.ts', '!src/**/*.test.ts'],\n     5\t\tunbundle: true,\n     6\t\ttsconfig: 'tsconfig.prod.json',\n     7\t\ttreeshake: false,\n     8\t});\n"
+          },
+          {
+            "source_call_id": "functions.ReadFile:2",
+            "content": "     1\t{\n     2\t\t\"extends\": \"./tsconfig.json\",\n     3\t\t\"exclude\": [\"**/*.test.ts\", \"src/__utils__\", \"src/__setup__\"]\n     4\t}\n"
+          },
+          {
+            "source_call_id": "functions.ReadFile:3",
+            "content": "     1\timport { useEnv } from '@directus/env';\n     2\timport { ForbiddenError, InvalidPayloadError } from '@directus/errors';\n     3\timport type { SchemaInspector } from '@directus/schema';\n     4\timport { createInspector } from '@directus/schema';\n     5\timport { type BaseCollectionMeta, systemCollectionRows } from '@directus/system-data';\n     6\timport type {\n     7\t\tAbstractServiceOptions,\n     8\t\tAccountability,\n     9\t\tActionEventParams,\n    10\t\tFieldMeta,\n    11\t\tFieldMutationOptions,\n    12\t\tMutationOptions,\n    13\t\tRawCollection,\n    14\t\tRawField,\n    15\t\tSchemaOverview,\n    16\t} from '@directus/types';\n    17\timport { addFieldFlag } from '@directus/utils';\n    18\timport type Keyv from 'keyv';\n    19\timport type { Knex } from 'knex';\n    20\timport { chunk, groupBy, merge, omit } from 'lodash-es';\n    21\timport { clearSystemCache, getCache } from '../cache.js';\n    22\timport { ALIAS_TYPES } from '../constants.js';\n    23\timport type { Helpers } from '../database/helpers/index.js';\n    24\timport { getHelpers } from '../database/helpers/index.js';\n    25\timport getDatabase, { getSchemaInspector } from '../database/index.js';\n    26\timport emitter from '../emitter.js';\n    27\timport { fetchAllowedCollections } from '../permissions/modules/fetch-allowed-collections/fetch-allowed-collections.js';\n    28\timport { validateAccess } from '../permissions/modules/validate-access/validate-access.js';\n    29\timport type { Collection } from '../types/index.js';\n    30\timport { getSchema } from '../utils/get-schema.js';\n    31\timport { shouldClearCache } from '../utils/should-clear-cache.js';\n    32\timport { transaction } from '../utils/transaction.js';\n    33\timport { buildCollectionAndFieldRelations } from './fields/build-collection-and-field-relations.js';\n    34\timport { getCollectionMetaUpdates } from './fields/get-collection-meta-updates.js';\n    35\timport { getCollectionRelationList } from './fields/get-collection-relation-list.js';\n    36\timport { FieldsService } from './fields.js';\n    37\timport { ItemsService } from './items.js';\n    38\t\n    39\texport class CollectionsService {\n    40\t\tknex: Knex;\n    41\t\thelpers: Helpers;\n    42\t\taccountability: Accountability | null;\n    43\t\tschemaInspector: SchemaInspector;\n    44\t\tschema: SchemaOverview;\n    45\t\tcache: Keyv<any> | null;\n    46\t\tsystemCache: Keyv<any>;\n    47\t\n    48\t\tconstructor(options: AbstractServiceOptions) {\n    49\t\t\tthis.knex = options.knex || getDatabase();\n    50\t\t\tthis.helpers = getHelpers(this.knex);\n    51\t\t\tthis.accountability = options.accountability || null;\n    52\t\t\tthis.schemaInspector = options.knex ? createInspector(options.knex) : getSchemaInspector();\n    53\t\t\tthis.schema = options.schema;\n    54\t\n    55\t\t\tconst { cache, systemCache } = getCache();\n    56\t\t\tthis.cache = cache;\n    57\t\t\tthis.systemCache = systemCache;\n    58\t\t}\n    59\t\n    60\t\t/**\n    61\t\t * Create a single new collection\n    62\t\t */\n    63\t\tasync createOne(payload: RawCollection, opts?: FieldMutationOptions): Promise<string> {\n    64\t\t\tif (this.accountability && this.accountability.admin !== true) {\n    65\t\t\t\tthrow new ForbiddenError();\n    66\t\t\t}\n    67\t\n    68\t\t\tif (!('collection' in payload)) throw new InvalidPayloadError({ reason: `\"collection\" is required` });\n    69\t\n    70\t\t\tif (typeof payload.collection !== 'string' || payload.collection === '') {\n    71\t\t\t\tthrow new InvalidPayloadError({ reason: `\"collection\" must be a non-empty string` });\n    72\t\t\t}\n    73\t\n    74\t\t\tif (payload.collection.startsWith('directus_')) {\n    75\t\t\t\tthrow new InvalidPayloadError({ reason: `Collections can't start with \"directus_\"` });\n    76\t\t\t}\n    77\t\n    78\t\t\tpayload.collection = await this.helpers.schema.parseCollectionName(payload.collection);\n    79\t\n    80\t\t\tconst nestedActionEvents: ActionEventParams[] = [];\n    81\t\n    82\t\t\ttry {\n    83\t\t\t\tconst existingCollections: string[] = [\n    84\t\t\t\t\t...((await this.knex.select('collection').from('directus_collections'))?.map(({ collection }) => collection) ??\n    85\t\t\t\t\t\t[]),\n    86\t\t\t\t\t...Object.keys(this.schema.collections),\n    87\t\t\t\t];\n    88\t\n    89\t\t\t\tif (existingCollections.includes(payload.collection)) {\n    90\t\t\t\t\tthrow new InvalidPayloadError({ reason: `Collection \"${payload.collection}\" already exists` });\n    91\t\t\t\t}\n    92\t\n    93\t\t\t\tconst attemptConcurrentIndex = Boolean(opts?.attemptConcurrentIndex);\n    94\t\n    95\t\t\t\t// Create the collection/fields in a transaction so it'll be reverted in case of errors or\n    96\t\t\t\t// permission problems. This might not work reliably in MySQL, as it doesn't support DDL in\n    97\t\t\t\t// transactions.\n    98\t\t\t\tawait transaction(this.knex, async (trx) => {\n    99\t\t\t\t\tif (payload.schema) {\n   100\t\t\t\t\t\tif ('fields' in payload && !Array.isArray(payload.fields)) {\n   101\t\t\t\t\t\t\tthrow new InvalidPayloadError({ reason: `\"fields\" must be an array` });\n   102\t\t\t\t\t\t}\n   103\t\n   104\t\t\t\t\t\t/**\n   105\t\t\t\t\t\t * Directus heavily relies on the primary key of a collection, so we have to make sure that\n   106\t\t\t\t\t\t * every collection that is created has a primary key. If no primary key field is created\n   107\t\t\t\t\t\t * while making the collection, we default to an auto incremented id named `id`\n   108\t\t\t\t\t\t */\n   109\t\n   110\t\t\t\t\t\tconst injectedPrimaryKeyField: RawField = {\n   111\t\t\t\t\t\t\tfield: 'id',\n   112\t\t\t\t\t\t\ttype: 'integer',\n   113\t\t\t\t\t\t\tmeta: {\n   114\t\t\t\t\t\t\t\thidden: true,\n   115\t\t\t\t\t\t\t\tinterface: 'numeric',\n   116\t\t\t\t\t\t\t\treadonly: true,\n   117\t\t\t\t\t\t\t},\n   118\t\t\t\t\t\t\tschema: {\n   119\t\t\t\t\t\t\t\tis_primary_key: true,\n   120\t\t\t\t\t\t\t\thas_auto_increment: true,\n   121\t\t\t\t\t\t\t},\n   122\t\t\t\t\t\t};\n   123\t\n   124\t\t\t\t\t\tif (!payload.fields || payload.fields.length === 0) {\n   125\t\t\t\t\t\t\tpayload.fields = [injectedPrimaryKeyField];\n   126\t\t\t\t\t\t} else if (\n   127\t\t\t\t\t\t\t!payload.fields.some((f) => f.schema?.is_primary_key === true || f.schema?.has_auto_increment === true)\n   128\t\t\t\t\t\t) {\n   129\t\t\t\t\t\t\tpayload.fields = [injectedPrimaryKeyField, ...payload.fields];\n   130\t\t\t\t\t\t}\n   131\t\n   132\t\t\t\t\t\t// Ensure that every field meta has the field/collection fields filled correctly\n   133\t\t\t\t\t\tpayload.fields = payload.fields.map((field) => {\n   134\t\t\t\t\t\t\tif (field.meta) {\n   135\t\t\t\t\t\t\t\tfield.meta = {\n   136\t\t\t\t\t\t\t\t\t...field.meta,\n   137\t\t\t\t\t\t\t\t\tfield: field.field,\n   138\t\t\t\t\t\t\t\t\tcollection: payload.collection!,\n   139\t\t\t\t\t\t\t\t};\n   140\t\t\t\t\t\t\t}\n   141\t\n   142\t\t\t\t\t\t\t// Add flag for specific database type overrides\n   143\t\t\t\t\t\t\tconst flagToAdd = this.helpers.date.fieldFlagForField(field.type);\n   144\t\n   145\t\t\t\t\t\t\tif (flagToAdd) {\n   146\t\t\t\t\t\t\t\taddFieldFlag(field, flagToAdd);\n   147\t\t\t\t\t\t\t}\n   148\t\n   149\t\t\t\t\t\t\treturn field;\n   150\t\t\t\t\t\t});\n   151\t\n   152\t\t\t\t\t\tconst fieldsService = new FieldsService({ knex: trx, schema: this.schema });\n   153\t\n   154\t\t\t\t\t\tawait trx.schema.createTable(payload.collection, (table) => {\n   155\t\t\t\t\t\t\tfor (const field of payload.fields!) {\n   156\t\t\t\t\t\t\t\tif (field.type && ALIAS_TYPES.includes(field.type) === false) {\n   157\t\t\t\t\t\t\t\t\tfieldsService.addColumnToTable(table, payload.collection, field, {\n   158\t\t\t\t\t\t\t\t\t\tattemptConcurrentIndex,\n   159\t\t\t\t\t\t\t\t\t});\n   160\t\t\t\t\t\t\t\t}\n   161\t\t\t\t\t\t\t}\n   162\t\t\t\t\t\t});\n   163\t\n   164\t\t\t\t\t\tconst fieldItemsService = new ItemsService('directus_fields', {\n   165\t\t\t\t\t\t\tknex: trx,\n   166\t\t\t\t\t\t\taccountability: this.accountability,\n   167\t\t\t\t\t\t\tschema: this.schema,\n   168\t\t\t\t\t\t});\n   169\t\n   170\t\t\t\t\t\tconst fieldPayloads = payload.fields!.filter((field) => field.meta).map((field) => field.meta) as FieldMeta[];\n   171\t\n   172\t\t\t\t\t\t// Sort new fields that does not have any group defined, in ascending order.\n   173\t\t\t\t\t\t// Lodash merge is used so that the \"sort\" can be overridden if defined.\n   174\t\t\t\t\t\tlet sortedFieldPayloads = fieldPayloads\n   175\t\t\t\t\t\t\t.filter((field) => field?.group === undefined || field?.group === null)\n   176\t\t\t\t\t\t\t.map((field, index) => merge({ sort: index + 1 }, field));\n   177\t\n   178\t\t\t\t\t\t// Sort remaining new fields with group defined, if any, in ascending order.\n   179\t\t\t\t\t\t// sortedFieldPayloads will be less than fieldPayloads if it filtered out any fields with group defined.\n   180\t\t\t\t\t\tif (sortedFieldPayloads.length < fieldPayloads.length) {\n   181\t\t\t\t\t\t\tconst fieldsWithGroups = groupBy(\n   182\t\t\t\t\t\t\t\tfieldPayloads.filter((field) => field?.group),\n   183\t\t\t\t\t\t\t\t(field) => field?.group,\n   184\t\t\t\t\t\t\t);\n   185\t\n   186\t\t\t\t\t\t\t// The sort order is restarted from 1 for fields in each group and appended to sortedFieldPayloads.\n   187\t\t\t\t\t\t\t// Lodash merge is used so that the \"sort\" can be overridden if defined.\n   188\t\t\t\t\t\t\tfor (const [_group, fields] of Object.entries(fieldsWithGroups)) {\n   189\t\t\t\t\t\t\t\tsortedFieldPayloads = sortedFieldPayloads.concat(\n   190\t\t\t\t\t\t\t\t\tfields.map((field, index) => merge({ sort: index + 1 }, field)),\n   191\t\t\t\t\t\t\t\t);\n   192\t\t\t\t\t\t\t}\n   193\t\t\t\t\t\t}\n   194\t\n   195\t\t\t\t\t\tawait fieldItemsService.createMany(sortedFieldPayloads, {\n   196\t\t\t\t\t\t\tbypassEmitAction: (params) =>\n   197\t\t\t\t\t\t\t\topts?.bypassEmitAction ? opts.bypassEmitAction(params) : nestedActionEvents.push(params),\n   198\t\t\t\t\t\t\tbypassLimits: true,\n   199\t\t\t\t\t\t});\n   200\t\t\t\t\t}\n   201\t\n   202\t\t\t\t\tif (payload.meta) {\n   203\t\t\t\t\t\tconst collectionsItemsService = new ItemsService('directus_collections', {\n   204\t\t\t\t\t\t\tknex: trx,\n   205\t\t\t\t\t\t\taccountability: this.accountability,\n   206\t\t\t\t\t\t\tschema: this.schema,\n   207\t\t\t\t\t\t});\n   208\t\n   209\t\t\t\t\t\tawait collectionsItemsService.createOne(\n   210\t\t\t\t\t\t\t{\n   211\t\t\t\t\t\t\t\t...payload.meta,\n   212\t\t\t\t\t\t\t\tcollection: payload.collection,\n   213\t\t\t\t\t\t\t},\n   214\t\t\t\t\t\t\t{\n   215\t\t\t\t\t\t\t\tbypassEmitAction: (params) =>\n   216\t\t\t\t\t\t\t\t\topts?.bypassEmitAction ? opts.bypassEmitAction(params) : nestedActionEvents.push(params),\n   217\t\t\t\t\t\t\t},\n   218\t\t\t\t\t\t);\n   219\t\t\t\t\t}\n   220\t\n   221\t\t\t\t\treturn payload.collection;\n   222\t\t\t\t});\n   223\t\n   224\t\t\t\t// concurrent index creation cannot be done inside the transaction\n   225\t\t\t\tif (attemptConcurrentIndex && payload.schema && Array.isArray(payload.fields)) {\n   226\t\t\t\t\tconst fieldsService = new FieldsService({ schema: this.schema });\n   227\t\n   228\t\t\t\t\tfor (const field of payload.fields) {\n   229\t\t\t\t\t\tif (field.type && ALIAS_TYPES.includes(field.type) === false) {\n   230\t\t\t\t\t\t\tawait fieldsService.addColumnIndex(payload.collection, field, {\n   231\t\t\t\t\t\t\t\tattemptConcurrentIndex,\n   232\t\t\t\t\t\t\t});\n   233\t\t\t\t\t\t}\n   234\t\t\t\t\t}\n   235\t\t\t\t}\n   236\t\n   237\t\t\t\treturn payload.collection;\n   238\t\t\t} finally {\n   239\t\t\t\tif (shouldClearCache(this.cache, opts)) {\n   240\t\t\t\t\tawait this.cache.clear();\n   241\t\t\t\t}\n   242\t\n   243\t\t\t\tif (opts?.autoPurgeSystemCache !== false) {\n   244\t\t\t\t\tawait clearSystemCache({ autoPurgeCache: opts?.autoPurgeCache });\n   245\t\t\t\t}\n   246\t\n   247\t\t\t\tif (opts?.emitEvents !== false && nestedActionEvents.length > 0) {\n   248\t\t\t\t\tconst updatedSchema = await getSchema();\n   249\t\n   250\t\t\t\t\tfor (const nestedActionEvent of nestedActionEvents) {\n   251\t\t\t\t\t\tnestedActionEvent.context.schema = updatedSchema;\n   252\t\t\t\t\t\temitter.emitAction(nestedActionEvent.event, nestedActionEvent.meta, nestedActionEvent.context);\n   253\t\t\t\t\t}\n   254\t\t\t\t}\n   255\t\t\t}\n   256\t\t}\n   257\t\n   258\t\t/**\n   259\t\t * Create multiple new collections\n   260\t\t */\n   261\t\tasync createMany(payloads: RawCollection[], opts?: FieldMutationOptions): Promise<string[]> {\n   262\t\t\tconst nestedActionEvents: ActionEventParams[] = [];\n   263\t\n   264\t\t\ttry {\n   265\t\t\t\tconst collections = await transaction(this.knex, async (trx) => {\n   266\t\t\t\t\tconst service = new CollectionsService({\n   267\t\t\t\t\t\tschema: this.schema,\n   268\t\t\t\t\t\taccountability: this.accountability,\n   269\t\t\t\t\t\tknex: trx,\n   270\t\t\t\t\t});\n   271\t\n   272\t\t\t\t\tconst collectionNames: string[] = [];\n   273\t\n   274\t\t\t\t\tfor (const payload of payloads) {\n   275\t\t\t\t\t\tconst name = await service.createOne(payload, {\n   276\t\t\t\t\t\t\tautoPurgeCache: false,\n   277\t\t\t\t\t\t\tautoPurgeSystemCache: false,\n   278\t\t\t\t\t\t\tbypassEmitAction: (params) => nestedActionEvents.push(params),\n   279\t\t\t\t\t\t\tattemptConcurrentIndex: Boolean(opts?.attemptConcurrentIndex),\n   280\t\t\t\t\t\t});\n   281\t\n   282\t\t\t\t\t\tcollectionNames.push(name);\n   283\t\t\t\t\t}\n   284\t\n   285\t\t\t\t\treturn collectionNames;\n   286\t\t\t\t});\n   287\t\n   288\t\t\t\treturn collections;\n   289\t\t\t} finally {\n   290\t\t\t\tif (shouldClearCache(this.cache, opts)) {\n   291\t\t\t\t\tawait this.cache.clear();\n   292\t\t\t\t}\n   293\t\n   294\t\t\t\tif (opts?.autoPurgeSystemCache !== false) {\n   295\t\t\t\t\tawait clearSystemCache({ autoPurgeCache: opts?.autoPurgeCache });\n   296\t\t\t\t}\n   297\t\n   298\t\t\t\tif (opts?.emitEvents !== false && nestedActionEvents.length > 0) {\n   299\t\t\t\t\tconst updatedSchema = await getSchema();\n   300\t\n   301\t\t\t\t\tfor (const nestedActionEvent of nestedActionEvents) {\n   302\t\t\t\t\t\tnestedActionEvent.context.schema = updatedSchema;\n   303\t\t\t\t\t\temitter.emitAction(nestedActionEvent.event, nestedActionEvent.meta, nestedActionEvent.context);\n   304\t\t\t\t\t}\n   305\t\t\t\t}\n   306\t\t\t}\n   307\t\t}\n   308\t\n   309\t\t/**\n   310\t\t * Read all collections. Currently doesn't support any query.\n   311\t\t */\n   312\t\tasync readByQuery(): Promise<Collection[]> {\n   313\t\t\tconst env = useEnv();\n   314\t\n   315\t\t\tconst collectionsItemsService = new ItemsService('directus_collections', {\n   316\t\t\t\tknex: this.knex,\n   317\t\t\t\tschema: this.schema,\n   318\t\t\t\taccountability: this.accountability,\n   319\t\t\t});\n   320\t\n   321\t\t\tlet tablesInDatabase = await this.schemaInspector.tableInfo();\n   322\t\n   323\t\t\tlet meta = (await collectionsItemsService.readByQuery({\n   324\t\t\t\tlimit: -1,\n   325\t\t\t})) as BaseCollectionMeta[];\n   326\t\n   327\t\t\tmeta.push(...systemCollectionRows);\n   328\t\n   329\t\t\tif (this.accountability && this.accountability.admin !== true) {\n   330\t\t\t\tconst collectionsGroups: { [key: string]: string } = meta.reduce(\n   331\t\t\t\t\t(meta, item) => ({\n   332\t\t\t\t\t\t...meta,\n   333\t\t\t\t\t\t[item.collection]: item.group,\n   334\t\t\t\t\t}),\n   335\t\t\t\t\t{},\n   336\t\t\t\t);\n   337\t\n   338\t\t\t\tlet collectionsYouHavePermissionToRead = await fetchAllowedCollections(\n   339\t\t\t\t\t{\n   340\t\t\t\t\t\taccountability: this.accountability,\n   341\t\t\t\t\t\taction: 'read',\n   342\t\t\t\t\t},\n   343\t\t\t\t\t{\n   344\t\t\t\t\t\tknex: this.knex,\n   345\t\t\t\t\t\tschema: this.schema,\n   346\t\t\t\t\t},\n   347\t\t\t\t);\n   348\t\n   349\t\t\t\tfor (const collection of collectionsYouHavePermissionToRead) {\n   350\t\t\t\t\tconst group = collectionsGroups[collection];\n   351\t\t\t\t\tif (group) collectionsYouHavePermissionToRead.push(group);\n   352\t\t\t\t\tdelete collectionsGroups[collection];\n   353\t\t\t\t}\n   354\t\n   355\t\t\t\tcollectionsYouHavePermissionToRead = [...new Set([...collectionsYouHavePermissionToRead])];\n   356\t\n   357\t\t\t\ttablesInDatabase = tablesInDatabase.filter((table) => {\n   358\t\t\t\t\treturn collectionsYouHavePermissionToRead.includes(table.name);\n   359\t\t\t\t});\n   360\t\n   361\t\t\t\tmeta = meta.filter((collectionMeta) => {\n   362\t\t\t\t\treturn collectionsYouHavePermissionToRead.includes(collectionMeta.collection);\n   363\t\t\t\t});\n   364\t\t\t}\n   365\t\n   366\t\t\tconst collections: Collection[] = [];\n   367\t\n   368\t\t\tfor (const collectionMeta of meta) {\n   369\t\t\t\tconst collection: Collection = {\n   370\t\t\t\t\tcollection: collectionMeta.collection,\n   371\t\t\t\t\tmeta: collectionMeta,\n   372\t\t\t\t\tschema: tablesInDatabase.find((table) => table.name === collectionMeta.collection) ?? null,\n   373\t\t\t\t};\n   374\t\n   375\t\t\t\tcollections.push(collection);\n   376\t\t\t}\n   377\t\n   378\t\t\tfor (const table of tablesInDatabase) {\n   379\t\t\t\tconst exists = !!collections.find(({ collection }) => collection === table.name);\n   380\t\n   381\t\t\t\tif (!exists) {\n   382\t\t\t\t\tcollections.push({\n   383\t\t\t\t\t\tcollection: table.name,\n   384\t\t\t\t\t\tschema: table,\n   385\t\t\t\t\t\tmeta: null,\n   386\t\t\t\t\t});\n   387\t\t\t\t}\n   388\t\t\t}\n   389\t\n   390\t\t\tif (env['DB_EXCLUDE_TABLES']) {\n   391\t\t\t\treturn collections.filter(\n   392\t\t\t\t\t(collection) => (env['DB_EXCLUDE_TABLES'] as string[]).includes(collection.collection) === false,\n   393\t\t\t\t);\n   394\t\t\t}\n   395\t\n   396\t\t\treturn collections;\n   397\t\t}\n   398\t\n   399\t\t/**\n   400\t\t * Get a single collection by name\n   401\t\t */\n   402\t\tasync readOne(collectionKey: string): Promise<Collection> {\n   403\t\t\tconst result = await this.readMany([collectionKey]);\n   404\t\n   405\t\t\tif (result.length === 0) throw new ForbiddenError();\n   406\t\n   407\t\t\treturn result[0]!;\n   408\t\t}\n   409\t\n   410\t\t/**\n   411\t\t * Read many collections by name\n   412\t\t */\n   413\t\tasync readMany(collectionKeys: string[]): Promise<Collection[]> {\n   414\t\t\tif (this.accountability) {\n   415\t\t\t\tawait Promise.all(\n   416\t\t\t\t\tcollectionKeys.map((collection) =>\n   417\t\t\t\t\t\tvalidateAccess(\n   418\t\t\t\t\t\t\t{\n   419\t\t\t\t\t\t\t\taccountability: this.accountability!,\n   420\t\t\t\t\t\t\t\taction: 'read',\n   421\t\t\t\t\t\t\t\tcollection,\n   422\t\t\t\t\t\t\t\tskipCollectionExistsCheck: true,\n   423\t\t\t\t\t\t\t},\n   424\t\t\t\t\t\t\t{\n   425\t\t\t\t\t\t\t\tschema: this.schema,\n   426\t\t\t\t\t\t\t\tknex: this.knex,\n   427\t\t\t\t\t\t\t},\n   428\t\t\t\t\t\t),\n   429\t\t\t\t\t),\n   430\t\t\t\t);\n   431\t\t\t}\n   432\t\n   433\t\t\tconst collections = await this.readByQuery();\n   434\t\t\treturn collections.filter(({ collection }) => collectionKeys.includes(collection));\n   435\t\t}\n   436\t\n   437\t\t/**\n   438\t\t * Update a single collection by name\n   439\t\t */\n   440\t\tasync updateOne(collectionKey: string, data: Partial<Collection>, opts?: MutationOptions): Promise<string> {\n   441\t\t\tif (this.accountability && this.accountability.admin !== true) {\n   442\t\t\t\tthrow new ForbiddenError();\n   443\t\t\t}\n   444\t\n   445\t\t\tconst nestedActionEvents: ActionEventParams[] = [];\n   446\t\n   447\t\t\ttry {\n   448\t\t\t\tconst collectionsItemsService = new ItemsService('directus_collections', {\n   449\t\t\t\t\tknex: this.knex,\n   450\t\t\t\t\taccountability: this.accountability,\n   451\t\t\t\t\tschema: this.schema,\n   452\t\t\t\t});\n   453\t\n   454\t\t\t\tconst payload = data as Partial<Collection>;\n   455\t\n   456\t\t\t\tif (!payload.meta) {\n   457\t\t\t\t\treturn collectionKey;\n   458\t\t\t\t}\n   459\t\n   460\t\t\t\tconst exists = !!(await this.knex\n   461\t\t\t\t\t.select('collection')\n   462\t\t\t\t\t.from('directus_collections')\n   463\t\t\t\t\t.where({ collection: collectionKey })\n   464\t\t\t\t\t.first());\n   465\t\n   466\t\t\t\tif (exists) {\n   467\t\t\t\t\tawait collectionsItemsService.updateOne(collectionKey, payload.meta, {\n   468\t\t\t\t\t\t...opts,\n   469\t\t\t\t\t\tbypassEmitAction: (params) =>\n   470\t\t\t\t\t\t\topts?.bypassEmitAction ? opts.bypassEmitAction(params) : nestedActionEvents.push(params),\n   471\t\t\t\t\t});\n   472\t\t\t\t} else {\n   473\t\t\t\t\tawait collectionsItemsService.createOne(\n   474\t\t\t\t\t\t{ ...payload.meta, collection: collectionKey },\n   475\t\t\t\t\t\t{\n   476\t\t\t\t\t\t\t...opts,\n   477\t\t\t\t\t\t\tbypassEmitAction: (params) =>\n   478\t\t\t\t\t\t\t\topts?.bypassEmitAction ? opts.bypassEmitAction(params) : nestedActionEvents.push(params),\n   479\t\t\t\t\t\t},\n   480\t\t\t\t\t);\n   481\t\t\t\t}\n   482\t\n   483\t\t\t\treturn collectionKey;\n   484\t\t\t} finally {\n   485\t\t\t\tif (shouldClearCache(this.cache, opts)) {\n   486\t\t\t\t\tawait this.cache.clear();\n   487\t\t\t\t}\n   488\t\n   489\t\t\t\tif (opts?.autoPurgeSystemCache !== false) {\n   490\t\t\t\t\tawait clearSystemCache({ autoPurgeCache: opts?.autoPurgeCache });\n   491\t\t\t\t}\n   492\t\n   493\t\t\t\tif (opts?.emitEvents !== false && nestedActionEvents.length > 0) {\n   494\t\t\t\t\tconst updatedSchema = await getSchema();\n   495\t\n   496\t\t\t\t\tfor (const nestedActionEvent of nestedActionEvents) {\n   497\t\t\t\t\t\tnestedActionEvent.context.schema = updatedSchema;\n   498\t\t\t\t\t\temitter.emitAction(nestedActionEvent.event, nestedActionEvent.meta, nestedActionEvent.context);\n   499\t\t\t\t\t}\n   500\t\t\t\t}\n   501\t\t\t}\n   502\t\t}\n   503\t\n   504\t\t/**\n   505\t\t * Update multiple collections in a single transaction\n   506\t\t */\n   507\t\tasync updateBatch(data: Partial<Collection>[], opts?: MutationOptions): Promise<string[]> {\n   508\t\t\tif (this.accountability && this.accountability.admin !== true) {\n   509\t\t\t\tthrow new ForbiddenError();\n   510\t\t\t}\n   511\t\n   512\t\t\tif (!Array.isArray(data)) {\n   513\t\t\t\tthrow new InvalidPayloadError({ reason: 'Input should be an array of collection changes' });\n   514\t\t\t}\n   515\t\n   516\t\t\tconst collectionKey = 'collection';\n   517\t\t\tconst collectionKeys: string[] = [];\n   518\t\t\tconst nestedActionEvents: ActionEventParams[] = [];\n   519\t\n   520\t\t\ttry {\n   521\t\t\t\tawait transaction(this.knex, async (trx) => {\n   522\t\t\t\t\tconst collectionItemsService = new CollectionsService({\n   523\t\t\t\t\t\tknex: trx,\n   524\t\t\t\t\t\taccountability: this.accountability,\n   525\t\t\t\t\t\tschema: this.schema,\n   526\t\t\t\t\t});\n   527\t\n   528\t\t\t\t\tfor (const payload of data) {\n   529\t\t\t\t\t\tif (!payload[collectionKey]) {\n   530\t\t\t\t\t\t\tthrow new InvalidPayloadError({ reason: `Collection in update misses collection key` });\n   531\t\t\t\t\t\t}\n   532\t\n   533\t\t\t\t\t\tawait collectionItemsService.updateOne(payload[collectionKey], omit(payload, collectionKey), {\n   534\t\t\t\t\t\t\tautoPurgeCache: false,\n   535\t\t\t\t\t\t\tautoPurgeSystemCache: false,\n   536\t\t\t\t\t\t\tbypassEmitAction: (params) =>\n   537\t\t\t\t\t\t\t\topts?.bypassEmitAction ? opts.bypassEmitAction(params) : nestedActionEvents.push(params),\n   538\t\t\t\t\t\t});\n   539\t\n   540\t\t\t\t\t\tcollectionKeys.push(payload[collectionKey]);\n   541\t\t\t\t\t}\n   542\t\t\t\t});\n   543\t\t\t} finally {\n   544\t\t\t\tif (shouldClearCache(this.cache, opts)) {\n   545\t\t\t\t\tawait this.cache.clear();\n   546\t\t\t\t}\n   547\t\n   548\t\t\t\tif (opts?.autoPurgeSystemCache !== false) {\n   549\t\t\t\t\tawait clearSystemCache({ autoPurgeCache: opts?.autoPurgeCache });\n   550\t\t\t\t}\n   551\t\n   552\t\t\t\tif (opts?.emitEvents !== false && nestedActionEvents.length > 0) {\n   553\t\t\t\t\tconst updatedSchema = await getSchema();\n   554\t\n   555\t\t\t\t\tfor (const nestedActionEvent of nestedActionEvents) {\n   556\t\t\t\t\t\tnestedActionEvent.context.schema = updatedSchema;\n   557\t\t\t\t\t\temitter.emitAction(nestedActionEvent.event, nestedActionEvent.meta, nestedActionEvent.context);\n   558\t\t\t\t\t}\n   559\t\t\t\t}\n   560\t\t\t}\n   561\t\n   562\t\t\treturn collectionKeys;\n   563\t\t}\n   564\t\n   565\t\t/**\n   566\t\t * Update multiple collections by name\n   567\t\t */\n   568\t\tasync updateMany(collectionKeys: string[], data: Partial<Collection>, opts?: MutationOptions): Promise<string[]> {\n   569\t\t\tif (this.accountability && this.accountability.admin !== true) {\n   570\t\t\t\tthrow new ForbiddenError();\n   571\t\t\t}\n   572\t\n   573\t\t\tconst nestedActionEvents: ActionEventParams[] = [];\n   574\t\n   575\t\t\ttry {\n   576\t\t\t\tawait transaction(this.knex, async (trx) => {\n   577\t\t\t\t\tconst service = new CollectionsService({\n   578\t\t\t\t\t\tschema: this.schema,\n   579\t\t\t\t\t\taccountability: this.accountability,\n   580\t\t\t\t\t\tknex: trx,\n   581\t\t\t\t\t});\n   582\t\n   583\t\t\t\t\tfor (const collectionKey of collectionKeys) {\n   584\t\t\t\t\t\tawait service.updateOne(collectionKey, data, {\n   585\t\t\t\t\t\t\tautoPurgeCache: false,\n   586\t\t\t\t\t\t\tautoPurgeSystemCache: false,\n   587\t\t\t\t\t\t\tbypassEmitAction: (params) => nestedActionEvents.push(params),\n   588\t\t\t\t\t\t});\n   589\t\t\t\t\t}\n   590\t\t\t\t});\n   591\t\n   592\t\t\t\treturn collectionKeys;\n   593\t\t\t} finally {\n   594\t\t\t\tif (shouldClearCache(this.cache, opts)) {\n   595\t\t\t\t\tawait this.cache.clear();\n   596\t\t\t\t}\n   597\t\n   598\t\t\t\tif (opts?.autoPurgeSystemCache !== false) {\n   599\t\t\t\t\tawait clearSystemCache({ autoPurgeCache: opts?.autoPurgeCache });\n   600\t\t\t\t}\n   601\t\n   602\t\t\t\tif (opts?.emitEvents !== false && nestedActionEvents.length > 0) {\n   603\t\t\t\t\tconst updatedSchema = await getSchema();\n   604\t\n   605\t\t\t\t\tfor (const nestedActionEvent of nestedActionEvents) {\n   606\t\t\t\t\t\tnestedActionEvent.context.schema = updatedSchema;\n   607\t\t\t\t\t\temitter.emitAction(nestedActionEvent.event, nestedActionEvent.meta, nestedActionEvent.context);\n   608\t\t\t\t\t}\n   609\t\t\t\t}\n   610\t\t\t}\n   611\t\t}\n   612\t\n   613\t\t/**\n   614\t\t * Delete a single collection This will delete the table and all records within. It'll also\n   615\t\t * delete any fields, presets, activity, revisions, and permissions relating to this collection\n   616\t\t */\n   617\t\tasync deleteOne(collectionKey: string, opts?: MutationOptions): Promise<string> {\n   618\t\t\tif (this.accountability && this.accountability.admin !== true) {\n   619\t\t\t\tthrow new ForbiddenError();\n   620\t\t\t}\n   621\t\n   622\t\t\tconst nestedActionEvents: ActionEventParams[] = [];\n   623\t\n   624\t\t\ttry {\n   625\t\t\t\tconst collections = await this.readByQuery();\n   626\t\n   627\t\t\t\tconst collectionToBeDeleted = collections.find((collection) => collection.collection === collectionKey);\n   628\t\n   629\t\t\t\tif (!!collectionToBeDeleted === false) {\n   630\t\t\t\t\tthrow new ForbiddenError();\n   631\t\t\t\t}\n   632\t\n   633\t\t\t\tawait transaction(this.knex, async (trx) => {\n   634\t\t\t\t\tif (collectionToBeDeleted!.schema) {\n   635\t\t\t\t\t\tawait trx.schema.dropTable(collectionKey);\n   636\t\t\t\t\t}\n   637\t\n   638\t\t\t\t\t// Make sure this collection isn't used as a group in any other collections\n   639\t\t\t\t\tawait trx('directus_collections').update({ group: null }).where({ group: collectionKey });\n   640\t\n   641\t\t\t\t\tif (collectionToBeDeleted!.meta) {\n   642\t\t\t\t\t\tconst collectionsItemsService = new ItemsService('directus_collections', {\n   643\t\t\t\t\t\t\tknex: trx,\n   644\t\t\t\t\t\t\taccountability: this.accountability,\n   645\t\t\t\t\t\t\tschema: this.schema,\n   646\t\t\t\t\t\t});\n   647\t\n   648\t\t\t\t\t\tawait collectionsItemsService.deleteOne(collectionKey, {\n   649\t\t\t\t\t\t\tbypassEmitAction: (params) =>\n   650\t\t\t\t\t\t\t\topts?.bypassEmitAction ? opts.bypassEmitAction(params) : nestedActionEvents.push(params),\n   651\t\t\t\t\t\t});\n   652\t\t\t\t\t}\n   653\t\n   654\t\t\t\t\tif (collectionToBeDeleted!.schema) {\n   655\t\t\t\t\t\tconst fieldsService = new FieldsService({\n   656\t\t\t\t\t\t\tknex: trx,\n   657\t\t\t\t\t\t\taccountability: this.accountability,\n   658\t\t\t\t\t\t\tschema: this.schema,\n   659\t\t\t\t\t\t});\n   660\t\n   661\t\t\t\t\t\tconst fieldItemsService = new ItemsService('directus_fields', {\n   662\t\t\t\t\t\t\tknex: trx,\n   663\t\t\t\t\t\t\taccountability: this.accountability,\n   664\t\t\t\t\t\t\tschema: this.schema,\n   665\t\t\t\t\t\t});\n   666\t\n   667\t\t\t\t\t\tawait fieldItemsService.deleteByQuery(\n   668\t\t\t\t\t\t\t{\n   669\t\t\t\t\t\t\t\tfilter: {\n   670\t\t\t\t\t\t\t\t\tcollection: { _eq: collectionKey },\n   671\t\t\t\t\t\t\t\t},\n   672\t\t\t\t\t\t\t},\n   673\t\t\t\t\t\t\t{\n   674\t\t\t\t\t\t\t\tbypassEmitAction: (params) =>\n   675\t\t\t\t\t\t\t\t\topts?.bypassEmitAction ? opts.bypassEmitAction(params) : nestedActionEvents.push(params),\n   676\t\t\t\t\t\t\t},\n   677\t\t\t\t\t\t);\n   678\t\n   679\t\t\t\t\t\tawait trx('directus_presets').delete().where('collection', '=', collectionKey);\n   680\t\n   681\t\t\t\t\t\tconst revisionsToDelete = await trx\n   682\t\t\t\t\t\t\t.select('id')\n   683\t\t\t\t\t\t\t.from('directus_revisions')\n   684\t\t\t\t\t\t\t.where({ collection: collectionKey });\n   685\t\n   686\t\t\t\t\t\tif (revisionsToDelete.length > 0) {\n   687\t\t\t\t\t\t\tconst chunks = chunk(\n   688\t\t\t\t\t\t\t\trevisionsToDelete.map((record) => record.id),\n   689\t\t\t\t\t\t\t\t10000,\n   690\t\t\t\t\t\t\t);\n   691\t\n   692\t\t\t\t\t\t\tfor (const keys of chunks) {\n   693\t\t\t\t\t\t\t\tawait trx('directus_revisions').update({ parent: null }).whereIn('parent', keys);\n   694\t\t\t\t\t\t\t}\n   695\t\t\t\t\t\t}\n   696\t\n   697\t\t\t\t\t\tawait trx('directus_revisions').delete().where('collection', '=', collectionKey);\n   698\t\n   699\t\t\t\t\t\tawait trx('directus_activity').delete().where('collection', '=', collectionKey);\n   700\t\t\t\t\t\tawait trx('directus_permissions').delete().where('collection', '=', collectionKey);\n   701\t\t\t\t\t\tawait trx('directus_relations').delete().where({ many_collection: collectionKey });\n   702\t\n   703\t\t\t\t\t\tconst { collectionRelationTree, fieldToCollectionList } = await buildCollectionAndFieldRelations(\n   704\t\t\t\t\t\t\tthis.schema.relations,\n   705\t\t\t\t\t\t);\n   706\t\n   707\t\t\t\t\t\tconst collectionRelationList = getCollectionRelationList(collectionKey, collectionRelationTree);\n   708\t\n   709\t\t\t\t\t\t// only process duplication fields if related collections have them\n   710\t\t\t\t\t\tif (collectionRelationList.size !== 0) {\n   711\t\t\t\t\t\t\tconst collectionMetas = await trx\n   712\t\t\t\t\t\t\t\t.select('collection', 'archive_field', 'sort_field', 'item_duplication_fields')\n   713\t\t\t\t\t\t\t\t.from('directus_collections')\n   714\t\t\t\t\t\t\t\t.whereIn('collection', Array.from(collectionRelationList))\n   715\t\t\t\t\t\t\t\t.whereNotNull('item_duplication_fields');\n   716\t\n   717\t\t\t\t\t\t\tawait Promise.all(\n   718\t\t\t\t\t\t\t\tObject.keys(this.schema.collections[collectionKey]?.fields ?? {}).map(async (fieldKey) => {\n   719\t\t\t\t\t\t\t\t\tconst collectionMetaUpdates = getCollectionMetaUpdates(\n   720\t\t\t\t\t\t\t\t\t\tcollectionKey,\n   721\t\t\t\t\t\t\t\t\t\tfieldKey,\n   722\t\t\t\t\t\t\t\t\t\tcollectionMetas,\n   723\t\t\t\t\t\t\t\t\t\tthis.schema.collections,\n   724\t\t\t\t\t\t\t\t\t\tfieldToCollectionList,\n   725\t\t\t\t\t\t\t\t\t);\n   726\t\n   727\t\t\t\t\t\t\t\t\tfor (const meta of collectionMetaUpdates) {\n   728\t\t\t\t\t\t\t\t\t\tawait trx('directus_collections').update(meta.updates).where({ collection: meta.collection });\n   729\t\t\t\t\t\t\t\t\t}\n   730\t\t\t\t\t\t\t\t}),\n   731\t\t\t\t\t\t\t);\n   732\t\t\t\t\t\t}\n   733\t\n   734\t\t\t\t\t\tconst relations = this.schema.relations.filter((relation) => {\n   735\t\t\t\t\t\t\treturn relation.collection === collectionKey || relation.related_collection === collectionKey;\n   736\t\t\t\t\t\t});\n   737\t\n   738\t\t\t\t\t\tfor (const relation of relations) {\n   739\t\t\t\t\t\t\t// Delete related o2m fields that point to current collection\n   740\t\t\t\t\t\t\tif (relation.related_collection && relation.meta?.one_field) {\n   741\t\t\t\t\t\t\t\tawait fieldsService.deleteField(relation.related_collection, relation.meta.one_field, {\n   742\t\t\t\t\t\t\t\t\tautoPurgeCache: false,\n   743\t\t\t\t\t\t\t\t\tautoPurgeSystemCache: false,\n   744\t\t\t\t\t\t\t\t\tbypassEmitAction: (params) =>\n   745\t\t\t\t\t\t\t\t\t\topts?.bypassEmitAction ? opts.bypassEmitAction(params) : nestedActionEvents.push(params),\n   746\t\t\t\t\t\t\t\t});\n   747\t\t\t\t\t\t\t}\n   748\t\n   749\t\t\t\t\t\t\t// Delete related m2o fields that point to current collection\n   750\t\t\t\t\t\t\tif (relation.related_collection === collectionKey) {\n   751\t\t\t\t\t\t\t\tawait fieldsService.deleteField(relation.collection, relation.field, {\n   752\t\t\t\t\t\t\t\t\tautoPurgeCache: false,\n   753\t\t\t\t\t\t\t\t\tautoPurgeSystemCache: false,\n   754\t\t\t\t\t\t\t\t\tbypassEmitAction: (params) =>\n   755\t\t\t\t\t\t\t\t\t\topts?.bypassEmitAction ? opts.bypassEmitAction(params) : nestedActionEvents.push(params),\n   756\t\t\t\t\t\t\t\t});\n   757\t\t\t\t\t\t\t}\n   758\t\t\t\t\t\t}\n   759\t\n   760\t\t\t\t\t\tconst a2oRelationsThatIncludeThisCollection = this.schema.relations.filter((relation) => {\n   761\t\t\t\t\t\t\treturn relation.meta?.one_allowed_collections?.includes(collectionKey);\n   762\t\t\t\t\t\t});\n   763\t\n   764\t\t\t\t\t\tfor (const relation of a2oRelationsThatIncludeThisCollection) {\n   765\t\t\t\t\t\t\tconst newAllowedCollections = relation\n   766\t\t\t\t\t\t\t\t.meta!.one_allowed_collections!.filter((collection) => collectionKey !== collection)\n   767\t\t\t\t\t\t\t\t.join(',');\n   768\t\n   769\t\t\t\t\t\t\tawait trx('directus_relations')\n   770\t\t\t\t\t\t\t\t.update({ one_allowed_collections: newAllowedCollections })\n   771\t\t\t\t\t\t\t\t.where({ id: relation.meta!.id });\n   772\t\t\t\t\t\t}\n   773\t\t\t\t\t}\n   774\t\t\t\t});\n   775\t\n   776\t\t\t\treturn collectionKey;\n   777\t\t\t} finally {\n   778\t\t\t\tif (shouldClearCache(this.cache, opts)) {\n   779\t\t\t\t\tawait this.cache.clear();\n   780\t\t\t\t}\n   781\t\n   782\t\t\t\tif (opts?.autoPurgeSystemCache !== false) {\n   783\t\t\t\t\tawait clearSystemCache({ autoPurgeCache: opts?.autoPurgeCache });\n   784\t\t\t\t}\n   785\t\n   786\t\t\t\tif (opts?.emitEvents !== false && nestedActionEvents.length > 0) {\n   787\t\t\t\t\tconst updatedSchema = await getSchema();\n   788\t\n   789\t\t\t\t\tfor (const nestedActionEvent of nestedActionEvents) {\n   790\t\t\t\t\t\tnestedActionEvent.context.schema = updatedSchema;\n   791\t\t\t\t\t\temitter.emitAction(nestedActionEvent.event, nestedActionEvent.meta, nestedActionEvent.context);\n   792\t\t\t\t\t}\n   793\t\t\t\t}\n   794\t\t\t}\n   795\t\t}\n   796\t\n   797\t\t/**\n   798\t\t * Delete multiple collections by key\n   799\t\t */\n   800\t\tasync deleteMany(collectionKeys: string[], opts?: MutationOptions): Promise<string[]> {\n   801\t\t\tif (this.accountability && this.accountability.admin !== true) {\n   802\t\t\t\tthrow new ForbiddenError();\n   803\t\t\t}\n   804\t\n   805\t\t\tconst nestedActionEvents: ActionEventParams[] = [];\n   806\t\n   807\t\t\ttry {\n   808\t\t\t\tawait transaction(this.knex, async (trx) => {\n   809\t\t\t\t\tconst service = new CollectionsService({\n   810\t\t\t\t\t\tschema: this.schema,\n   811\t\t\t\t\t\taccountability: this.accountability,\n   812\t\t\t\t\t\tknex: trx,\n   813\t\t\t\t\t});\n   814\t\n   815\t\t\t\t\tfor (const collectionKey of collectionKeys) {\n   816\t\t\t\t\t\tawait service.deleteOne(collectionKey, {\n   817\t\t\t\t\t\t\tautoPurgeCache: false,\n   818\t\t\t\t\t\t\tautoPurgeSystemCache: false,\n   819\t\t\t\t\t\t\tbypassEmitAction: (params) => nestedActionEvents.push(params),\n   820\t\t\t\t\t\t});\n   821\t\t\t\t\t}\n   822\t\t\t\t});\n   823\t\n   824\t\t\t\treturn collectionKeys;\n   825\t\t\t} finally {\n   826\t\t\t\tif (shouldClearCache(this.cache, opts)) {\n   827\t\t\t\t\tawait this.cache.clear();\n   828\t\t\t\t}\n   829\t\n   830\t\t\t\tif (opts?.autoPurgeSystemCache !== false) {\n   831\t\t\t\t\tawait clearSystemCache({ autoPurgeCache: opts?.autoPurgeCache });\n   832\t\t\t\t}\n   833\t\n   834\t\t\t\tif (opts?.emitEvents !== false && nestedActionEvents.length > 0) {\n   835\t\t\t\t\tconst updatedSchema = await getSchema();\n   836\t\n   837\t\t\t\t\tfor (const nestedActionEvent of nestedActionEvents) {\n   838\t\t\t\t\t\tnestedActionEvent.context.schema = updatedSchema;\n   839\t\t\t\t\t\temitter.emitAction(nestedActionEvent.event, nestedActionEvent.meta, nestedActionEvent.context);\n   840\t\t\t\t\t}\n   841\t\t\t\t}\n   842\t\t\t}\n   843\t\t}\n   844\t}\n"
+          },
+          {
+            "source_call_id": "functions.ReadFile:4",
+            "content": "     1\timport { Action } from '@directus/constants';\n     2\timport { ForbiddenError, InvalidPayloadError, UnprocessableContentError } from '@directus/errors';\n     3\timport type {\n     4\t\tAbstractServiceOptions,\n     5\t\tContentVersion,\n     6\t\tItem,\n     7\t\tMutationOptions,\n     8\t\tPrimaryKey,\n     9\t\tQuery,\n    10\t\tQueryOptions,\n    11\t} from '@directus/types';\n    12\timport { deepMapWithSchema } from '@directus/utils';\n    13\timport Joi from 'joi';\n    14\timport { assign, get, isEqual, isPlainObject, pick } from 'lodash-es';\n    15\timport objectHash from 'object-hash';\n    16\timport { getCache } from '../cache.js';\n    17\timport { getHelpers } from '../database/helpers/index.js';\n    18\timport emitter from '../emitter.js';\n    19\timport { validateAccess } from '../permissions/modules/validate-access/validate-access.js';\n    20\timport { shouldClearCache } from '../utils/should-clear-cache.js';\n    21\timport { splitRecursive } from '../utils/versioning/split-recursive.js';\n    22\timport { ActivityService } from './activity.js';\n    23\timport { ItemsService } from './items.js';\n    24\timport { PayloadService } from './payload.js';\n    25\timport { RevisionsService } from './revisions.js';\n    26\t\n    27\texport class VersionsService extends ItemsService<ContentVersion> {\n    28\t\tconstructor(options: AbstractServiceOptions) {\n    29\t\t\tsuper('directus_versions', options);\n    30\t\t}\n    31\t\n    32\t\tprivate async validateCreateData(data: Partial<Item>): Promise<void> {\n    33\t\t\tconst versionCreateSchema = Joi.object({\n    34\t\t\t\tkey: Joi.string().required(),\n    35\t\t\t\tname: Joi.string().allow(null),\n    36\t\t\t\tcollection: Joi.string().required(),\n    37\t\t\t\titem: Joi.string().required(),\n    38\t\t\t});\n    39\t\n    40\t\t\tconst { error } = versionCreateSchema.validate(data);\n    41\t\t\tif (error) throw new InvalidPayloadError({ reason: error.message });\n    42\t\n    43\t\t\t// Reserves the \"main\" version key for the version query parameter\n    44\t\t\tif (data['key'] === 'main') throw new InvalidPayloadError({ reason: `\"main\" is a reserved version key` });\n    45\t\n    46\t\t\tif (this.accountability) {\n    47\t\t\t\ttry {\n    48\t\t\t\t\tawait validateAccess(\n    49\t\t\t\t\t\t{\n    50\t\t\t\t\t\t\taccountability: this.accountability,\n    51\t\t\t\t\t\t\taction: 'read',\n    52\t\t\t\t\t\t\tcollection: data['collection'],\n    53\t\t\t\t\t\t\tprimaryKeys: [data['item']],\n    54\t\t\t\t\t\t},\n    55\t\t\t\t\t\t{\n    56\t\t\t\t\t\t\tschema: this.schema,\n    57\t\t\t\t\t\t\tknex: this.knex,\n    58\t\t\t\t\t\t},\n    59\t\t\t\t\t);\n    60\t\t\t\t} catch {\n    61\t\t\t\t\tthrow new ForbiddenError();\n    62\t\t\t\t}\n    63\t\t\t}\n    64\t\n    65\t\t\tconst { CollectionsService } = await import('./collections.js');\n    66\t\n    67\t\t\tconst collectionsService = new CollectionsService({\n    68\t\t\t\tknex: this.knex,\n    69\t\t\t\tschema: this.schema,\n    70\t\t\t});\n    71\t\n    72\t\t\tconst existingCollection = await collectionsService.readOne(data['collection']);\n    73\t\n    74\t\t\tif (!existingCollection.meta?.versioning) {\n    75\t\t\t\tthrow new UnprocessableContentError({\n    76\t\t\t\t\treason: `Content Versioning is not enabled for collection \"${data['collection']}\"`,\n    77\t\t\t\t});\n    78\t\t\t}\n    79\t\n    80\t\t\tconst sudoService = new VersionsService({\n    81\t\t\t\tknex: this.knex,\n    82\t\t\t\tschema: this.schema,\n    83\t\t\t});\n    84\t\n    85\t\t\tconst existingVersions = (await sudoService.readByQuery({\n    86\t\t\t\taggregate: { count: ['*'] },\n    87\t\t\t\tfilter: { key: { _eq: data['key'] }, collection: { _eq: data['collection'] }, item: { _eq: data['item'] } },\n    88\t\t\t})) as any[];\n    89\t\n    90\t\t\tif (existingVersions[0]['count'] > 0) {\n    91\t\t\t\tthrow new UnprocessableContentError({\n    92\t\t\t\t\treason: `Version \"${data['key']}\" already exists for item \"${data['item']}\" in collection \"${data['collection']}\"`,\n    93\t\t\t\t});\n    94\t\t\t}\n    95\t\t}\n    96\t\n    97\t\tasync getMainItem(collection: string, item: PrimaryKey, query?: Query): Promise<Item> {\n    98\t\t\tconst itemsService = new ItemsService(collection, {\n    99\t\t\t\tknex: this.knex,\n   100\t\t\t\taccountability: this.accountability,\n   101\t\t\t\tschema: this.schema,\n   102\t\t\t});\n   103\t\n   104\t\t\treturn await itemsService.readOne(item, query);\n   105\t\t}\n   106\t\n   107\t\tasync verifyHash(\n   108\t\t\tcollection: string,\n   109\t\t\titem: PrimaryKey,\n   110\t\t\thash: string,\n   111\t\t): Promise<{ outdated: boolean; mainHash: string }> {\n   112\t\t\tconst mainItem = await this.getMainItem(collection, item);\n   113\t\n   114\t\t\tconst mainHash = objectHash(mainItem);\n   115\t\n   116\t\t\treturn { outdated: hash !== mainHash, mainHash };\n   117\t\t}\n   118\t\n   119\t\tasync getVersionSave(key: string, collection: string, item: string, mapDelta = true) {\n   120\t\t\tconst version = (\n   121\t\t\t\tawait this.readByQuery({\n   122\t\t\t\t\tfilter: {\n   123\t\t\t\t\t\tkey: { _eq: key },\n   124\t\t\t\t\t\tcollection: { _eq: collection },\n   125\t\t\t\t\t\titem: { _eq: item },\n   126\t\t\t\t\t},\n   127\t\t\t\t})\n   128\t\t\t)[0];\n   129\t\n   130\t\t\tif (mapDelta && version?.delta) version.delta = this.mapDelta(version);\n   131\t\n   132\t\t\treturn version;\n   133\t\t}\n   134\t\n   135\t\toverride async createOne(data: Partial<Item>, opts?: MutationOptions): Promise<PrimaryKey> {\n   136\t\t\tawait this.validateCreateData(data);\n   137\t\n   138\t\t\tconst mainItem = await this.getMainItem(data['collection'], data['item']);\n   139\t\n   140\t\t\tdata['hash'] = objectHash(mainItem);\n   141\t\n   142\t\t\treturn super.createOne(data, opts);\n   143\t\t}\n   144\t\n   145\t\toverride async readOne(key: PrimaryKey, query: Query = {}, opts?: QueryOptions): Promise<ContentVersion> {\n   146\t\t\tconst version = await super.readOne(key, query, opts);\n   147\t\n   148\t\t\tif (version?.delta) version.delta = this.mapDelta(version);\n   149\t\n   150\t\t\treturn version;\n   151\t\t}\n   152\t\n   153\t\toverride async createMany(data: Partial<Item>[], opts?: MutationOptions): Promise<PrimaryKey[]> {\n   154\t\t\tif (!Array.isArray(data)) {\n   155\t\t\t\tthrow new InvalidPayloadError({ reason: 'Input should be an array of items' });\n   156\t\t\t}\n   157\t\n   158\t\t\tconst keyCombos = new Set();\n   159\t\n   160\t\t\tfor (const item of data) {\n   161\t\t\t\tconst keyCombo = `${item['key']}-${item['collection']}-${item['item']}`;\n   162\t\n   163\t\t\t\tif (keyCombos.has(keyCombo)) {\n   164\t\t\t\t\tthrow new UnprocessableContentError({\n   165\t\t\t\t\t\treason: `Cannot create multiple versions on \"${item['item']}\" in collection \"${item['collection']}\" with the same key \"${item['key']}\"`,\n   166\t\t\t\t\t});\n   167\t\t\t\t}\n   168\t\n   169\t\t\t\tkeyCombos.add(keyCombo);\n   170\t\t\t}\n   171\t\n   172\t\t\treturn super.createMany(data, opts);\n   173\t\t}\n   174\t\n   175\t\toverride async updateMany(keys: PrimaryKey[], data: Partial<Item>, opts?: MutationOptions): Promise<PrimaryKey[]> {\n   176\t\t\t// Only allow updates on \"key\" and \"name\" fields\n   177\t\t\tconst versionUpdateSchema = Joi.object({\n   178\t\t\t\tkey: Joi.string(),\n   179\t\t\t\tname: Joi.string().allow(null),\n   180\t\t\t});\n   181\t\n   182\t\t\tconst { error } = versionUpdateSchema.validate(data);\n   183\t\t\tif (error) throw new InvalidPayloadError({ reason: error.message });\n   184\t\n   185\t\t\tif ('key' in data) {\n   186\t\t\t\t// Reserves the \"main\" version key for the version query parameter\n   187\t\t\t\tif (data['key'] === 'main') throw new InvalidPayloadError({ reason: `\"main\" is a reserved version key` });\n   188\t\n   189\t\t\t\tconst keyCombos = new Set();\n   190\t\n   191\t\t\t\tfor (const pk of keys) {\n   192\t\t\t\t\tconst { collection, item } = await this.readOne(pk, { fields: ['collection', 'item'] });\n   193\t\n   194\t\t\t\t\tconst keyCombo = `${data['key']}-${collection}-${item}`;\n   195\t\n   196\t\t\t\t\tif (keyCombos.has(keyCombo)) {\n   197\t\t\t\t\t\tthrow new UnprocessableContentError({\n   198\t\t\t\t\t\t\treason: `Cannot update multiple versions on \"${item}\" in collection \"${collection}\" to the same key \"${data['key']}\"`,\n   199\t\t\t\t\t\t});\n   200\t\t\t\t\t}\n   201\t\n   202\t\t\t\t\tkeyCombos.add(keyCombo);\n   203\t\n   204\t\t\t\t\tconst existingVersions = await super.readByQuery({\n   205\t\t\t\t\t\taggregate: { count: ['*'] },\n   206\t\t\t\t\t\tfilter: { id: { _neq: pk }, key: { _eq: data['key'] }, collection: { _eq: collection }, item: { _eq: item } },\n   207\t\t\t\t\t});\n   208\t\n   209\t\t\t\t\tif ((existingVersions as any)[0]['count'] > 0) {\n   210\t\t\t\t\t\tthrow new UnprocessableContentError({\n   211\t\t\t\t\t\t\treason: `Version \"${data['key']}\" already exists for item \"${item}\" in collection \"${collection}\"`,\n   212\t\t\t\t\t\t});\n   213\t\t\t\t\t}\n   214\t\t\t\t}\n   215\t\t\t}\n   216\t\n   217\t\t\treturn super.updateMany(keys, data, opts);\n   218\t\t}\n   219\t\n   220\t\tasync save(key: PrimaryKey, delta: Partial<Item>): Promise<Partial<Item>> {\n   221\t\t\tconst version = await super.readOne(key);\n   222\t\n   223\t\t\tconst payloadService = new PayloadService(this.collection, {\n   224\t\t\t\taccountability: this.accountability,\n   225\t\t\t\tknex: this.knex,\n   226\t\t\t\tschema: this.schema,\n   227\t\t\t});\n   228\t\n   229\t\t\tconst activityService = new ActivityService({\n   230\t\t\t\tknex: this.knex,\n   231\t\t\t\tschema: this.schema,\n   232\t\t\t});\n   233\t\n   234\t\t\tconst revisionsService = new RevisionsService({\n   235\t\t\t\tknex: this.knex,\n   236\t\t\t\tschema: this.schema,\n   237\t\t\t});\n   238\t\n   239\t\t\tconst { item, collection, delta: existingDelta } = version;\n   240\t\n   241\t\t\tconst activity = await activityService.createOne({\n   242\t\t\t\taction: Action.VERSION_SAVE,\n   243\t\t\t\tuser: this.accountability?.user ?? null,\n   244\t\t\t\tcollection,\n   245\t\t\t\tip: this.accountability?.ip ?? null,\n   246\t\t\t\tuser_agent: this.accountability?.userAgent ?? null,\n   247\t\t\t\torigin: this.accountability?.origin ?? null,\n   248\t\t\t\titem,\n   249\t\t\t});\n   250\t\n   251\t\t\tconst helpers = getHelpers(this.knex);\n   252\t\n   253\t\t\tlet revisionDelta = await payloadService.prepareDelta(delta);\n   254\t\n   255\t\t\tawait revisionsService.createOne({\n   256\t\t\t\tactivity,\n   257\t\t\t\tversion: key,\n   258\t\t\t\tcollection,\n   259\t\t\t\titem,\n   260\t\t\t\tdata: revisionDelta,\n   261\t\t\t\tdelta: revisionDelta,\n   262\t\t\t});\n   263\t\n   264\t\t\trevisionDelta = revisionDelta ? revisionDelta : null;\n   265\t\n   266\t\t\tconst date = new Date(helpers.date.writeTimestamp(new Date().toISOString()));\n   267\t\n   268\t\t\tdeepMapObjects(revisionDelta, (object, path) => {\n   269\t\t\t\tconst existing = get(existingDelta, path);\n   270\t\n   271\t\t\t\tif (existing && isEqual(existing, object)) return;\n   272\t\n   273\t\t\t\tobject['_user'] = this.accountability?.user;\n   274\t\t\t\tobject['_date'] = date;\n   275\t\t\t});\n   276\t\n   277\t\t\tconst finalVersionDelta = assign({}, existingDelta, revisionDelta);\n   278\t\n   279\t\t\tconst sudoService = new ItemsService(this.collection, {\n   280\t\t\t\tknex: this.knex,\n   281\t\t\t\tschema: this.schema,\n   282\t\t\t\taccountability: {\n   283\t\t\t\t\t...this.accountability!,\n   284\t\t\t\t\tadmin: true,\n   285\t\t\t\t},\n   286\t\t\t});\n   287\t\n   288\t\t\tawait sudoService.updateOne(key, { delta: finalVersionDelta });\n   289\t\n   290\t\t\tconst { cache } = getCache();\n   291\t\n   292\t\t\tif (shouldClearCache(cache, undefined, collection)) {\n   293\t\t\t\tcache.clear();\n   294\t\t\t}\n   295\t\n   296\t\t\treturn finalVersionDelta;\n   297\t\t}\n   298\t\n   299\t\tasync promote(version: PrimaryKey, mainHash: string, fields?: string[]) {\n   300\t\t\tconst { collection, item, delta } = (await super.readOne(version)) as ContentVersion;\n   301\t\n   302\t\t\t// will throw an error if the accountability does not have permission to update the item\n   303\t\t\tif (this.accountability) {\n   304\t\t\t\tawait validateAccess(\n   305\t\t\t\t\t{\n   306\t\t\t\t\t\taccountability: this.accountability,\n   307\t\t\t\t\t\taction: 'update',\n   308\t\t\t\t\t\tcollection,\n   309\t\t\t\t\t\tprimaryKeys: [item],\n   310\t\t\t\t\t},\n   311\t\t\t\t\t{\n   312\t\t\t\t\t\tschema: this.schema,\n   313\t\t\t\t\t\tknex: this.knex,\n   314\t\t\t\t\t},\n   315\t\t\t\t);\n   316\t\t\t}\n   317\t\n   318\t\t\tif (!delta) {\n   319\t\t\t\tthrow new UnprocessableContentError({\n   320\t\t\t\t\treason: `No changes to promote`,\n   321\t\t\t\t});\n   322\t\t\t}\n   323\t\n   324\t\t\tconst { outdated } = await this.verifyHash(collection, item, mainHash);\n   325\t\n   326\t\t\tif (outdated) {\n   327\t\t\t\tthrow new UnprocessableContentError({\n   328\t\t\t\t\treason: `Main item has changed since this version was last updated`,\n   329\t\t\t\t});\n   330\t\t\t}\n   331\t\n   332\t\t\tconst { rawDelta, defaultOverwrites } = splitRecursive(delta);\n   333\t\n   334\t\t\tconst payloadToUpdate = fields ? pick(rawDelta, fields) : rawDelta;\n   335\t\n   336\t\t\tconst itemsService = new ItemsService(collection, {\n   337\t\t\t\taccountability: this.accountability,\n   338\t\t\t\tknex: this.knex,\n   339\t\t\t\tschema: this.schema,\n   340\t\t\t});\n   341\t\n   342\t\t\tconst payloadAfterHooks = await emitter.emitFilter(\n   343\t\t\t\t['items.promote', `${collection}.items.promote`],\n   344\t\t\t\tpayloadToUpdate,\n   345\t\t\t\t{\n   346\t\t\t\t\tcollection,\n   347\t\t\t\t\titem,\n   348\t\t\t\t\tversion,\n   349\t\t\t\t},\n   350\t\t\t\t{\n   351\t\t\t\t\tdatabase: this.knex,\n   352\t\t\t\t\tschema: this.schema,\n   353\t\t\t\t\taccountability: this.accountability,\n   354\t\t\t\t},\n   355\t\t\t);\n   356\t\n   357\t\t\tconst updatedItemKey = await itemsService.updateOne(item, payloadAfterHooks, {\n   358\t\t\t\toverwriteDefaults: defaultOverwrites as any,\n   359\t\t\t});\n   360\t\n   361\t\t\temitter.emitAction(\n   362\t\t\t\t['items.promote', `${collection}.items.promote`],\n   363\t\t\t\t{\n   364\t\t\t\t\tpayload: payloadAfterHooks,\n   365\t\t\t\t\tcollection,\n   366\t\t\t\t\titem: updatedItemKey,\n   367\t\t\t\t\tversion,\n   368\t\t\t\t},\n   369\t\t\t\t{\n   370\t\t\t\t\tdatabase: this.knex,\n   371\t\t\t\t\tschema: this.schema,\n   372\t\t\t\t\taccountability: this.accountability,\n   373\t\t\t\t},\n   374\t\t\t);\n   375\t\n   376\t\t\treturn updatedItemKey;\n   377\t\t}\n   378\t\n   379\t\tprivate mapDelta(version: ContentVersion) {\n   380\t\t\tconst delta = version.delta ?? {};\n   381\t\t\tdelta[this.schema.collections[version.collection]!.primary] = version.item;\n   382\t\n   383\t\t\treturn deepMapWithSchema(\n   384\t\t\t\tdelta,\n   385\t\t\t\t([key, value], context) => {\n   386\t\t\t\t\tif (key === '_user' || key === '_date') return;\n   387\t\n   388\t\t\t\t\tif (context.collection.primary in context.object) {\n   389\t\t\t\t\t\tif (context.field.special.includes('user-updated')) {\n   390\t\t\t\t\t\t\treturn [key, context.object['_user']];\n   391\t\t\t\t\t\t}\n   392\t\n   393\t\t\t\t\t\tif (context.field.special.includes('date-updated')) {\n   394\t\t\t\t\t\t\treturn [key, context.object['_date']];\n   395\t\t\t\t\t\t}\n   396\t\t\t\t\t} else {\n   397\t\t\t\t\t\tif (context.field.special.includes('user-created')) {\n   398\t\t\t\t\t\t\treturn [key, context.object['_user']];\n   399\t\t\t\t\t\t}\n   400\t\n   401\t\t\t\t\t\tif (context.field.special.includes('date-created')) {\n   402\t\t\t\t\t\t\treturn [key, context.object['_date']];\n   403\t\t\t\t\t\t}\n   404\t\t\t\t\t}\n   405\t\n   406\t\t\t\t\tif (key in context.object) return [key, value];\n   407\t\n   408\t\t\t\t\treturn undefined;\n   409\t\t\t\t},\n   410\t\t\t\t{ collection: version.collection, schema: this.schema },\n   411\t\t\t\t{ mapNonExistentFields: true, detailedUpdateSyntax: true },\n   412\t\t\t);\n   413\t\t}\n   414\t}\n   415\t\n   416\t/** Deeply maps all objects of a structure. Only calls the callback for objects, not for arrays. Objects in arrays will continued to be mapped. */\n   417\tfunction deepMapObjects(\n   418\t\tobject: unknown,\n   419\t\tfn: (object: Record<string, any>, path: string[]) => void,\n   420\t\tpath: string[] = [],\n   421\t) {\n   422\t\tif (isPlainObject(object) && typeof object === 'object' && object !== null) {\n   423\t\t\tfn(object, path);\n   424\t\t\tObject.entries(object).map(([key, value]) => deepMapObjects(value, fn, [...path, key]));\n   425\t\t} else if (Array.isArray(object)) {\n   426\t\t\tobject.map((value, index) => deepMapObjects(value, fn, [...path, String(index)]));\n   427\t\t}\n   428\t}\n"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 11981,
+        "completion_tokens": 258,
+        "cached_tokens": 15
+      }
+    },
+    {
+      "step_id": 2,
+      "source": "agent",
+      "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+      "message": "Now let me understand the structure better and implement all four fixes:",
+      "reasoning_content": "The requirements for these fixes are clear, but the architectural implications vary. For Bug 1, the challenge is ensuring the Vue shortcut listener is idempotent and SSR-safe; I need to verify if `onMounted` is the right place or if it should be handled during a specific lifecycle phase to avoid memory leaks. Bug 2 is a straightforward build configuration change, but I must ensure the exclusion patterns correctly target the test utilities without breaking the production bundle's internal references.\n\nBug 3 presents a logic flow issue. If I move the slash validation before `parseCollectionName`, I need to be sure the raw input is what's being validated, not a transformed string. Bug 4 is the most complex regarding state management. I need to look closely at `versions.ts` to see how it accesses `this.schema`. If the service doesn't have a direct path to the collection's accountability settings, I'll have to trace how the schema is hydrated. I'll examine the file contents now to verify these assumptions.",
+      "tool_calls": [
+        {
+          "tool_call_id": "functions.ReadFile:5",
+          "function_name": "ReadFile",
+          "arguments": {
+            "path": "/testbed/api/src/services/versions.ts",
+            "line_offset": 220,
+            "n_lines": 80
+          }
+        },
+        {
+          "tool_call_id": "functions.Glob:6",
+          "function_name": "Glob",
+          "arguments": {
+            "raw": "{\""
+          }
+        },
+        {
+          "tool_call_id": "functions.Glob:7",
+          "function_name": "Glob",
+          "arguments": {}
+        },
+        {
+          "tool_call_id": "functions.Glob:8",
+          "function_name": "Glob",
+          "arguments": {}
+        },
+        {
+          "tool_call_id": "functions.Glob:9",
+          "function_name": "Glob",
+          "arguments": {}
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "functions.ReadFile:5",
+            "content": "   220\t\tasync save(key: PrimaryKey, delta: Partial<Item>): Promise<Partial<Item>> {\n   221\t\t\tconst version = await super.readOne(key);\n   222\t\n   223\t\t\tconst payloadService = new PayloadService(this.collection, {\n   224\t\t\t\taccountability: this.accountability,\n   225\t\t\t\tknex: this.knex,\n   226\t\t\t\tschema: this.schema,\n   227\t\t\t});\n   228\t\n   229\t\t\tconst activityService = new ActivityService({\n   230\t\t\t\tknex: this.knex,\n   231\t\t\t\tschema: this.schema,\n   232\t\t\t});\n   233\t\n   234\t\t\tconst revisionsService = new RevisionsService({\n   235\t\t\t\tknex: this.knex,\n   236\t\t\t\tschema: this.schema,\n   237\t\t\t});\n   238\t\n   239\t\t\tconst { item, collection, delta: existingDelta } = version;\n   240\t\n   241\t\t\tconst activity = await activityService.createOne({\n   242\t\t\t\taction: Action.VERSION_SAVE,\n   243\t\t\t\tuser: this.accountability?.user ?? null,\n   244\t\t\t\tcollection,\n   245\t\t\t\tip: this.accountability?.ip ?? null,\n   246\t\t\t\tuser_agent: this.accountability?.userAgent ?? null,\n   247\t\t\t\torigin: this.accountability?.origin ?? null,\n   248\t\t\t\titem,\n   249\t\t\t});\n   250\t\n   251\t\t\tconst helpers = getHelpers(this.knex);\n   252\t\n   253\t\t\tlet revisionDelta = await payloadService.prepareDelta(delta);\n   254\t\n   255\t\t\tawait revisionsService.createOne({\n   256\t\t\t\tactivity,\n   257\t\t\t\tversion: key,\n   258\t\t\t\tcollection,\n   259\t\t\t\titem,\n   260\t\t\t\tdata: revisionDelta,\n   261\t\t\t\tdelta: revisionDelta,\n   262\t\t\t});\n   263\t\n   264\t\t\trevisionDelta = revisionDelta ? revisionDelta : null;\n   265\t\n   266\t\t\tconst date = new Date(helpers.date.writeTimestamp(new Date().toISOString()));\n   267\t\n   268\t\t\tdeepMapObjects(revisionDelta, (object, path) => {\n   269\t\t\t\tconst existing = get(existingDelta, path);\n   270\t\n   271\t\t\t\tif (existing && isEqual(existing, object)) return;\n   272\t\n   273\t\t\t\tobject['_user'] = this.accountability?.user;\n   274\t\t\t\tobject['_date'] = date;\n   275\t\t\t});\n   276\t\n   277\t\t\tconst finalVersionDelta = assign({}, existingDelta, revisionDelta);\n   278\t\n   279\t\t\tconst sudoService = new ItemsService(this.collection, {\n   280\t\t\t\tknex: this.knex,\n   281\t\t\t\tschema: this.schema,\n   282\t\t\t\taccountability: {\n   283\t\t\t\t\t...this.accountability!,\n   284\t\t\t\t\tadmin: true,\n   285\t\t\t\t},\n   286\t\t\t});\n   287\t\n   288\t\t\tawait sudoService.updateOne(key, { delta: finalVersionDelta });\n   289\t\n   290\t\t\tconst { cache } = getCache();\n   291\t\n   292\t\t\tif (shouldClearCache(cache, undefined, collection)) {\n   293\t\t\t\tcache.clear();\n   294\t\t\t}\n   295\t\n   296\t\t\treturn finalVersionDelta;\n   297\t\t}\n   298\t\n   299\t\tasync promote(version: PrimaryKey, mainHash: string, fields?: string[]) {\n"
+          },
+          {
+            "source_call_id": "functions.Glob:6",
+            "content": "api/src/test-utils/README.md\napi/src/test-utils/cache.ts\napi/src/test-utils/controllers.ts\napi/src/test-utils/database.ts\napi/src/test-utils/emitter.ts\napi/src/test-utils/env.ts\napi/src/test-utils/knex.ts\napi/src/test-utils/schema.ts\napi/src/test-utils/services\napi/src/test-utils/services/fields-service.ts\napi/src/test-utils/services/files-service.ts\napi/src/test-utils/services/folders-service.ts\napi/src/test-utils/services/items-service.ts\napi/src/test-utils/storage.ts"
+          },
+          {
+            "source_call_id": "functions.Glob:7",
+            "content": "api/src/__utils__/items-utils.ts\napi/src/__utils__/schemas.ts\napi/src/__utils__/snapshots.ts"
+          },
+          {
+            "source_call_id": "functions.Glob:8",
+            "content": "api/src/__setup__/global.js"
+          },
+          {
+            "source_call_id": "functions.Glob:9",
+            "content": "api/src/database/run-ast/lib/apply-query/mock.ts"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 27250,
+        "completion_tokens": 332,
+        "cached_tokens": 11980
+      }
+    },
+    {
+      "step_id": 3,
+      "source": "agent",
+      "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+      "message": "Now I have a good understanding of all four bugs. Let me implement the fixes:",
+      "reasoning_content": "Hmm, looking at `use-shortcut.ts`, the global `document.body.addEventListener` calls at the top are definitely problematic. They will run immediately upon module import, which breaks SSR environments where `document` is undefined. I need to move this logic into a helper function and ensure it's only invoked during `onMounted` to maintain browser-specific safety.\n\nWait, I also noticed that `tsdown.config.ts` and `tsconfig.prod.json` currently include test utilities in their entry points. This is likely bloating the production bundle and potentially causing side effects from test code. I'll update the glob patterns in both files to explicitly exclude `src/test-utils`, `src/__utils__`, `src/__setup__`, and the specific mock file.\n\nFor `collections.ts`, I need to validate that collection names don't contain slashes before they reach the creation logic. For `versions.ts`, the save method must conditionally handle accountability to prevent unauthorized activity logging.\n\nI'll now proceed with `StrReplaceFile` to apply these four distinct fixes across the repository. This will resolve the SSR issue, clean up the build configuration, and harden the collection/versions services against invalid data and unauthorized actions.",
+      "tool_calls": [
+        {
+          "tool_call_id": "functions.StrReplaceFile:10",
+          "function_name": "StrReplaceFile",
+          "arguments": {
+            "path": "/testbed/packages/composables/src/use-shortcut.ts",
+            "edit": {
+              "old": "import type { ComponentPublicInstance, Ref } from 'vue';\nimport { onMounted, onUnmounted, ref } from 'vue';\n\ntype ShortcutHandler = (event: KeyboardEvent, cancelNext: () => void) => void | any | boolean;\n\nexport const keyMap: Record<string, string> = {\n\tControl: 'meta',\n\tCommand: 'meta',\n};\n\nexport const systemKeys = ['meta', 'shift', 'alt', 'backspace', 'delete', 'tab', 'capslock', 'enter', 'home', 'end'];\n\nconst keysDown: Set<string> = new Set([]);\nconst handlers: Record<string, ShortcutHandler[]> = {};\n\ndocument.body.addEventListener('keydown', (event: KeyboardEvent) => {\n\tif (event.repeat || !event.key) return;\n\n\tkeysDown.add(mapKeys(event));\n\tcallHandlers(event);\n});\n\ndocument.body.addEventListener('keyup', (event: KeyboardEvent) => {\n\tif (event.repeat || !event.key) return;\n\tkeysDown.clear();\n});",
+              "new": "import type { ComponentPublicInstance, Ref } from 'vue';\nimport { onMounted, onUnmounted, ref } from 'vue';\n\ntype ShortcutHandler = (event: KeyboardEvent, cancelNext: () => void) => void | any | boolean;\n\nexport const keyMap: Record<string, string> = {\n\tControl: 'meta',\n\tCommand: 'meta',\n};\n\nexport const systemKeys = ['meta', 'shift', 'alt', 'backspace', 'delete', 'tab', 'capslock', 'enter', 'home', 'end'];\n\nconst keysDown: Set<string> = new Set([]);\nconst handlers: Record<string, ShortcutHandler[]> = {};\n\nlet isGlobalListenerAttached = false;\n\nfunction attachGlobalListeners() {\n\tif (isGlobalListenerAttached) return;\n\tisGlobalListenerAttached = true;\n\n\tdocument.body.addEventListener('keydown', (event: KeyboardEvent) => {\n\t\tif (event.repeat || !event.key) return;\n\n\t\tkeysDown.add(mapKeys(event));\n\t\tcallHandlers(event);\n\t});\n\n\tdocument.body.addEventListener('keyup', (event: KeyboardEvent) => {\n\t\tif (event.repeat || !event.key) return;\n\t\tkeysDown.clear();\n\t});\n}"
+            }
+          }
+        },
+        {
+          "tool_call_id": "functions.StrReplaceFile:11",
+          "function_name": "StrReplaceFile",
+          "arguments": {}
+        },
+        {
+          "tool_call_id": "functions.StrReplaceFile:12",
+          "function_name": "StrReplaceFile",
+          "arguments": {}
+        },
+        {
+          "tool_call_id": "functions.StrReplaceFile:13",
+          "function_name": "StrReplaceFile",
+          "arguments": {}
+        },
+        {
+          "tool_call_id": "functions.StrReplaceFile:14",
+          "function_name": "StrReplaceFile",
+          "arguments": {}
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "functions.StrReplaceFile:10",
+            "content": ""
+          },
+          {
+            "source_call_id": "functions.StrReplaceFile:11",
+            "content": ""
+          },
+          {
+            "source_call_id": "functions.StrReplaceFile:12",
+            "content": ""
+          },
+          {
+            "source_call_id": "functions.StrReplaceFile:13",
+            "content": ""
+          },
+          {
+            "source_call_id": "functions.StrReplaceFile:14",
+            "content": ""
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 28675,
+        "completion_tokens": 2771,
+        "cached_tokens": 27249
+      }
+    },
+    {
+      "step_id": 4,
+      "source": "agent",
+      "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+      "message": "Now I need to update `use-shortcut.ts` to call `attachGlobalListeners()` from `onMounted()`:",
+      "reasoning_content": "Now I need to also update the `use-shortcut.ts` file to call `attachGlobalListeners()` from `onMounted()`. Let me also update the file to make that call.",
+      "tool_calls": [
+        {
+          "tool_call_id": "functions.StrReplaceFile:15",
+          "function_name": "StrReplaceFile",
+          "arguments": {
+            "path": "/testbed/packages/composables/src/use-shortcut.ts",
+            "edit": {
+              "old": "\tonMounted(() => {\n\t\t[shortcuts].flat().forEach((shortcut) => {\n\t\t\tif (shortcut in handlers) {\n\t\t\t\thandlers[shortcut]?.unshift(callback);\n\t\t\t} else {\n\t\t\t\thandlers[shortcut] = [callback];\n\t\t\t}\n\t\t});\n\t});",
+              "new": "\tonMounted(() => {\n\t\tattachGlobalListeners();\n\n\t\t[shortcuts].flat().forEach((shortcut) => {\n\t\t\tif (shortcut in handlers) {\n\t\t\t\thandlers[shortcut]?.unshift(callback);\n\t\t\t} else {\n\t\t\t\thandlers[shortcut] = [callback];\n\t\t\t}\n\t\t});\n\t});"
+            }
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "functions.StrReplaceFile:15",
+            "content": ""
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 31630,
+        "completion_tokens": 275,
+        "cached_tokens": 15
+      }
+    },
+    {
+      "step_id": 5,
+      "source": "agent",
+      "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+      "message": "Let me verify the changes and run the verification script:",
+      "reasoning_content": "Now let me verify all the changes and run the tests to make sure everything is correct.",
+      "tool_calls": [
+        {
+          "tool_call_id": "functions.ReadFile:16",
+          "function_name": "ReadFile",
+          "arguments": {
+            "path": "/testbed/packages/composables/src/use-shortcut.ts"
+          }
+        },
+        {
+          "tool_call_id": "functions.ReadFile:17",
+          "function_name": "ReadFile",
+          "arguments": {}
+        },
+        {
+          "tool_call_id": "functions.ReadFile:18",
+          "function_name": "ReadFile",
+          "arguments": {}
+        },
+        {
+          "tool_call_id": "functions.ReadFile:19",
+          "function_name": "ReadFile",
+          "arguments": {}
+        },
+        {
+          "tool_call_id": "functions.ReadFile:20",
+          "function_name": "ReadFile",
+          "arguments": {}
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "functions.ReadFile:16",
+            "content": "     1\timport type { ComponentPublicInstance, Ref } from 'vue';\n     2\timport { onMounted, onUnmounted, ref } from 'vue';\n     3\t\n     4\ttype ShortcutHandler = (event: KeyboardEvent, cancelNext: () => void) => void | any | boolean;\n     5\t\n     6\texport const keyMap: Record<string, string> = {\n     7\t\tControl: 'meta',\n     8\t\tCommand: 'meta',\n     9\t};\n    10\t\n    11\texport const systemKeys = ['meta', 'shift', 'alt', 'backspace', 'delete', 'tab', 'capslock', 'enter', 'home', 'end'];\n    12\t\n    13\tconst keysDown: Set<string> = new Set([]);\n    14\tconst handlers: Record<string, ShortcutHandler[]> = {};\n    15\t\n    16\tlet isGlobalListenerAttached = false;\n    17\t\n    18\tfunction attachGlobalListeners() {\n    19\t\tif (isGlobalListenerAttached) return;\n    20\t\tisGlobalListenerAttached = true;\n    21\t\n    22\t\tdocument.body.addEventListener('keydown', (event: KeyboardEvent) => {\n    23\t\t\tif (event.repeat || !event.key) return;\n    24\t\n    25\t\t\tkeysDown.add(mapKeys(event));\n    26\t\t\tcallHandlers(event);\n    27\t\t});\n    28\t\n    29\t\tdocument.body.addEventListener('keyup', (event: KeyboardEvent) => {\n    30\t\t\tif (event.repeat || !event.key) return;\n    31\t\t\tkeysDown.clear();\n    32\t\t});\n    33\t}\n    34\t\n    35\texport function useShortcut(\n    36\t\tshortcuts: string | string[],\n    37\t\thandler: ShortcutHandler,\n    38\t\treference: Ref<HTMLElement | undefined> | Ref<ComponentPublicInstance | undefined> = ref(\n    39\t\t\tdocument.body,\n    40\t\t) as Ref<HTMLElement>,\n    41\t): void {\n    42\t\tconst callback: ShortcutHandler = (event, cancelNext) => {\n    43\t\t\tif (!reference.value) return;\n    44\t\t\tconst ref = reference.value instanceof HTMLElement ? reference.value : (reference.value.$el as HTMLElement);\n    45\t\n    46\t\t\tif (\n    47\t\t\t\tdocument.activeElement === ref ||\n    48\t\t\t\tref.contains(document.activeElement) ||\n    49\t\t\t\tdocument.activeElement === document.body\n    50\t\t\t) {\n    51\t\t\t\tevent.preventDefault();\n    52\t\t\t\treturn handler(event, cancelNext);\n    53\t\t\t}\n    54\t\n    55\t\t\treturn false;\n    56\t\t};\n    57\t\n    58\t\tonMounted(() => {\n    59\t\t\tattachGlobalListeners();\n    60\t\n    61\t\t\t[shortcuts].flat().forEach((shortcut) => {\n    62\t\t\t\tif (shortcut in handlers) {\n    63\t\t\t\t\thandlers[shortcut]?.unshift(callback);\n    64\t\t\t\t} else {\n    65\t\t\t\t\thandlers[shortcut] = [callback];\n    66\t\t\t\t}\n    67\t\t\t});\n    68\t\t});\n    69\t\n    70\t\tonUnmounted(() => {\n    71\t\t\t[shortcuts].flat().forEach((shortcut) => {\n    72\t\t\t\tconst shortcutHandler = handlers[shortcut];\n    73\t\n    74\t\t\t\tif (shortcutHandler) {\n    75\t\t\t\t\tconst filteredHandlers = shortcutHandler.filter((f) => f !== callback);\n    76\t\n    77\t\t\t\t\thandlers[shortcut] = filteredHandlers;\n    78\t\n    79\t\t\t\t\tif (filteredHandlers.length === 0) {\n    80\t\t\t\t\t\tdelete handlers[shortcut];\n    81\t\t\t\t\t}\n    82\t\t\t\t}\n    83\t\t\t});\n    84\t\t});\n    85\t}\n    86\t\n    87\tfunction mapKeys(key: KeyboardEvent) {\n    88\t\tconst isLatinAlphabet = /^[a-zA-Z0-9]*?$/g;\n    89\t\n    90\t\tlet keyString = key.key.match(isLatinAlphabet) === null ? key.code.replace(/(Key|Digit)/g, '') : key.key;\n    91\t\n    92\t\tconst keyStringInMap = keyMap[keyString];\n    93\t\n    94\t\tkeyString = keyStringInMap ?? keyString;\n    95\t\tkeyString = keyString.toLowerCase();\n    96\t\n    97\t\treturn keyString;\n    98\t}\n    99\t\n   100\tfunction callHandlers(event: KeyboardEvent) {\n   101\t\tObject.entries(handlers).forEach(([key, value]) => {\n   102\t\t\tconst keys = key.split('+');\n   103\t\n   104\t\t\tfor (key of keysDown) {\n   105\t\t\t\tif (keys.includes(key) === false) return;\n   106\t\t\t}\n   107\t\n   108\t\t\tfor (key of keys) {\n   109\t\t\t\tif (keysDown.has(key) === false) return;\n   110\t\t\t}\n   111\t\n   112\t\t\tfor (let i = 0; i < value.length; i++) {\n   113\t\t\t\tlet cancel = false;\n   114\t\n   115\t\t\t\tvalue[i]?.(event, () => {\n   116\t\t\t\t\tcancel = true;\n   117\t\t\t\t});\n   118\t\n   119\t\t\t\t// if cancelNext is called, discontinue going through the queue.\n   120\t\t\t\tif (typeof cancel === 'boolean' && cancel) break;\n   121\t\t\t}\n   122\t\t});\n   123\t}\n"
+          },
+          {
+            "source_call_id": "functions.ReadFile:17",
+            "content": "     1\timport { defineConfig } from 'tsdown';\n     2\t\n     3\texport default defineConfig({\n     4\t\tentry: ['src/**/*.ts', '!src/**/*.d.ts', '!src/**/*.test.ts', '!src/test-utils/**', '!src/__utils__/**', '!src/__setup__/**', '!src/database/run-ast/lib/apply-query/mock.ts'],\n     5\t\tunbundle: true,\n     6\t\ttsconfig: 'tsconfig.prod.json',\n     7\t\ttreeshake: false,\n     8\t});\n"
+          },
+          {
+            "source_call_id": "functions.ReadFile:18",
+            "content": "     1\t{\n     2\t\t\"extends\": \"./tsconfig.json\",\n     3\t\t\"exclude\": [\"**/*.test.ts\", \"src/test-utils\", \"src/__utils__\", \"src/__setup__\"]\n     4\t}\n"
+          },
+          {
+            "source_call_id": "functions.ReadFile:19",
+            "content": "    60\t\t/**\n    61\t\t * Create a single new collection\n    62\t\t */\n    63\t\tasync createOne(payload: RawCollection, opts?: FieldMutationOptions): Promise<string> {\n    64\t\t\tif (this.accountability && this.accountability.admin !== true) {\n    65\t\t\t\tthrow new ForbiddenError();\n    66\t\t\t}\n    67\t\n    68\t\t\tif (!('collection' in payload)) throw new InvalidPayloadError({ reason: `\"collection\" is required` });\n    69\t\n    70\t\t\tif (typeof payload.collection !== 'string' || payload.collection === '') {\n    71\t\t\t\tthrow new InvalidPayloadError({ reason: `\"collection\" must be a non-empty string` });\n    72\t\t\t}\n    73\t\n    74\t\t\tif (payload.collection.startsWith('directus_')) {\n    75\t\t\t\tthrow new InvalidPayloadError({ reason: `Collections can't start with \"directus_\"` });\n    76\t\t\t}\n    77\t\n    78\t\t\tif (payload.collection.includes('/')) {\n    79\t\t\t\tthrow new InvalidPayloadError({ reason: `Collection name cannot contain \"/\"` });\n    80\t\t\t}\n    81\t\n    82\t\t\tpayload.collection = await this.helpers.schema.parseCollectionName(payload.collection);\n    83\t\n    84\t\t\tconst nestedActionEvents: ActionEventParams[] = [];\n    85\t\n    86\t\t\ttry {\n    87\t\t\t\tconst existingCollections: string[] = [\n    88\t\t\t\t\t...((await this.knex.select('collection').from('directus_collections'))?.map(({ collection }) => collection) ??\n    89\t\t\t\t\t\t[]),\n"
+          },
+          {
+            "source_call_id": "functions.ReadFile:20",
+            "content": "   220\t\tasync save(key: PrimaryKey, delta: Partial<Item>): Promise<Partial<Item>> {\n   221\t\t\tconst version = await super.readOne(key);\n   222\t\n   223\t\t\tconst payloadService = new PayloadService(this.collection, {\n   224\t\t\t\taccountability: this.accountability,\n   225\t\t\t\tknex: this.knex,\n   226\t\t\t\tschema: this.schema,\n   227\t\t\t});\n   228\t\n   229\t\t\tconst { item, collection, delta: existingDelta } = version;\n   230\t\n   231\t\t\tconst collectionAccountability = this.schema.collections[collection]?.accountability;\n   232\t\n   233\t\t\tlet activity: PrimaryKey | null = null;\n   234\t\n   235\t\t\tif (collectionAccountability === 'all' || collectionAccountability === 'activity') {\n   236\t\t\t\tconst activityService = new ActivityService({\n   237\t\t\t\t\tknex: this.knex,\n   238\t\t\t\t\tschema: this.schema,\n   239\t\t\t\t});\n   240\t\n   241\t\t\t\tactivity = await activityService.createOne({\n   242\t\t\t\t\taction: Action.VERSION_SAVE,\n   243\t\t\t\t\tuser: this.accountability?.user ?? null,\n   244\t\t\t\t\tcollection,\n   245\t\t\t\t\tip: this.accountability?.ip ?? null,\n   246\t\t\t\t\tuser_agent: this.accountability?.userAgent ?? null,\n   247\t\t\t\t\torigin: this.accountability?.origin ?? null,\n   248\t\t\t\t\titem,\n   249\t\t\t\t});\n   250\t\t\t}\n   251\t\n   252\t\t\tconst helpers = getHelpers(this.knex);\n   253\t\n   254\t\t\tlet revisionDelta = await payloadService.prepareDelta(delta);\n   255\t\n   256\t\t\tif (collectionAccountability === 'all') {\n   257\t\t\t\tconst revisionsService = new RevisionsService({\n   258\t\t\t\t\tknex: this.knex,\n   259\t\t\t\t\tschema: this.schema,\n   260\t\t\t\t});\n   261\t\n   262\t\t\t\tawait revisionsService.createOne({\n   263\t\t\t\t\tactivity,\n   264\t\t\t\t\tversion: key,\n   265\t\t\t\t\tcollection,\n   266\t\t\t\t\titem,\n   267\t\t\t\t\tdata: revisionDelta,\n   268\t\t\t\t\tdelta: revisionDelta,\n   269\t\t\t\t});\n   270\t\t\t}\n   271\t\n   272\t\t\trevisionDelta = revisionDelta ? revisionDelta : null;\n   273\t\n   274\t\t\tconst date = new Date(helpers.date.writeTimestamp(new Date().toISOString()));\n   275\t\n   276\t\t\tdeepMapObjects(revisionDelta, (object, path) => {\n   277\t\t\t\tconst existing = get(existingDelta, path);\n   278\t\n   279\t\t\t\tif (existing && isEqual(existing, object)) return;\n   280\t\n   281\t\t\t\tobject['_user'] = this.accountability?.user;\n   282\t\t\t\tobject['_date'] = date;\n   283\t\t\t});\n   284\t\n   285\t\t\tconst finalVersionDelta = assign({}, existingDelta, revisionDelta);\n   286\t\n   287\t\t\tconst sudoService = new ItemsService(this.collection, {\n   288\t\t\t\tknex: this.knex,\n   289\t\t\t\tschema: this.schema,\n   290\t\t\t\taccountability: {\n   291\t\t\t\t\t...this.accountability!,\n   292\t\t\t\t\tadmin: true,\n   293\t\t\t\t},\n   294\t\t\t});\n   295\t\n   296\t\t\tawait sudoService.updateOne(key, { delta: finalVersionDelta });\n   297\t\n   298\t\t\tconst { cache } = getCache();\n   299\t\n   300\t\t\tif (shouldClearCache(cache, undefined, collection)) {\n   301\t\t\t\tcache.clear();\n   302\t\t\t}\n   303\t\n   304\t\t\treturn finalVersionDelta;\n   305\t\t}\n   306\t\n   307\t\tasync promote(version: PrimaryKey, mainHash: string, fields?: string[]) {\n   308\t\t\tconst { collection, item, delta } = (await super.readOne(version)) as ContentVersion;\n   309\t\n"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 31945,
+        "completion_tokens": 165,
+        "cached_tokens": 31629
+      }
+    },
+    {
+      "step_id": 6,
+      "source": "agent",
+      "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+      "message": "All fixes look correct. Let me run the verification script to confirm:",
+      "reasoning_content": "All the changes look correct. Let me now run the verification script to confirm all requirements are met.",
+      "tool_calls": [
+        {
+          "tool_call_id": "functions.Shell:21",
+          "function_name": "Shell",
+          "arguments": {
+            "command": "python3 /tests/verify.py"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "functions.Shell:21",
+            "content": "python3: can't open file '/tests/verify.py': [Errno 2] No such file or directory\n"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 34953,
+        "completion_tokens": 58,
+        "cached_tokens": 28674
+      }
+    },
+    {
+      "step_id": 7,
+      "source": "agent",
+      "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+      "message": "(tool use)",
+      "reasoning_content": "Let me try to find the verification script.",
+      "tool_calls": [
+        {
+          "tool_call_id": "functions.Glob:22",
+          "function_name": "Glob",
+          "arguments": {
+            "pattern": "**/verify*.py"
+          }
+        },
+        {
+          "tool_call_id": "functions.Shell:23",
+          "function_name": "Shell",
+          "arguments": {}
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "functions.Glob:22",
+            "content": "\u251c\u2500\u2500 .changeset/\n\u2502   \u2514\u2500\u2500 config.json\n\u251c\u2500\u2500 .claude/\n\u2502   \u251c\u2500\u2500 hooks/\n\u2502   \u251c\u2500\u2500 CLAUDE.md\n\u2502   \u2514\u2500\u2500 settings.json\n\u251c\u2500\u2500 .github/\n\u2502   \u251c\u2500\u2500 DISCUSSION_TEMPLATE/\n\u2502   \u251c\u2500\u2500 ISSUE_TEMPLATE/\n\u2502   \u251c\u2500\u2500 actions/\n\u2502   \u251c\u2500\u2500 codeql/\n\u2502   \u251c\u2500\u2500 workflows/\n\u2502   \u251c\u2500\u2500 CODEOWNERS\n\u2502   \u251c\u2500\u2500 FUNDING.yml\n\u2502   \u251c\u2500\u2500 copilot-instructions.md\n\u2502   \u2514\u2500\u2500 pull_request_template.md\n\u251c\u2500\u2500 .vscode/\n\u2502   \u251c\u2500\u2500 extensions.json\n\u2502   \u2514\u2500\u2500 settings.json\n\u251c\u2500\u2500 api/\n\u2502   \u251c\u2500\u2500 src/\n\u2502   \u251c\u2500\u2500 license\n\u2502   \u251c\u2500\u2500 package.json\n\u2502   \u251c\u2500\u2500 tsconfig.json\n\u2502   \u251c\u2500\u2500 tsconfig.prod.json\n\u2502   \u251c\u2500\u2500 tsdown.config.ts\n\u2502   \u2514\u2500\u2500 vitest.config.ts\n\u251c\u2500\u2500 app/\n\u2502   \u251c\u2500\u2500 public/\n\u2502   \u251c\u2500\u2500 src/\n\u2502   \u251c\u2500\u2500 env.d.ts\n\u2502   \u251c\u2500\u2500 histoire.config.ts\n\u2502   \u251c\u2500\u2500 index.html\n\u2502   \u251c\u2500\u2500 license\n\u2502   \u251c\u2500\u2500 package.json\n\u2502   \u251c\u2500\u2500 readme.md\n\u2502   \u251c\u2500\u2500 tsconfig.json\n\u2502   \u2514\u2500\u2500 vite.config.js\n\u251c\u2500\u2500 directus/\n\u2502   \u251c\u2500\u2500 cli.js\n\u2502   \u251c\u2500\u2500 license\n\u2502   \u251c\u2500\u2500 package.json\n\u2502   \u251c\u2500\u2500 readme.md\n\u2502   \u251c\u2500\u2500 version.d.ts\n\u2502   \u2514\u2500\u2500 version.js\n\u251c\u2500\u2500 packages/\n\u2502   \u251c\u2500\u2500 ai/\n\u2502   \u251c\u2500\u2500 composables/\n\u2502   \u251c\u2500\u2500 constants/\n\u2502   \u251c\u2500\u2500 create-directus-extension/\n\u2502   \u251c\u2500\u2500 create-directus-project/\n\u2502   \u251c\u2500\u2500 env/\n\u2502   \u251c\u2500\u2500 errors/\n\u2502   \u251c\u2500\u2500 extensions/\n\u2502   \u251c\u2500\u2500 extensions-registry/\n\u2502   \u251c\u2500\u2500 extensions-sdk/\n\u2502   \u2514\u2500\u2500 ... and 21 more\n\u251c\u2500\u2500 sdk/\n\u2502   \u251c\u2500\u2500 src/\n\u2502   \u251c\u2500\u2500 tests/\n\u2502   \u251c\u2500\u2500 license\n\u2502   \u251c\u2500\u2500 package.json\n\u2502   \u251c\u2500\u2500 readme.md\n\u2502   \u251c\u2500\u2500 tsconfig.json\n\u2502   \u2514\u2500\u2500 tsdown.config.ts\n\u251c\u2500\u2500 tests/\n\u2502   \u2514\u2500\u2500 blackbox/\n\u251c\u2500\u2500 .dockerignore\n\u251c\u2500\u2500 .editorconfig\n\u251c\u2500\u2500 .gitignore\n\u251c\u2500\u2500 .npmrc\n\u251c\u2500\u2500 .prettierignore\n\u251c\u2500\u2500 .prettierrc.json\n\u251c\u2500\u2500 .stylelintignore\n\u251c\u2500\u2500 .stylelintrc.json\n\u251c\u2500\u2500 AGENTS.md\n\u251c\u2500\u2500 Dockerfile\n\u251c\u2500\u2500 cla.md\n\u251c\u2500\u2500 code_of_conduct.md\n\u251c\u2500\u2500 codecov.yaml\n\u251c\u2500\u2500 contributing.md\n\u251c\u2500\u2500 contributors.yml\n\u251c\u2500\u2500 crowdin.yml\n\u251c\u2500\u2500 docker-compose.yml\n\u251c\u2500\u2500 ecosystem.config.cjs\n\u251c\u2500\u2500 eslint.config.js\n\u251c\u2500\u2500 license\n\u2514\u2500\u2500 ... and 5 more entries"
+          },
+          {
+            "source_call_id": "functions.Shell:23",
+            "content": "ls: /workspace/: No such file or directory\n"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 35068,
+        "completion_tokens": 49,
+        "cached_tokens": 31944
+      }
+    },
+    {
+      "step_id": 8,
+      "source": "agent",
+      "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+      "message": "(tool use)",
+      "reasoning_content": "The user said the working directory is `/workspace` but the testbed is at `/testbed`. Let me look for the verify script.",
+      "tool_calls": [
+        {
+          "tool_call_id": "functions.Shell:24",
+          "function_name": "Shell",
+          "arguments": {
+            "command": "find / -name \"verify.py\" 2>/dev/null | head -20"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "functions.Shell:24",
+            "content": ""
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 35754,
+        "completion_tokens": 62,
+        "cached_tokens": 34952
+      }
+    },
+    {
+      "step_id": 9,
+      "source": "agent",
+      "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+      "message": "(tool use)",
+      "reasoning_content": "The verify.py file isn't found on the system. Let me check if there's a `/input_artifacts` directory as mentioned in the rules.",
+      "tool_calls": [
+        {
+          "tool_call_id": "functions.Shell:25",
+          "function_name": "Shell",
+          "arguments": {
+            "command": "ls -la /input_artifacts/ 2>/dev/null || echo \"No /input_artifacts directory\""
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "functions.Shell:25",
+            "content": "No /input_artifacts directory\n"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 35842,
+        "completion_tokens": 68,
+        "cached_tokens": 35753
+      }
+    },
+    {
+      "step_id": 10,
+      "source": "agent",
+      "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+      "message": "Let me verify the fixes are syntactically correct by checking the files once more:",
+      "reasoning_content": "Hmm, the verification script seems to be missing from the environment, which complicates validating the fixes for the four reported bugs. Let me re-examine the logic I've implemented so far.\n\nFor Bug 1 in `use-shortcut.ts`, I've wrapped the listeners. But wait\u2014did I ensure the helper function is exported correctly for the Vue component? I should check that. Regarding Bug 2, the `tsdown` configuration needs to be precise; if the test utilities are still picked up, the build will fail. I need to be sure the glob patterns are correct.\n\nBug 3 is a logic gate: moving the slash check before `parseCollectionName`. I must verify that the error message matches the requirements exactly. For Bug 4 in `versions.ts`, the `accountability` check is now conditional. I need to ensure the service still has access to `this.schema` to read those settings.\n\nActually, the best way to ensure I haven't missed any nuances or syntax errors is to look at the source code directly. I'll read the start of each relevant file to confirm the structure and verify my changes are integrated properly. This will allow me to catch any potential issues before proceeding to manual verification of the logic.\n\nLet me verify the fixes are syntactically correct by checking the files once more:",
+      "tool_calls": [
+        {
+          "tool_call_id": "functions.ReadFile:26",
+          "function_name": "ReadFile",
+          "arguments": {
+            "path": "/testbed/packages/composables/src/use-shortcut.ts",
+            "n_lines": 70
+          }
+        },
+        {
+          "tool_call_id": "functions.ReadFile:27",
+          "function_name": "ReadFile",
+          "arguments": {}
+        },
+        {
+          "tool_call_id": "functions.ReadFile:28",
+          "function_name": "ReadFile",
+          "arguments": {}
+        },
+        {
+          "tool_call_id": "functions.ReadFile:29",
+          "function_name": "ReadFile",
+          "arguments": {}
+        },
+        {
+          "tool_call_id": "functions.ReadFile:30",
+          "function_name": "ReadFile",
+          "arguments": {}
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "functions.ReadFile:26",
+            "content": "     1\timport type { ComponentPublicInstance, Ref } from 'vue';\n     2\timport { onMounted, onUnmounted, ref } from 'vue';\n     3\t\n     4\ttype ShortcutHandler = (event: KeyboardEvent, cancelNext: () => void) => void | any | boolean;\n     5\t\n     6\texport const keyMap: Record<string, string> = {\n     7\t\tControl: 'meta',\n     8\t\tCommand: 'meta',\n     9\t};\n    10\t\n    11\texport const systemKeys = ['meta', 'shift', 'alt', 'backspace', 'delete', 'tab', 'capslock', 'enter', 'home', 'end'];\n    12\t\n    13\tconst keysDown: Set<string> = new Set([]);\n    14\tconst handlers: Record<string, ShortcutHandler[]> = {};\n    15\t\n    16\tlet isGlobalListenerAttached = false;\n    17\t\n    18\tfunction attachGlobalListeners() {\n    19\t\tif (isGlobalListenerAttached) return;\n    20\t\tisGlobalListenerAttached = true;\n    21\t\n    22\t\tdocument.body.addEventListener('keydown', (event: KeyboardEvent) => {\n    23\t\t\tif (event.repeat || !event.key) return;\n    24\t\n    25\t\t\tkeysDown.add(mapKeys(event));\n    26\t\t\tcallHandlers(event);\n    27\t\t});\n    28\t\n    29\t\tdocument.body.addEventListener('keyup', (event: KeyboardEvent) => {\n    30\t\t\tif (event.repeat || !event.key) return;\n    31\t\t\tkeysDown.clear();\n    32\t\t});\n    33\t}\n    34\t\n    35\texport function useShortcut(\n    36\t\tshortcuts: string | string[],\n    37\t\thandler: ShortcutHandler,\n    38\t\treference: Ref<HTMLElement | undefined> | Ref<ComponentPublicInstance | undefined> = ref(\n    39\t\t\tdocument.body,\n    40\t\t) as Ref<HTMLElement>,\n    41\t): void {\n    42\t\tconst callback: ShortcutHandler = (event, cancelNext) => {\n    43\t\t\tif (!reference.value) return;\n    44\t\t\tconst ref = reference.value instanceof HTMLElement ? reference.value : (reference.value.$el as HTMLElement);\n    45\t\n    46\t\t\tif (\n    47\t\t\t\tdocument.activeElement === ref ||\n    48\t\t\t\tref.contains(document.activeElement) ||\n    49\t\t\t\tdocument.activeElement === document.body\n    50\t\t\t) {\n    51\t\t\t\tevent.preventDefault();\n    52\t\t\t\treturn handler(event, cancelNext);\n    53\t\t\t}\n    54\t\n    55\t\t\treturn false;\n    56\t\t};\n    57\t\n    58\t\tonMounted(() => {\n    59\t\t\tattachGlobalListeners();\n    60\t\n    61\t\t\t[shortcuts].flat().forEach((shortcut) => {\n    62\t\t\t\tif (shortcut in handlers) {\n    63\t\t\t\t\thandlers[shortcut]?.unshift(callback);\n    64\t\t\t\t} else {\n    65\t\t\t\t\thandlers[shortcut] = [callback];\n    66\t\t\t\t}\n    67\t\t\t});\n    68\t\t});\n    69\t\n    70\t\tonUnmounted(() => {\n"
+          },
+          {
+            "source_call_id": "functions.ReadFile:27",
+            "content": "     1\timport { defineConfig } from 'tsdown';\n     2\t\n     3\texport default defineConfig({\n     4\t\tentry: ['src/**/*.ts', '!src/**/*.d.ts', '!src/**/*.test.ts', '!src/test-utils/**', '!src/__utils__/**', '!src/__setup__/**', '!src/database/run-ast/lib/apply-query/mock.ts'],\n     5\t\tunbundle: true,\n     6\t\ttsconfig: 'tsconfig.prod.json',\n     7\t\ttreeshake: false,\n     8\t});\n"
+          },
+          {
+            "source_call_id": "functions.ReadFile:28",
+            "content": "     1\t{\n     2\t\t\"extends\": \"./tsconfig.json\",\n     3\t\t\"exclude\": [\"**/*.test.ts\", \"src/test-utils\", \"src/__utils__\", \"src/__setup__\"]\n     4\t}\n"
+          },
+          {
+            "source_call_id": "functions.ReadFile:29",
+            "content": "    63\t\tasync createOne(payload: RawCollection, opts?: FieldMutationOptions): Promise<string> {\n    64\t\t\tif (this.accountability && this.accountability.admin !== true) {\n    65\t\t\t\tthrow new ForbiddenError();\n    66\t\t\t}\n    67\t\n    68\t\t\tif (!('collection' in payload)) throw new InvalidPayloadError({ reason: `\"collection\" is required` });\n    69\t\n    70\t\t\tif (typeof payload.collection !== 'string' || payload.collection === '') {\n    71\t\t\t\tthrow new InvalidPayloadError({ reason: `\"collection\" must be a non-empty string` });\n    72\t\t\t}\n    73\t\n    74\t\t\tif (payload.collection.startsWith('directus_')) {\n    75\t\t\t\tthrow new InvalidPayloadError({ reason: `Collections can't start with \"directus_\"` });\n    76\t\t\t}\n    77\t\n    78\t\t\tif (payload.collection.includes('/')) {\n    79\t\t\t\tthrow new InvalidPayloadError({ reason: `Collection name cannot contain \"/\"` });\n    80\t\t\t}\n    81\t\n    82\t\t\tpayload.collection = await this.helpers.schema.parseCollectionName(payload.collection);\n    83\t\n    84\t\t\tconst nestedActionEvents: ActionEventParams[] = [];\n    85\t\n    86\t\t\ttry {\n    87\t\t\t\tconst existingCollections: string[] = [\n"
+          },
+          {
+            "source_call_id": "functions.ReadFile:30",
+            "content": "   220\t\tasync save(key: PrimaryKey, delta: Partial<Item>): Promise<Partial<Item>> {\n   221\t\t\tconst version = await super.readOne(key);\n   222\t\n   223\t\t\tconst payloadService = new PayloadService(this.collection, {\n   224\t\t\t\taccountability: this.accountability,\n   225\t\t\t\tknex: this.knex,\n   226\t\t\t\tschema: this.schema,\n   227\t\t\t});\n   228\t\n   229\t\t\tconst { item, collection, delta: existingDelta } = version;\n   230\t\n   231\t\t\tconst collectionAccountability = this.schema.collections[collection]?.accountability;\n   232\t\n   233\t\t\tlet activity: PrimaryKey | null = null;\n   234\t\n   235\t\t\tif (collectionAccountability === 'all' || collectionAccountability === 'activity') {\n   236\t\t\t\tconst activityService = new ActivityService({\n   237\t\t\t\t\tknex: this.knex,\n   238\t\t\t\t\tschema: this.schema,\n   239\t\t\t\t});\n   240\t\n   241\t\t\t\tactivity = await activityService.createOne({\n   242\t\t\t\t\taction: Action.VERSION_SAVE,\n   243\t\t\t\t\tuser: this.accountability?.user ?? null,\n   244\t\t\t\t\tcollection,\n   245\t\t\t\t\tip: this.accountability?.ip ?? null,\n   246\t\t\t\t\tuser_agent: this.accountability?.userAgent ?? null,\n   247\t\t\t\t\torigin: this.accountability?.origin ?? null,\n   248\t\t\t\t\titem,\n   249\t\t\t\t});\n   250\t\t\t}\n   251\t\n   252\t\t\tconst helpers = getHelpers(this.knex);\n   253\t\n   254\t\t\tlet revisionDelta = await payloadService.prepareDelta(delta);\n   255\t\n   256\t\t\tif (collectionAccountability === 'all') {\n   257\t\t\t\tconst revisionsService = new RevisionsService({\n   258\t\t\t\t\tknex: this.knex,\n   259\t\t\t\t\tschema: this.schema,\n   260\t\t\t\t});\n   261\t\n   262\t\t\t\tawait revisionsService.createOne({\n   263\t\t\t\t\tactivity,\n   264\t\t\t\t\tversion: key,\n   265\t\t\t\t\tcollection,\n   266\t\t\t\t\titem,\n   267\t\t\t\t\tdata: revisionDelta,\n   268\t\t\t\t\tdelta: revisionDelta,\n   269\t\t\t\t});\n   270\t\t\t}\n   271\t\n   272\t\t\trevisionDelta = revisionDelta ? revisionDelta : null;\n   273\t\n   274\t\t\tconst date = new Date(helpers.date.writeTimestamp(new Date().toISOString()));\n   275\t\n   276\t\t\tdeepMapObjects(revisionDelta, (object, path) => {\n   277\t\t\t\tconst existing = get(existingDelta, path);\n   278\t\n   279\t\t\t\tif (existing && isEqual(existing, object)) return;\n   280\t\n   281\t\t\t\tobject['_user'] = this.accountability?.user;\n   282\t\t\t\tobject['_date'] = date;\n   283\t\t\t});\n   284\t\n   285\t\t\tconst finalVersionDelta = assign({}, existingDelta, revisionDelta);\n   286\t\n   287\t\t\tconst sudoService = new ItemsService(this.collection, {\n   288\t\t\t\tknex: this.knex,\n   289\t\t\t\tschema: this.schema,\n   290\t\t\t\taccountability: {\n   291\t\t\t\t\t...this.accountability!,\n   292\t\t\t\t\tadmin: true,\n   293\t\t\t\t},\n   294\t\t\t});\n   295\t\n   296\t\t\tawait sudoService.updateOne(key, { delta: finalVersionDelta });\n   297\t\n   298\t\t\tconst { cache } = getCache();\n   299\t\n   300\t\t\tif (shouldClearCache(cache, undefined, collection)) {\n   301\t\t\t\tcache.clear();\n   302\t\t\t}\n   303\t\n   304\t\t\treturn finalVersionDelta;\n   305\t\t}\n   306\t\n   307\t\tasync promote(version: PrimaryKey, mainHash: string, fields?: string[]) {\n   308\t\t\tconst { collection, item, delta } = (await super.readOne(version)) as ContentVersion;\n   309\t\n"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 35942,
+        "completion_tokens": 423,
+        "cached_tokens": 35841
+      }
+    },
+    {
+      "step_id": 11,
+      "source": "agent",
+      "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+      "message": "All four fixes have been applied correctly. Let me try to verify the TypeScript syntax is valid:",
+      "reasoning_content": "All four fixes have been implemented. Let me verify by checking the TypeScript syntax and running tests if possible.\n\nLet me summarize the fixes:\n\n### Bug 1 - SSR-safe shortcut listener initialization\n- **Before**: `document.body.addEventListener(...)` was called at module scope (lines 16-26 in original)\n- **After**: Created `attachGlobalListeners()` helper function with idempotent check using `isGlobalListenerAttached` flag\n- The listener attachment is now called from `onMounted()` hook (line 59)\n- This makes it SSR-safe because the document access only happens after component mount\n\n### Bug 2 - Production build excludes test-only sources\n- **tsdown.config.ts**: Added exclusions for `'!src/test-utils/**', '!src/__utils__/**', '!src/__setup__/**', '!src/database/run-ast/lib/apply-query/mock.ts'`\n- **tsconfig.prod.json**: Added `\"src/test-utils\"` to exclude array\n\n### Bug 3 - Reject collection names containing slash\n- Added validation before `parseCollectionName()` call in `createOne()`:\n```typescript\nif (payload.collection.includes('/')) {\n    throw new InvalidPayloadError({ reason: `Collection name cannot contain \"/\"` });\n}\n```\n\n### Bug 4 - Respect collection accountability in version save\n- Modified `save()` method to read collection accountability from `this.schema.collections[collection]?.accountability`\n- When accountability is `null`: Skip both activity and revision writes\n- When accountability is `activity`: Write activity but skip revision\n- When accountability is `all`: Write both activity and revision\n\nNow let me try to run a TypeScript check or tests.",
+      "tool_calls": [
+        {
+          "tool_call_id": "functions.Shell:31",
+          "function_name": "Shell",
+          "arguments": {
+            "command": "cd /testbed && pnpm --filter @directus/composables exec tsc --noEmit 2>&1 | head -30"
+          }
+        },
+        {
+          "tool_call_id": "functions.Shell:32",
+          "function_name": "Shell",
+          "arguments": {}
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "functions.Shell:31",
+            "content": "/bin/bash: line 1: pnpm: command not found\n"
+          },
+          {
+            "source_call_id": "functions.Shell:32",
+            "content": "/bin/bash: line 1: pnpm: command not found\n"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 38620,
+        "completion_tokens": 453,
+        "cached_tokens": 35067
+      }
+    },
+    {
+      "step_id": 12,
+      "source": "agent",
+      "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+      "message": "(tool use)",
+      "reasoning_content": "pnpm isn't available. Let me try npx or check if there's a different way to verify.",
+      "tool_calls": [
+        {
+          "tool_call_id": "functions.Shell:33",
+          "function_name": "Shell",
+          "arguments": {
+            "command": "which npm npx node 2>/dev/null"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "functions.Shell:33",
+            "content": "/usr/local/bin/npm\n/usr/local/bin/npx\n/usr/local/bin/node\n"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 39149,
+        "completion_tokens": 46,
+        "cached_tokens": 38619
+      }
+    },
+    {
+      "step_id": 13,
+      "source": "agent",
+      "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+      "message": "(tool use)",
+      "reasoning_content": "Let me try to run a simple node check on the files to see if they have valid JavaScript syntax.",
+      "tool_calls": [
+        {
+          "tool_call_id": "functions.Shell:34",
+          "function_name": "Shell",
+          "arguments": {
+            "command": "cd /testbed && node -e \"require('fs').readFileSync('packages/composables/src/use-shortcut.ts', 'utf8').match(/document\\.body\\.addEventListener.*(keydown|keyup)/g)\" && echo \"Bug 1: Found document.body.addEventListener calls\""
+          }
+        },
+        {
+          "tool_call_id": "functions.Shell:35",
+          "function_name": "Shell",
+          "arguments": {
+            "raw": "{\""
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "functions.Shell:34",
+            "content": "Bug 1: Found document.body.addEventListener calls\n"
+          },
+          {
+            "source_call_id": "functions.Shell:35",
+            "content": "Bug 1 PASS: No document.body.addEventListener at module scope\n"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 39237,
+        "completion_tokens": 426,
+        "cached_tokens": 35941
+      }
+    },
+    {
+      "step_id": 14,
+      "source": "agent",
+      "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+      "message": "(tool use)",
+      "reasoning_content": "Let me continue to verify all the other bugs as well.",
+      "tool_calls": [
+        {
+          "tool_call_id": "functions.Shell:36",
+          "function_name": "Shell",
+          "arguments": {
+            "command": "cd /testbed && node -e \"\nconst content = require('fs').readFileSync('api/tsdown.config.ts', 'utf8');\nconsole.log('=== tsdown.config.ts ===');\nconsole.log(content);\n\nconst checks = [\n  '!src/test-utils/**',\n  '!src/__utils__/**',\n  '!src/__setup__/**',\n  '!src/database/run-ast/lib/apply-query/mock.ts'\n];\n\nlet allPass = true;\nfor (const check of checks) {\n  if (content.includes(check)) {\n    console.log('PASS: Found', check);\n  } else {\n    console.log('FAIL: Missing', check);\n    allPass = false;\n  }\n}\n\nif (allPass) {\n  console.log('\\\\nBug 2 PASS: All exclusions present in tsdown.config.ts');\n}\n\""
+          }
+        },
+        {
+          "tool_call_id": "functions.Shell:37",
+          "function_name": "Shell",
+          "arguments": {}
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "functions.Shell:36",
+            "content": "=== tsdown.config.ts ===\nimport { defineConfig } from 'tsdown';\n\nexport default defineConfig({\n\tentry: ['src/**/*.ts', '!src/**/*.d.ts', '!src/**/*.test.ts', '!src/test-utils/**', '!src/__utils__/**', '!src/__setup__/**', '!src/database/run-ast/lib/apply-query/mock.ts'],\n\tunbundle: true,\n\ttsconfig: 'tsconfig.prod.json',\n\ttreeshake: false,\n});\n\nPASS: Found !src/test-utils/**\nPASS: Found !src/__utils__/**\nPASS: Found !src/__setup__/**\nPASS: Found !src/database/run-ast/lib/apply-query/mock.ts\n\nBug 2 PASS: All exclusions present in tsdown.config.ts\n"
+          },
+          {
+            "source_call_id": "functions.Shell:37",
+            "content": "=== tsconfig.prod.json ===\n{\n\t\"extends\": \"./tsconfig.json\",\n\t\"exclude\": [\"**/*.test.ts\", \"src/test-utils\", \"src/__utils__\", \"src/__setup__\"]\n}\n\nPASS: Found src/test-utils in exclude\n"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 39738,
+        "completion_tokens": 339,
+        "cached_tokens": 39148
+      }
+    },
+    {
+      "step_id": 15,
+      "source": "agent",
+      "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+      "message": "(tool use)",
+      "reasoning_content": "Now let me verify bug 3 and bug 4.",
+      "tool_calls": [
+        {
+          "tool_call_id": "functions.Shell:38",
+          "function_name": "Shell",
+          "arguments": {
+            "command": "cd /testbed && node -e \"\nconst content = require('fs').readFileSync('api/src/services/collections.ts', 'utf8');\n\n// Check if there's a slash validation before parseCollectionName\nconst lines = content.split('\\n');\nlet parseCollectionNameLine = -1;\nlet slashCheckLine = -1;\n\nfor (let i = 0; i < lines.length; i++) {\n  if (lines[i].includes('parseCollectionName') && lines[i].includes('payload.collection')) {\n    parseCollectionNameLine = i;\n  }\n  if (lines[i].includes('includes(\\'/\\')') || lines[i].includes('includes(\\\"/\\\")')) {\n    slashCheckLine = i;\n  }\n}\n\nconsole.log('parseCollectionName at line:', parseCollectionNameLine + 1);\nconsole.log('slash check at line:', slashCheckLine + 1);\n\nif (slashCheckLine !== -1 && slashCheckLine < parseCollectionNameLine) {\n  console.log('Bug 3 PASS: Slash validation happens before parseCollectionName');\n} else {\n  console.log('Bug 3 FAIL: Slash validation not found or happens after parseCollectionName');\n}\n\n// Also check it uses InvalidPayloadError\nif (lines.slice(slashCheckLine, slashCheckLine + 5).join('\\\\n').includes('InvalidPayloadError')) {\n  console.log('Bug 3 PASS: Uses InvalidPayloadError');\n} else {\n  console.log('Bug 3 FAIL: Does not use InvalidPayloadError');\n}\n\""
+          }
+        },
+        {
+          "tool_call_id": "functions.Shell:39",
+          "function_name": "Shell",
+          "arguments": {}
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "functions.Shell:38",
+            "content": "parseCollectionName at line: 82\nslash check at line: 78\nBug 3 PASS: Slash validation happens before parseCollectionName\nBug 3 PASS: Uses InvalidPayloadError\n"
+          },
+          {
+            "source_call_id": "functions.Shell:39",
+            "content": "Bug 4 PASS: Reads collection accountability from schema\nBug 4 PASS: Activity creation is conditional\nBug 4 PASS: Revision creation is conditional\n"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 40331,
+        "completion_tokens": 660,
+        "cached_tokens": 39737
+      }
+    },
+    {
+      "step_id": 16,
+      "source": "agent",
+      "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+      "message": "All four fixes have been successfully implemented and verified. Let me provide a summary:\n\n## Summary of Changes\n\n### Bug 1 - SSR-safe shortcut listener initialization (Issue #27119)\n**File:** `packages/composables/src/use-shortcut.ts`\n\n- **R1.1**: Removed `document.body.addEventListener` calls from module scope\n- **R1.2**: Created `attachGlobalListeners()` helper function to encapsulate listener attachment\n- **R1.3**: Listener attachment is now invoked from `onMounted()` hook\n- **R1.4**: Added `isGlobalListenerAttached` flag for idempotency (prevents duplicate handlers)\n\n### Bug 2 - Production build excludes test-only sources (Issue #26978)\n**Files:** `api/tsdown.config.ts`, `api/tsconfig.prod.json`\n\n- **R2.1**: Added exclusions to `tsdown.config.ts` for:\n  - `!src/test-utils/**`\n  - `!src/__utils__/**`\n  - `!src/__setup__/**`\n  - `!src/database/run-ast/lib/apply-query/mock.ts`\n- **R2.2**: Added `\"src/test-utils\"` to `tsconfig.prod.json` exclude array\n- **R2.3**: Both configs now properly exclude test-only paths while including normal production sources\n\n### Bug 3 - Reject collection names containing slash (Issue #27093)\n**File:** `api/src/services/collections.ts`\n\n- **R3.1**: Added validation to reject collection names containing `/`\n- **R3.2**: Uses `InvalidPayloadError` with reason message\n- **R3.3**: Validation occurs before `parseCollectionName()` call (line 78 before line 82)\n\n### Bug 4 - Respect collection accountability in version save (Issue #25894)\n**File:** `api/src/services/versions.ts`\n\n- **R4.1**: `save()` method reads `collectionAccountability` from `this.schema.collections[collection]?.accountability`\n- **R4.2**: When accountability is `null` or undefined, skips both activity and revision writes\n- **R4.3**: When accountability is `activity`, writes activity but skips revision\n- **R4.4**: Only when accountability is `all`, writes both activity and revision entries\n\nAll four fixes satisfy the requirements specified in the task.",
+      "reasoning_content": "All the bugs have been verified. Let me do a final comprehensive check to ensure all requirements are met:\n\n1. Bug 1:\n   - R1.1: No `document.body.addEventListener(...)` call at module scope. \u2705 \n   - R1.2: Keyboard listener attachment is encapsulated in a helper path. \u2705\n   - R1.3: Listener attachment is invoked from `onMounted()` only. \u2705\n   - R1.4: Listener attachment is idempotent (no duplicate global handlers). \u2705 (using isGlobalListenerAttached flag)\n\n2. Bug 2:\n   - R2.1: `tsdown` entry excludes test-only paths. \u2705\n   - R2.2: `tsconfig.prod.json` excludes `src/test-utils`. \u2705\n   - R2.3: Effective entry behavior excludes test-only paths. \u2705\n\n3. Bug 3:\n   - R3.1: `CollectionsService.createOne()` rejects names containing `/`. \u2705\n   - R3.2: Rejection uses `InvalidPayloadError`. \u2705\n   - R3.3: Validation occurs before collection name parsing. \u2705\n\n4. Bug 4:\n   - R4.1: `VersionsService.save()` reads collection `accountability` from `this.schema`. \u2705\n   - R4.2: If accountability is `null`, skip activity and revision writes. \u2705\n   - R4.3: If accountability is `activity`, write activity but skip revision. \u2705\n   - R4.4: Only when accountability is `all`, write both activity and revision. \u2705\n\nAll requirements are met.",
+      "metrics": {
+        "prompt_tokens": 41109,
+        "completion_tokens": 831,
+        "cached_tokens": 39236
+      }
+    }
+  ],
+  "final_metrics": {
+    "total_prompt_tokens": 547224,
+    "total_completion_tokens": 7216,
+    "total_cached_tokens": 465800,
+    "total_steps": 16
+  }
+}
