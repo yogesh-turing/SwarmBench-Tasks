@@ -1,0 +1,25 @@
+[task]
+name = "swarmbench/CODESWE-SUPABASE-BUGFIX"
+description = "Fixing bugs in SUPABASE"
+
+[metadata]
+verifier_type = "executable"
+domain = "code-swe"
+coordination_pattern = "fan-out-synthesize"
+human_solving_hours_estimate = 2
+human_solving_hours_justification = "<TBA>"
+estimated_sub_agents = 1
+input_token_estimate = 10000
+reference_link = "https://github.com/supabase/supabase"
+why_multi_agent = ""
+
+[agent]
+timeout_sec = 3600
+
+[verifier]
+timeout_sec = 600
+
+[environment]
+cpus = 2
+memory_mb = 4096
+build_timeout_sec = 600

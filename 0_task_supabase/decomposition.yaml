@@ -1,0 +1,27 @@
+## Bug 1: 
+# The `auth.sessions.inactivity_timeout` value is correctly configured in `config.toml` using duration format such as:
+
+# ```
+# [auth.sessions]
+# inactivity_timeout = "10h0m0s"
+# During deployment, the backend correctly converts this value internally to seconds (36000).
+# ```
+# However, in the Supabase Dashboard/Auth Sessions UI, the value is displayed directly as 36000 without clarifying that the unit is seconds. This creates confusion because users expect the configured duration (10 hours) rather than the raw converted value.
+
+sub_tasks:
+  - id: investigate-and-fix-bug-1
+    description: >
+      Investigate the code responsible for displaying the `auth.sessions.inactivity_timeout` value in the Supabase Dashboard/Auth Sessions UI. 
+      Identify where the conversion from duration format to seconds is happening and why the UI is showing the raw seconds value instead of the original duration format. 
+      Implement a fix to display the value in a more user-friendly format (e.g., "10h0m0s" or "10 hours") while ensuring that the underlying functionality remains intact. Do not modify any other unrelated functionality or tests.
+
+    depends_on: []
+    parallel_group: fan-out
+
+  - id: verify-all-fixes
+    description: >
+      After the fix for Bug 1 is applied, run the verification script
+      from the repository root to confirm all checks pass. If any check
+      fails, report which check failed and why.
+    depends_on: [investigate-and-fix-bug-1]
+    parallel_group: synthesize
