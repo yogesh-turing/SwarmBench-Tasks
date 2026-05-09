@@ -8,6 +8,29 @@
 # ```
 # However, in the Supabase Dashboard/Auth Sessions UI, the value is displayed directly as 36000 without clarifying that the unit is seconds. This creates confusion because users expect the configured duration (10 hours) rather than the raw converted value.
 
+# **Bug 2** - The Vercel deployment authorization script calls the GitHub Status API without authentication.
+
+# Step to reproduce the bug:
+#     Run the Vercel authorization script in CI without providing a GITHUB_TOKEN.
+#     Steps:
+#         Run the script with only these env variables:
+#         HEAD_COMMIT_SHA
+#         VERCEL_TOKEN
+#         Script calls:
+#         https://api.github.com/repos/supabase/supabase/statuses/{sha}
+#         GitHub API responds with rate limit / unauthenticated request.
+#         Deployment authorization fails.
+
+# Expected behavior
+#     The script should:
+#         - Authenticate GitHub API requests using GITHUB_TOKEN
+#         - Work reliably in CI
+#         - Support private repositories
+#         - Not hang indefinitely on network calls
+#         - Retry temporary API failures
+#         - Safely skip statuses without target_url
+#         - Exit with non-zero code when authorization fails
+
 sub_tasks:
   - id: investigate-and-fix-bug-1
     description: >
@@ -18,10 +41,16 @@ sub_tasks:
     depends_on: []
     parallel_group: fan-out
 
+  - id: investigate-and-fix-bug-2
+    description: >
+      Investigate the Vercel deployment authorization script to identify where it calls the GitHub Status API without authentication. 
+      Implement a fix to ensure that all GitHub API requests are authenticated using a provided GITHUB_TOKEN. 
+      The fix should include error handling for cases where the token is missing or invalid, and should ensure that the script exits with an appropriate error message and non-zero code when authorization fails. Do not modify any other unrelated functionality or tests.
+
   - id: verify-all-fixes
     description: >
-      After the fix for Bug 1 is applied, run the verification script
+      After the fix for Bug 1 and Bug 2 is applied, run the verification script
       from the repository root to confirm all checks pass. If any check
       fails, report which check failed and why.
-    depends_on: [investigate-and-fix-bug-1]
+    depends_on: [investigate-and-fix-bug-1, investigate-and-fix-bug-2]
     parallel_group: synthesize

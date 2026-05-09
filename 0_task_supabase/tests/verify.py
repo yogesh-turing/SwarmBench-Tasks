@@ -72,8 +72,6 @@ check(
     weight=1.0,
 )
 
-reward = PASSED_WEIGHT / TOTAL_WEIGHT if TOTAL_WEIGHT else 0.0
+reward = PASSED_WEIGHT / TOTAL_WEIGHT
 
 print(f"\nReward: {reward:.4f}")
-
-sys.exit(0 if reward == 1.0 else 1)

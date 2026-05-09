@@ -107,5 +107,28 @@ index 03b333ed17a84..36064088cecb5 100644
      updateAuthConfig(
 __BUGFIX1__
 
+
+cat > /testbed/solution_patch.diff << '__BUGFIX2__'
+diff --git a/scripts/authorizeVercelDeploys.ts b/scripts/authorizeVercelDeploys.ts
+index 8a068193d5144..2b4305949e24b 100644
+--- a/scripts/authorizeVercelDeploys.ts
++++ b/scripts/authorizeVercelDeploys.ts
+@@ -38,7 +38,13 @@ async function fetchGitHubStatuses(sha: string): Promise<GitHubStatus[]> {
+   const url = `https://api.github.com/repos/supabase/supabase/statuses/${sha}`
+   console.log(`Fetching GitHub statuses for SHA: ${sha}`)
+ 
+-  const response = await fetch(url)
++  const headers: Record<string, string> = {}
++  
++  if (process.env.GITHUB_TOKEN) {
++    headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`
++  }
++
++  const response = await fetch(url, { headers })
+   if (!response.ok) {
+     throw new Error(`Failed to fetch GitHub statuses: ${response.status} ${response.statusText}`)
+   }
+__BUGFIX2__
+
 cd /testbed
 patch --fuzz=5 -p1 -i /testbed/solution_patch.diff
