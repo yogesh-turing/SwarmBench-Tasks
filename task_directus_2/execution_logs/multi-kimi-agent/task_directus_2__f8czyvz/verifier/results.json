@@ -1,0 +1,101 @@
+{
+  "score": 0.65,
+  "checks": [
+    {
+      "id": "R1.1-no-top-level-listener",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R1.2-helper-exists",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R1.3-onmounted-invocation",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R1.4-idempotent-attach",
+      "passed": false,
+      "detail": "attachGlobalListeners body not found"
+    },
+    {
+      "id": "R1.5-keydown-keyup-in-helper",
+      "passed": false,
+      "detail": "attachGlobalListeners body not found"
+    },
+    {
+      "id": "R2.1-tsdown-exclusions-present",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R2.2-tsconfig-exclude-test-utils",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R2.3-entry-behavior-simulation",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R2.4-build-mode-preserved",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R3.1-slash-check",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R3.2-invalid-payload-error",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R3.3-validation-order",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R4.1-read-accountability",
+      "passed": false,
+      "detail": "schema accountability read with null fallback is missing"
+    },
+    {
+      "id": "R4.2-non-null-guard",
+      "passed": false,
+      "detail": "accountability variable not found"
+    },
+    {
+      "id": "R4.3-activity-gated",
+      "passed": false,
+      "detail": "accountability variable not found"
+    },
+    {
+      "id": "R4.4-all-guard",
+      "passed": false,
+      "detail": "accountability variable not found"
+    },
+    {
+      "id": "R4.5-revision-gated",
+      "passed": false,
+      "detail": "accountability variable not found"
+    },
+    {
+      "id": "R4.6-no-unconditional-side-effects",
+      "passed": false,
+      "detail": "accountability variable not found"
+    }
+  ],
+  "bug_scores": {
+    "bug1": 0.6,
+    "bug2": 1.0,
+    "bug3": 1.0,
+    "bug4": 0.0
+  }
+}

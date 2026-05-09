@@ -1,0 +1,29 @@
+============================================================
+Directus Four-Fix Verifier
+============================================================
+  PASS  R1.1-no-top-level-listener
+  PASS  R1.2-helper-exists
+  PASS  R1.3-onmounted-invocation
+  FAIL  R1.4-idempotent-attach: attachGlobalListeners body not found
+  FAIL  R1.5-keydown-keyup-in-helper: attachGlobalListeners body not found
+  PASS  R2.1-tsdown-exclusions-present
+  PASS  R2.2-tsconfig-exclude-test-utils
+  PASS  R2.3-entry-behavior-simulation
+  PASS  R2.4-build-mode-preserved
+  PASS  R3.1-slash-check
+  PASS  R3.2-invalid-payload-error
+  PASS  R3.3-validation-order
+  FAIL  R4.1-read-accountability: schema accountability read with null fallback is missing
+  FAIL  R4.2-non-null-guard: accountability variable not found
+  FAIL  R4.3-activity-gated: accountability variable not found
+  FAIL  R4.4-all-guard: accountability variable not found
+  FAIL  R4.5-revision-gated: accountability variable not found
+  FAIL  R4.6-no-unconditional-side-effects: accountability variable not found
+
+Per-bug completion:
+  bug1: 0.600
+  bug2: 1.000
+  bug3: 1.000
+  bug4: 0.000
+
+Reward: 0.650000

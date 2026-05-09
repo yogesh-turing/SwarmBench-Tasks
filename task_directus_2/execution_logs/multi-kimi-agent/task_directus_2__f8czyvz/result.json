@@ -1,0 +1,107 @@
+{
+    "id": "a949fb07-cd61-492e-b07b-3097f667fb7f",
+    "task_name": "swarmbench/8836d4b7ec4248fe8074265d17910ac3-SWARMBENCH-FANOUT-CODESWE-DIRECTUS-BUG-FIXES",
+    "trial_name": "task_directus_2__f8czyvz",
+    "trial_uri": "file:///W:/git/tasks/task_directus_2/execution_logs/multi-kimi-agent/task_directus_2__f8czyvz",
+    "task_id": {
+        "path": "..\\tasks\\task_directus_2"
+    },
+    "source": null,
+    "task_checksum": "ea5ca077b9d1abe965daee09c65d47df4f92aadf0091006c61bad2892f7ddf7c",
+    "config": {
+        "task": {
+            "path": "..\\tasks\\task_directus_2",
+            "git_url": null,
+            "git_commit_id": null,
+            "name": null,
+            "ref": null,
+            "overwrite": false,
+            "download_dir": null,
+            "source": null
+        },
+        "trial_name": "task_directus_2__f8czyvz",
+        "trials_dir": "..\\tasks\\task_directus_2\\execution_logs\\multi-kimi-agent",
+        "timeout_multiplier": 1.0,
+        "agent_timeout_multiplier": null,
+        "verifier_timeout_multiplier": null,
+        "agent_setup_timeout_multiplier": null,
+        "environment_build_timeout_multiplier": null,
+        "agent": {
+            "name": "swarm-kimi-multi",
+            "import_path": null,
+            "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+            "override_timeout_sec": null,
+            "override_setup_timeout_sec": null,
+            "max_timeout_sec": null,
+            "kwargs": {},
+            "env": {
+                "FIREWORKS_API_KEY": "${FIREWORKS_API_KEY}"
+            }
+        },
+        "environment": {
+            "type": "docker",
+            "import_path": null,
+            "force_build": false,
+            "delete": true,
+            "override_cpus": null,
+            "override_memory_mb": null,
+            "override_storage_mb": null,
+            "override_gpus": null,
+            "suppress_override_warnings": false,
+            "mounts_json": null,
+            "env": {},
+            "kwargs": {}
+        },
+        "verifier": {
+            "override_timeout_sec": null,
+            "max_timeout_sec": null,
+            "env": {
+                "FIREWORKS_API_KEY": "${FIREWORKS_API_KEY}"
+            },
+            "disable": false
+        },
+        "artifacts": [],
+        "job_id": "18a5bdc6-2bec-4614-bf74-fcd93be2c8e2"
+    },
+    "agent_info": {
+        "name": "swarm-kimi-multi",
+        "version": "unknown",
+        "model_info": {
+            "name": "accounts/fireworks/models/kimi-k2p5",
+            "provider": "fireworks_ai"
+        }
+    },
+    "agent_result": {
+        "n_input_tokens": 47338,
+        "n_cache_tokens": 22909,
+        "n_output_tokens": 2039,
+        "cost_usd": null,
+        "rollout_details": null,
+        "metadata": null
+    },
+    "verifier_result": {
+        "rewards": {
+            "reward": 0.65
+        }
+    },
+    "exception_info": null,
+    "started_at": "2026-05-09T03:07:19.616440Z",
+    "finished_at": "2026-05-09T03:20:14.777628Z",
+    "environment_setup": {
+        "started_at": "2026-05-09T03:07:20.351997Z",
+        "finished_at": "2026-05-09T03:07:27.766727Z"
+    },
+    "agent_setup": {
+        "started_at": "2026-05-09T03:07:27.766778Z",
+        "finished_at": "2026-05-09T03:08:39.904567Z"
+    },
+    "agent_execution": {
+        "started_at": "2026-05-09T03:08:39.904714Z",
+        "finished_at": "2026-05-09T03:20:10.485570Z"
+    },
+    "verifier": {
+        "started_at": "2026-05-09T03:20:10.501723Z",
+        "finished_at": "2026-05-09T03:20:11.535529Z"
+    },
+    "step_results": null
+}
