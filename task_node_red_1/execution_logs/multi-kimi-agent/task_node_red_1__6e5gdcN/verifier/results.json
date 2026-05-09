@@ -1,0 +1,85 @@
+{
+  "score": 0.9,
+  "checks": [
+    {
+      "id": "npm-test",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "spacebar-modifier-guard",
+      "passed": false,
+      "detail": "modifier guard not found in view.js"
+    },
+    {
+      "id": "spacebar-cleanup-state",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "spacebar-early-return",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "halo-status-height-cache",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "halo-height-setAttribute",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "halo-width-conditional",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "sidebar-click-listener",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "sidebar-drag-flag-reset",
+      "passed": false,
+      "detail": "draggingTabButton reset not found in sidebar.js"
+    },
+    {
+      "id": "sidebar-trigger-click",
+      "passed": false,
+      "detail": "trigger('click') not found in sidebar.js"
+    },
+    {
+      "id": "build-normalize-fn",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "build-win32-guard",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "build-normalized-var",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "a11y-togglebutton-aria-pressed",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "a11y-searchbox-aria-expanded",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "a11y-palette-aria-expanded",
+      "passed": true,
+      "detail": ""
+    }
+  ]
+}

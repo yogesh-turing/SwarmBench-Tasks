@@ -1,0 +1,8 @@
+OK: fastify.js exposeHeadRoutes
+OK: errors.js add FST_ERR_SCH_BODY_GET_HEAD
+OK: route.js add GET/HEAD schema.body guard
+OK: reply.js make sent setter throw
+OK: wrapThenable.js rewritten
+OK: handleRequest.js wrap non-Error throws
+OK: hooks.js wrap non-Error hook errors
+Oracle patching complete.

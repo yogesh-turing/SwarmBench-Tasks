@@ -1,0 +1,25 @@
+[task]
+name = "swarmbench/task-4"
+description = "Fix bugs in Lodash"
+
+[metadata]
+verifier_type = "executable"
+domain = "code-swe"
+coordination_pattern = "fan-out-synthesize"
+human_solving_hours_estimate = 6
+human_solving_hours_justification = "A developer must first understand the repository structure including vendor scripts, test suites, and core lodash implementation (~1h). The Firebug Lite security issue requires analyzing how the debug script is exposed, verifying runtime inclusion paths, and safely removing or gating it without breaking functionality (~1.5h). The typo fixes require repository-wide scanning, careful correction across multiple files including tests and vendor code, and validation that no expected string outputs or test assertions are broken (~1.5h). The clone/cloneDeep bug requires deeper understanding of JavaScript object model, prototype chains, Object.freeze behavior, and property descriptors; reproducing the issue, implementing a safe cloning strategy, and ensuring no regression across edge cases (~3h). The unescape bug requires tracing HTML entity decoding logic, correcting parsing behavior for decimal entities, and validating against existing escape/unescape cases (~1h). Finally, running the full test suite, debugging regressions, and adding missing edge-case tests (~1h)."
+estimated_sub_agents = 4
+input_token_estimate = 10000
+why_multi_agent = "The task spans multiple distinct domains within the same repository: frontend security handling (Firebug Lite exposure), large-scale textual corrections (typos across multiple files), deep JavaScript runtime behavior (prototype chain and cloning edge cases), and string parsing logic (HTML entity decoding). These areas require different reasoning modes: security auditing, bulk static correction, low-level language semantics, and parsing logic validation. A single agent handling all sequentially risks context dilution and inefficiency. Parallel agents can independently investigate and fix each bug category (security, typos, cloning logic, unescape logic), while a final synthesizing agent validates integration and regression safety."
+reference_link = "https://github.com/lodash/lodash"
+
+[agent]
+timeout_sec = 3600
+
+[verifier]
+timeout_sec = 600
+
+[environment]
+cpus = 2
+memory_mb = 4096
+build_timeout_sec = 600

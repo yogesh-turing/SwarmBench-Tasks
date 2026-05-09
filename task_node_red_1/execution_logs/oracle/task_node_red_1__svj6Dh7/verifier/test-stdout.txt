@@ -1,0 +1,33 @@
+============================================================
+Node-RED multi-bug verifier
+============================================================
+
+[Behavioural] npm test (0.50)
+  PASS  npm-test
+
+[Bug 1] Spacebar modifier guard (0.10)
+  PASS  spacebar-modifier-guard
+  PASS  spacebar-cleanup-state
+  PASS  spacebar-early-return
+
+[Bug 2] Halo geometry sync (0.10)
+  PASS  halo-status-height-cache
+  PASS  halo-height-setAttribute
+  PASS  halo-width-conditional
+
+[Bug 3] Sidebar click handler (0.10)
+  PASS  sidebar-click-listener
+  PASS  sidebar-drag-flag-reset
+  PASS  sidebar-trigger-click
+
+[Bug 4] Build path normalization (0.10)
+  PASS  build-normalize-fn
+  PASS  build-win32-guard
+  PASS  build-normalized-var
+
+[Bug 5] Accessibility attributes (0.10)
+  PASS  a11y-togglebutton-aria-pressed
+  PASS  a11y-searchbox-aria-expanded
+  PASS  a11y-palette-aria-expanded
+
+FINAL SCORE: 1.0

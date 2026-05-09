@@ -1,0 +1,7 @@
+﻿[task]
+domain = "swe"
+pattern = "fan-out-synthesize"
+timeout_sec = 4200
+
+[evaluation]
+entry = "tests/test.sh"

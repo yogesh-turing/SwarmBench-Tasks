@@ -1,0 +1,35 @@
+{
+  "issue_id": "27119",
+  "issue_url": "https://github.com/directus/directus/issues/27119",
+  "pr_url": "https://github.com/directus/directus/pull/27155",
+  "difficulty": "Medium",
+  "category": "runtime boundary",
+  "expected_tools": [
+    "git",
+    "pnpm",
+    "node",
+    "ripgrep"
+  ],
+  "expected_capabilities": [
+    "repo exploration",
+    "runtime reasoning",
+    "multi-package reasoning",
+    "verification",
+    "failure recovery"
+  ],
+  "files_expected_to_change": [
+    "packages/composables/src/use-shortcut.ts"
+  ],
+  "estimated_steps": 8,
+  "verification_command": "bash benchmarks/directus/issue-27119/verification.sh",
+  "failure_signals": [
+    "ReferenceError: document is not defined",
+    "stack trace enters packages/composables/dist/index.js",
+    "SSR regression test fails before the fix"
+  ],
+  "success_signals": [
+    "SSR regression test passes",
+    "pnpm --filter @directus/composables build succeeds",
+    "node import of packages/composables/dist/index.js succeeds"
+  ]
+}

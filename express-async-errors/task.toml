@@ -1,0 +1,25 @@
+[task]
+name = "swarmbench/express-async-errors"
+description = "Comprehensive Express 4.x security and reliability hardening sweep: primary focus on CRLF header injection prevention across all request/response entry points, supported by async error propagation fixes and Node.js 22 compatibility cleanup. Multi-threaded task requiring specialized agents for CRLF validation plumbing, response security, request trust boundaries, async reliability, and compatibility modernization."
+
+[metadata]
+verifier_type = "executable"
+domain = "code-swe"
+coordination_pattern = "fan-out-synthesize"
+human_solving_hours_estimate = 14
+human_solving_hours_justification = "CRLF injection prevention requires deep security analysis and careful implementation across 10+ entry points: shared utility design (~2h), response-side hardening in res.set/append/cookie/location/redirect (~3h), request-side hardening in req.get/header/referer/hostname and trust boundaries (~3h). Async error propagation requires careful guard logic in layer.js and param pipeline (~2h). Node.js 22 compatibility refactoring from connection->socket and trimRight->trimEnd (~1h). Final orchestration, integration validation across 43 tests, and cross-module consistency checks (~3h)."
+estimated_sub_agents = 6
+input_token_estimate = 95000
+reference_link = "https://github.com/expressjs/express/blob/4.19.2/lib/router/layer.js"
+why_multi_agent = "CRLF injection prevention is the primary security concern (40% of verifier weight) and requires coordination across three distinct code paths: utils (shared validation), response (set/append/cookie/location), and request (get/hostname trust boundary). A single agent either over-invests in one area and misses others, or context-fills before completing all entry points consistently. Async error propagation (35% weight) requires focus on two separate routing mechanisms (layer vs param pipeline). Node.js 22 compatibility (15% weight) needs careful coordination with CRLF changes in request.js. Multi-agent decomposition forces specialization: each agent owns one security/reliability workstream, the orchestrator enforces cross-file consistency."
+
+[agent]
+timeout_sec = 1200
+
+[verifier]
+timeout_sec = 60
+
+[environment]
+cpus = 1
+memory_mb = 2048
+build_timeout_sec = 300

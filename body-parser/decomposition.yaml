@@ -1,0 +1,62 @@
+pattern: fan-out-synthesize
+
+agents:
+  - name: agent-multipart-streaming
+    scope: |
+      Implement multipart/form-data parsing support.
+
+      Own multipart boundary parsing, field extraction,
+      duplicate field handling, field-level limit enforcement,
+      malformed multipart handling, and request stream lifecycle behavior.
+
+      Ensure multipart parsing integrates cleanly with existing parser
+      middleware semantics and verification callback behavior.
+
+  - name: agent-generic-parser
+    scope: |
+      Implement the generic parser factory architecture.
+
+      Own parse callback lifecycle semantics, charset-aware decoding,
+      buffer/string parsing modes, integration with read utilities,
+      and parser error propagation behavior.
+
+      Ensure compatibility with existing text/raw parser behavior.
+
+  - name: agent-security-and-charsets
+    scope: |
+      Harden parser security and charset handling.
+
+      Own prototype poisoning protection, recursive dangerous key handling,
+      charset normalization consistency, RFC-compatible validation,
+      invalid encoding handling, and parser compatibility behavior.
+
+      Ensure all parser types enforce charset semantics consistently.
+
+  - name: agent-performance-and-compatibility
+    scope: |
+      Improve parser performance and middleware compatibility behavior.
+
+      Own parameter counting optimization, request body lifecycle semantics,
+      stack trace preservation, parser exports, compatibility behavior,
+      and empty body handling.
+
+      Ensure all parsers preserve existing middleware expectations.
+
+  - name: agent-regression-and-integration
+    scope: |
+      Expand and stabilize integration and regression coverage.
+
+      Own multipart integration tests, malformed payload tests,
+      charset compatibility tests, consumed-stream tests,
+      verification callback tests, parser interoperability tests,
+      and security regression coverage.
+
+  - name: orchestrator
+    scope: |
+      Integrate all parser subsystems into a single coherent architecture.
+
+      Resolve conflicts between multipart parsing, generic parser behavior,
+      charset handling, security hardening, and middleware lifecycle semantics.
+
+      Ensure cross-parser consistency, integration correctness,
+      backward compatibility, and full repository test stability.

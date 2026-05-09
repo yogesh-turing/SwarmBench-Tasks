@@ -1,0 +1,35 @@
+{
+  "issue_id": "26748",
+  "issue_url": "https://github.com/directus/directus/issues/26748",
+  "pr_url": "",
+  "difficulty": "Hard",
+  "category": "permission regression",
+  "expected_tools": [
+    "git",
+    "pnpm",
+    "node",
+    "ripgrep"
+  ],
+  "expected_capabilities": [
+    "repo exploration",
+    "security reasoning",
+    "debugging",
+    "verification",
+    "failure recovery"
+  ],
+  "files_expected_to_change": [
+    "api/src/services/versions.ts"
+  ],
+  "estimated_steps": 9,
+  "verification_command": "bash benchmarks/directus/issue-26748/verification.sh",
+  "failure_signals": [
+    "derived permission regression test fails",
+    "save() still reaches sudo updateOne despite denied access",
+    "validateAccess is never called before the fix"
+  ],
+  "success_signals": [
+    "derived permission regression test passes",
+    "save() throws ForbiddenError when directus_versions update access is denied",
+    "sudo updateOne is not reached on denied access"
+  ]
+}

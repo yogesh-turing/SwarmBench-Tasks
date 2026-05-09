@@ -1,0 +1,92 @@
+coordination_pattern: fan-out-synthesize
+
+sub_tasks:
+  - id: spacebar-event-handling
+    description: >
+      Own the spacebar panning handler in
+      /testbed/packages/node_modules/@node-red/editor-client/src/js/ui/view.js.
+      The keydown handler for keyCode 32 currently activates canvas panning
+      even when a modifier key (Ctrl, Cmd, or Alt) is held, stealing shortcuts
+      like Ctrl+Space. Your goal: the panning path must not activate when any
+      modifier is held; if modifiers are detected while panning is already
+      active, clean up the panning state and return early.
+      Do not change any other behaviour in view.js and do not touch tests.
+    depends_on: []
+    parallel_group: fan-out
+
+  - id: halo-geometry-sync
+    description: >
+      Own the status/halo redraw logic in
+      /testbed/packages/node_modules/@node-red/editor-client/src/js/ui/view.js.
+      When a node's status changes height (icon or text appears/disappears), the
+      selection halo SVG element is not resized, leaving it clipped or oversized.
+      Your goal: capture the old status height before the redraw, compute the new
+      height after, and if the height changed update the halo element's height
+      attribute to reflect the full node height plus status clearance.
+      Also ensure the button-halo width calculation is conditional on whether the
+      button is in toggle state so the halo does not overflow on one side.
+      Do not modify tests or any file other than view.js.
+    depends_on: []
+    parallel_group: fan-out
+
+  - id: sidebar-drag-interaction
+    description: >
+      Own the tab button interaction in
+      /testbed/packages/node_modules/@node-red/editor-client/src/js/ui/sidebar.js.
+      The current mouseup listener on tab buttons fires at the end of a drag,
+      causing an unintended tab switch. Your goal: switch the listener to a click
+      event (which does not fire after a drag), reset the drag flag inside the
+      sortable stop callback so subsequent real clicks are not blocked, and update
+      any synthetic event trigger that activates a tab to match the new event name.
+      Do not modify tests or any file other than sidebar.js.
+    depends_on: []
+    parallel_group: fan-out
+
+  - id: build-path-normalization
+    description: >
+      Own the file-glob expansion in /testbed/scripts/build/concat.js.
+      On Windows, path strings may contain backslashes, which fast-glob and
+      fs.existsSync do not handle correctly. Your goal: add a helper that
+      normalises path separators to forward slashes on Windows and is a no-op
+      elsewhere, then apply it to every pattern string before passing it to
+      fast-glob or existsSync. Error messages should also use the normalised form.
+      Do not modify tests or any other file under scripts/.
+    depends_on: []
+    parallel_group: fan-out
+
+  - id: accessibility-widgets
+    description: >
+      Own all ARIA accessibility improvements across the editor UI widget files:
+        - packages/node_modules/@node-red/editor-client/src/js/ui/common/editableList.js
+        - packages/node_modules/@node-red/editor-client/src/js/ui/common/searchBox.js
+        - packages/node_modules/@node-red/editor-client/src/js/ui/common/toggleButton.js
+        - packages/node_modules/@node-red/editor-client/src/js/ui/common/treeList.js
+        - packages/node_modules/@node-red/editor-client/src/js/ui/common/typedInput.js
+        - packages/node_modules/@node-red/editor-client/src/js/ui/notifications.js
+        - packages/node_modules/@node-red/editor-client/src/js/ui/palette.js
+      Each widget needs specific ARIA attributes so screen readers can navigate
+      the editor: aria-label/aria-labelledby forwarding for list widgets,
+      aria-haspopup and aria-expanded on the search-options dropdown button,
+      aria-pressed on toggle buttons, aria-expanded on palette category headers
+      with keyboard Enter/Space activation, and focus management for modal
+      notifications. Refer to the task instruction for the exact requirements per
+      file. Do not modify tests or any file outside this list.
+    depends_on: []
+    parallel_group: fan-out
+
+  - id: integration-and-verify
+    description: >
+      After all four fix agents complete their work, verify the integrated result.
+      Run the Node-RED test suite from /testbed with `npm test` and confirm it
+      exits with code 0. Check that the changes from all five fix threads are
+      present and do not conflict — in particular, both the spacebar guard and
+      the halo-geometry fix land in view.js without overwriting each other.
+      If any test fails or a fix is missing, diagnose and resolve before
+      reporting done.
+    depends_on:
+      - spacebar-event-handling
+      - halo-geometry-sync
+      - sidebar-drag-interaction
+      - build-path-normalization
+      - accessibility-widgets
+    parallel_group: synthesize

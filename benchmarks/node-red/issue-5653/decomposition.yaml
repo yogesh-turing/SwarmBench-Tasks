@@ -1,0 +1,37 @@
+﻿pattern: fan-out-synthesize
+agents:
+  - name: agent-widget-semantics
+    technical_domain: editor-ui-accessibility
+    scope: Audit reusable widget primitives for missing accessibility semantics and state attributes.
+    deliverables:
+      - Common widget controls expose semantic labels and state attributes.
+      - Reusable list/tree/input widgets can accept accessibility labels from call sites.
+
+  - name: agent-navigation-focus
+    technical_domain: focus-management
+    scope: Validate and harden focus movement rules for transient and modal UI surfaces.
+    deliverables:
+      - Focus transition rules are explicit and consistent.
+      - Transient notifications do not steal focus.
+      - Hidden/inactive regions are non-interactive.
+
+  - name: agent-sidebar-palette-integration
+    technical_domain: interaction-integration
+    scope: Ensure sidebar and palette controls keep keyboard and pointer semantics aligned under dynamic state changes.
+    deliverables:
+      - Expanded/collapsed and overflow states are represented consistently.
+      - Keyboard activation behavior remains intact.
+
+  - name: agent-regression-verifier
+    technical_domain: verification
+    scope: Run focused checks and confirm no regressions in editor usability-critical interactions.
+    deliverables:
+      - Evidence of passing behavioral checks.
+      - Evidence of passing static guard checks.
+
+  - name: orchestrator
+    technical_domain: synthesis
+    scope: Integrate all patches, resolve conflicts, and ensure cross-surface consistency.
+    deliverables:
+      - Unified patch with coherent accessibility semantics.
+      - Final verification report with no failing checks.

@@ -1,0 +1,135 @@
+agents:
+  - name: routing-agent
+    description: >
+      Implement the routing-related breaking changes for Fastify v3→v4.
+      
+      Your scope covers THREE files:
+      
+      1. fastify.js — Change the default value of `exposeHeadRoutes` from `false` to `true`.
+         Find the ternary expression: `options.exposeHeadRoutes != null ? options.exposeHeadRoutes : false`
+         and change the fallback to `true`.
+      
+      2. lib/errors.js — Add a new error `FST_ERR_SCH_BODY_GET_HEAD` to the exported errors
+         object, just before `FST_ERR_SCH_SERIALIZATION_BUILD`:
+         ```js
+         FST_ERR_SCH_BODY_GET_HEAD: createError(
+           'FST_ERR_SCH_BODY_GET_HEAD',
+           'Body validation schema for %s method is not allowed!',
+           400
+         ),
+         ```
+      
+      3. lib/route.js — Import `FST_ERR_SCH_BODY_GET_HEAD` from `./errors`, then inside the
+         `if (opts.schema) {` block, add a check before validation setup:
+         ```js
+         if (opts.schema.body && (opts.method === 'GET' || opts.method === 'HEAD')) {
+           throw new FST_ERR_SCH_BODY_GET_HEAD(opts.method)
+         }
+         ```
+      
+      The files are at /testbed/fastify.js, /testbed/lib/errors.js, /testbed/lib/route.js.
+
+  - name: reply-agent
+    description: >
+      Implement the reply-related breaking changes for Fastify v3→v4.
+      
+      Your scope covers TWO files:
+      
+      1. lib/reply.js — The `reply.sent` setter (inside the `sent:` property descriptor) currently
+         allows `reply.sent = true`. In v4, the setter must always throw `FST_ERR_REP_SENT_VALUE`.
+         Replace the entire `set (value) { ... }` block with:
+         ```js
+         set (value) {
+           throw new FST_ERR_REP_SENT_VALUE()
+         }
+         ```
+         Use `reply.hijack()` for taking over the raw socket instead.
+      
+      2. lib/wrapThenable.js — Completely rewrite this file to handle async handlers returning
+         `undefined`. The new behavior:
+         - Use `kReplySent` (not `kReplySentOverwritten`) to check if reply was already sent
+         - On resolve: call `reply.send(payload)` for ALL values including `undefined`
+         - On reject: wrap non-Error values with `new Error(String(err))` before sending
+         
+         Import only `{ kReplyIsError, kReplySent }` from `./symbols`.
+      
+      The files are at /testbed/lib/reply.js and /testbed/lib/wrapThenable.js.
+
+  - name: handler-agent
+    description: >
+      Implement the throw-anything change in sync request handlers for Fastify v3→v4.
+      
+      Your scope covers ONE file: lib/handleRequest.js
+      
+      In the `preHandlerCallback` function, there is a try/catch block around:
+        `result = reply.context.handler(request, reply)`
+      
+      In v3, the catch block checks `instanceof Error` and sets `reply[kReplyIsError] = true`
+      only for non-Error values, then calls `reply.send(err)` with the raw non-Error value.
+      
+      In v4, ALL thrown values must be wrapped as proper Error objects:
+      ```js
+      } catch (err) {
+        if (!(err instanceof Error)) {
+          err = new Error(String(err))
+        }
+        reply[kReplyIsError] = true
+        reply.send(err)
+        return
+      }
+      ```
+      
+      This ensures that throwing a string like `throw 'oops'` produces a proper JSON 500 response
+      with `{ statusCode: 500, error: "Internal Server Error", message: "oops" }`.
+      
+      The file is at /testbed/lib/handleRequest.js.
+
+  - name: hooks-agent
+    description: >
+      Implement the throw-anything change in hooks for Fastify v3→v4.
+      
+      Your scope covers ONE file: lib/hooks.js
+      
+      In the `hookRunner` function there are two places to change:
+      
+      1. In the `next(err)` inner function — before `cb(err, request, reply)`, add non-Error wrapping:
+         ```js
+         if (err && !(err instanceof Error)) {
+           err = new Error(String(err))
+         }
+         cb(err, request, reply)
+         ```
+         This handles synchronous hooks that call `done('string error')`.
+      
+      2. In the `handleReject(err)` inner function — in the `else if (!(err instanceof Error))` branch,
+         add `err = new Error(String(err))` before setting `reply[kReplyIsError] = true`:
+         ```js
+         } else if (!(err instanceof Error)) {
+           err = new Error(String(err))
+           reply[kReplyIsError] = true
+         }
+         ```
+         This handles async hooks that `throw 'string error'` or `return Promise.reject('string')`.
+      
+      The file is at /testbed/lib/hooks.js.
+
+  - name: orchestrator
+    description: >
+      You are the orchestrator for a Fastify v3→v4 migration task.
+      
+      The task requires implementing 6 breaking changes across 7 files. You have 4 specialist agents
+      to delegate to. Dispatch them all in parallel at the start, then verify the final result.
+      
+      Agents and their responsibilities:
+      - routing-agent: fastify.js, lib/errors.js, lib/route.js (exposeHeadRoutes + body schema check)
+      - reply-agent: lib/reply.js, lib/wrapThenable.js (sent setter + async undefined handling)
+      - handler-agent: lib/handleRequest.js (throw-anything in sync handlers)
+      - hooks-agent: lib/hooks.js (throw-anything in hooks)
+      
+      After all agents complete, run the verification:
+        node /testbed/tests/run_tests.js
+      
+      Review the results. If any tests fail, identify which group failed and re-dispatch the
+      appropriate agent with corrected instructions.
+      
+      Target: all 30 tests passing (score = 1.0).

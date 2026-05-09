@@ -1,0 +1,30 @@
+{
+    "id": "362e55f5-be3f-40ab-a705-b988e69fdd83",
+    "started_at": "2026-05-07T23:00:59.657327",
+    "finished_at": "2026-05-07T23:01:28.491403",
+    "n_total_trials": 1,
+    "stats": {
+        "n_trials": 1,
+        "n_errors": 0,
+        "evals": {
+            "oracle__adhoc": {
+                "n_trials": 1,
+                "n_errors": 0,
+                "metrics": [
+                    {
+                        "mean": 0.0
+                    }
+                ],
+                "pass_at_k": {},
+                "reward_stats": {
+                    "reward": {
+                        "0.0": [
+                            "fastify-v4-breaking__8Ypq7UZ"
+                        ]
+                    }
+                },
+                "exception_stats": {}
+            }
+        }
+    }
+}

@@ -1,0 +1,21 @@
+patching file test/underscore.html
+patching file vendor/firebug-lite/src/firebug-lite-debug.js
+patching file vendor/underscore/test/objects.js
+patching file vendor/underscore/test/utility.js
+PATCH_BUG1 applied successfully.
+patching file lodash.js
+Hunk #1 succeeded at 2598 (offset -4 lines).
+patching file test/test.js
+Hunk #1 succeeded at 2932 (offset 8 lines).
+PATCH_BUG2 applied successfully.
+patching file lodash.js
+patching file test/test.js
+Hunk #1 succeeded at 24713 (offset 20 lines).
+PATCH_BUG3 applied successfully.
+patching file dist/lodash.js
+PATCH_BUG4 applied successfully.
+patching file lodash.js
+Hunk #1 succeeded at 12131 (offset -18 lines).
+patching file test/test.js
+Hunk #1 succeeded at 11524 (offset 35 lines).
+PATCH_BUG5 applied successfully.

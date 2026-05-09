@@ -1,0 +1,36 @@
+{
+  "issue_id": "26978",
+  "issue_url": "https://github.com/directus/directus/issues/26978",
+  "pr_url": "https://github.com/directus/directus/pull/27067",
+  "difficulty": "Medium",
+  "category": "tooling/build issue",
+  "expected_tools": [
+    "git",
+    "pnpm",
+    "node",
+    "ripgrep"
+  ],
+  "expected_capabilities": [
+    "repo exploration",
+    "build reasoning",
+    "verification",
+    "failure recovery",
+    "multi-package reasoning"
+  ],
+  "files_expected_to_change": [
+    "api/tsconfig.prod.json",
+    "api/tsdown.config.ts"
+  ],
+  "estimated_steps": 8,
+  "verification_command": "bash benchmarks/directus/issue-26978/verification.sh",
+  "failure_signals": [
+    "api/dist/node_modules exists after build",
+    "artifact-check script exits non-zero",
+    "build config still includes test-utils or mock-only entries"
+  ],
+  "success_signals": [
+    "api/dist/node_modules is absent after build",
+    "artifact-check script exits zero",
+    "API build still succeeds with unbundle mode enabled"
+  ]
+}

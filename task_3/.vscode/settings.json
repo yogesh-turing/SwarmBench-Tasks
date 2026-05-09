@@ -1,0 +1,7 @@
+{
+    "powerquery.client.additionalSymbolsDirectories": [
+        "w:/Turing/github/tasks/task_1/.vscode/excel-pq-symbols",
+        "w:/Turing/github/tasks/task_2/.vscode/excel-pq-symbols",
+        "w:/Turing/github/tasks/task_3/.vscode/excel-pq-symbols"
+    ]
+}

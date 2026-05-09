@@ -1,0 +1,85 @@
+{
+  "score": 0.4,
+  "checks": [
+    {
+      "id": "npm-test",
+      "passed": false,
+      "detail": "exit 3\n+    \"fn\": \"file3.js\"\n           \"mno\": \"pqr\"\n         }\n       ]\n      \n      at Assertion.fail (node_modules/should/cjs/should.js:275:17)\n      at Assertion.value (node_modules/should/cjs/should.js:356:19)\n      at /testbed/test/unit/@node-red/runtime/lib/storage/localfilesystem/library_spec.js:161:42\n\n\n\nWarning: Task \"simplemocha:all\" failed.\u0007 Use --force to continue.\n\nAborted due to warnings.\n\n=============================== Coverage summary ===============================\nStatements   : 69% ( 11555/16746 )\nBranches     : 61.85% ( 6377/10310 )\nFunctions    : 64.97% ( 1619/2492 )\nLines        : 69.12% ( 11205/16210 )\n================================================================================\nWarning: Task \"nyc:all\" failed.\u0007 Use --force to continue.\n\nAborted due to warnings."
+    },
+    {
+      "id": "spacebar-modifier-guard",
+      "passed": false,
+      "detail": "modifier guard not found in view.js"
+    },
+    {
+      "id": "spacebar-cleanup-state",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "spacebar-early-return",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "halo-status-height-cache",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "halo-height-setAttribute",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "halo-width-conditional",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "sidebar-click-listener",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "sidebar-drag-flag-reset",
+      "passed": false,
+      "detail": "draggingTabButton reset not found in sidebar.js"
+    },
+    {
+      "id": "sidebar-trigger-click",
+      "passed": false,
+      "detail": "trigger('click') not found in sidebar.js"
+    },
+    {
+      "id": "build-normalize-fn",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "build-win32-guard",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "build-normalized-var",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "a11y-togglebutton-aria-pressed",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "a11y-searchbox-aria-expanded",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "a11y-palette-aria-expanded",
+      "passed": true,
+      "detail": ""
+    }
+  ]
+}

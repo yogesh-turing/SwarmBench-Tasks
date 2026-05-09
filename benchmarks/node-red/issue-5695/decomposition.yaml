@@ -1,0 +1,25 @@
+﻿pattern: fan-out-synthesize
+agents:
+  - name: agent-event-semantics
+    technical_domain: ui-events
+    scope: Analyze activation event semantics for click/keyboard parity.
+    deliverables:
+      - Correct activation event strategy for sidebar buttons.
+
+  - name: agent-drag-lifecycle
+    technical_domain: drag-drop-state
+    scope: Validate drag-state transitions and ensure cleanup on drag completion.
+    deliverables:
+      - Drag-state no longer pollutes follow-up interactions.
+
+  - name: agent-interaction-regression
+    technical_domain: verification
+    scope: Check click, drag, and keyboard flows for regressions.
+    deliverables:
+      - Passing interaction-oriented checks.
+
+  - name: orchestrator
+    technical_domain: synthesis
+    scope: Integrate event and drag lifecycle changes into one coherent fix.
+    deliverables:
+      - Final patch with consistent interaction semantics.

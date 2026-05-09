@@ -1,0 +1,32 @@
+diff --git a/api/tsconfig.prod.json b/api/tsconfig.prod.json
+index e38333429..8dc2c64d9 100644
+--- a/api/tsconfig.prod.json
++++ b/api/tsconfig.prod.json
+@@ -1,4 +1,4 @@
+ {
+ 	"extends": "./tsconfig.json",
+-	"exclude": ["**/*.test.ts", "src/__utils__", "src/__setup__"]
++	"exclude": ["**/*.test.ts", "src/__utils__", "src/__setup__", "src/test-utils"]
+ }
+diff --git a/api/tsdown.config.ts b/api/tsdown.config.ts
+index 05eab1d0d..2290bafad 100644
+--- a/api/tsdown.config.ts
++++ b/api/tsdown.config.ts
+@@ -1,8 +1,15 @@
+ import { defineConfig } from 'tsdown';
+ 
+ export default defineConfig({
+-	entry: ['src/**/*.ts', '!src/**/*.d.ts', '!src/**/*.test.ts'],
++	entry: [
++		'src/**/*.ts',
++		'!src/**/*.d.ts',
++		'!src/**/*.test.ts',
++		'!src/__utils__',
++		'!src/__setup__',
++		'!src/test-utils',
++		'!src/database/run-ast/lib/apply-query/mock.ts',
++	],
+ 	unbundle: true,
+ 	tsconfig: 'tsconfig.prod.json',
+-	treeshake: false,
+ });

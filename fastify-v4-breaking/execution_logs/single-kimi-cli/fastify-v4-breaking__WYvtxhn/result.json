@@ -1,0 +1,105 @@
+{
+    "id": "cf59e7b7-45ba-44d2-85b6-34ede39f7e4e",
+    "task_name": "swarmbench/fastify-v4-breaking",
+    "trial_name": "fastify-v4-breaking__WYvtxhn",
+    "trial_uri": "file:///W:/git/tasks/fastify-v4-breaking/execution_logs/single-kimi-cli/fastify-v4-breaking__WYvtxhn",
+    "task_id": {
+        "path": "..\\tasks\\fastify-v4-breaking"
+    },
+    "source": null,
+    "task_checksum": "c16cbc5810bdab10ff16e89cfa43b4c9a659e5a9ce8d11b1b343f107ea038a62",
+    "config": {
+        "task": {
+            "path": "..\\tasks\\fastify-v4-breaking",
+            "git_url": null,
+            "git_commit_id": null,
+            "name": null,
+            "ref": null,
+            "overwrite": false,
+            "download_dir": null,
+            "source": null
+        },
+        "trial_name": "fastify-v4-breaking__WYvtxhn",
+        "trials_dir": "..\\tasks\\fastify-v4-breaking\\execution_logs\\single-kimi-cli",
+        "timeout_multiplier": 1.0,
+        "agent_timeout_multiplier": null,
+        "verifier_timeout_multiplier": null,
+        "agent_setup_timeout_multiplier": null,
+        "environment_build_timeout_multiplier": null,
+        "agent": {
+            "name": "kimi-cli",
+            "import_path": null,
+            "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+            "override_timeout_sec": null,
+            "override_setup_timeout_sec": null,
+            "max_timeout_sec": null,
+            "kwargs": {},
+            "env": {
+                "FIREWORKS_API_KEY": "${FIREWORKS_API_KEY}"
+            }
+        },
+        "environment": {
+            "type": "docker",
+            "import_path": null,
+            "force_build": false,
+            "delete": true,
+            "override_cpus": null,
+            "override_memory_mb": null,
+            "override_storage_mb": null,
+            "override_gpus": null,
+            "suppress_override_warnings": false,
+            "mounts_json": null,
+            "env": {},
+            "kwargs": {}
+        },
+        "verifier": {
+            "override_timeout_sec": null,
+            "max_timeout_sec": null,
+            "env": {
+                "FIREWORKS_API_KEY": "${FIREWORKS_API_KEY}"
+            },
+            "disable": false
+        },
+        "artifacts": [],
+        "job_id": "c342077e-46dc-4eb9-98f6-086c09cf033c"
+    },
+    "agent_info": {
+        "name": "kimi-cli",
+        "version": "unknown",
+        "model_info": {
+            "name": "accounts/fireworks/models/kimi-k2p5",
+            "provider": "fireworks_ai"
+        }
+    },
+    "agent_result": {
+        "n_input_tokens": null,
+        "n_cache_tokens": null,
+        "n_output_tokens": null,
+        "cost_usd": null,
+        "rollout_details": null,
+        "metadata": null
+    },
+    "verifier_result": null,
+    "exception_info": {
+        "exception_type": "ValueError",
+        "exception_message": "Unsupported provider 'fireworks_ai' for kimi-cli. Supported: ['anthropic', 'gemini', 'google', 'kimi', 'moonshot', 'openai']",
+        "exception_traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\yoges\\AppData\\Roaming\\uv\\tools\\harbor\\Lib\\site-packages\\harbor\\trial\\trial.py\", line 957, in run\n    await self._execute_agent()\n  File \"C:\\Users\\yoges\\AppData\\Roaming\\uv\\tools\\harbor\\Lib\\site-packages\\harbor\\trial\\trial.py\", line 360, in _execute_agent\n    await asyncio.wait_for(\n    ...<6 lines>...\n    )\n  File \"C:\\Users\\yoges\\AppData\\Roaming\\uv\\python\\cpython-3.13-windows-x86_64-none\\Lib\\asyncio\\tasks.py\", line 507, in wait_for\n    return await fut\n           ^^^^^^^^^\n  File \"C:\\Users\\yoges\\AppData\\Roaming\\uv\\tools\\harbor\\Lib\\site-packages\\harbor\\agents\\installed\\base.py\", line 42, in wrapper\n    return await fn(self, instruction, *args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\yoges\\AppData\\Roaming\\uv\\tools\\harbor\\Lib\\site-packages\\harbor\\agents\\installed\\kimi_cli.py\", line 263, in run\n    config_json = self._build_config_json(provider, model)\n  File \"C:\\Users\\yoges\\AppData\\Roaming\\uv\\tools\\harbor\\Lib\\site-packages\\harbor\\agents\\installed\\kimi_cli.py\", line 167, in _build_config_json\n    raise ValueError(\n    ...<2 lines>...\n    )\nValueError: Unsupported provider 'fireworks_ai' for kimi-cli. Supported: ['anthropic', 'gemini', 'google', 'kimi', 'moonshot', 'openai']\n",
+        "occurred_at": "2026-05-07T23:15:34.643520"
+    },
+    "started_at": "2026-05-07T17:44:50.932183Z",
+    "finished_at": "2026-05-07T17:45:39.162061Z",
+    "environment_setup": {
+        "started_at": "2026-05-07T17:44:51.060651Z",
+        "finished_at": "2026-05-07T17:45:10.053148Z"
+    },
+    "agent_setup": {
+        "started_at": "2026-05-07T17:45:10.053180Z",
+        "finished_at": "2026-05-07T17:45:34.590577Z"
+    },
+    "agent_execution": {
+        "started_at": "2026-05-07T17:45:34.590689Z",
+        "finished_at": "2026-05-07T17:45:34.590792Z"
+    },
+    "verifier": null,
+    "step_results": null
+}

@@ -1,0 +1,25 @@
+﻿pattern: fan-out-synthesize
+agents:
+  - name: agent-platform-repro
+    technical_domain: build-platform
+    scope: Reconstruct cross-platform mismatch and isolate path transformation stage.
+    deliverables:
+      - Repro narrative for Windows-specific failure mode.
+
+  - name: agent-pattern-expansion
+    technical_domain: build-scripts
+    scope: Harden glob expansion behavior for platform-specific separators.
+    deliverables:
+      - Path normalization integrated into expansion branch and file existence checks.
+
+  - name: agent-cross-platform-verification
+    technical_domain: verification
+    scope: Confirm behavior remains valid across normalized and native path forms.
+    deliverables:
+      - Passing checks for normalized pattern usage and error handling.
+
+  - name: orchestrator
+    technical_domain: synthesis
+    scope: Integrate and validate with minimal behavioral drift.
+    deliverables:
+      - Unified patch with preserved build semantics.

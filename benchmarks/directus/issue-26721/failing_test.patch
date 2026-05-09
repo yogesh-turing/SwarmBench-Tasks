@@ -1,0 +1,203 @@
+diff --git a/app/src/composables/use-permissions/item/lib/get-fields.test.ts b/app/src/composables/use-permissions/item/lib/get-fields.test.ts
+index 42f9bd320..ad038fa65 100644
+--- a/app/src/composables/use-permissions/item/lib/get-fields.test.ts
++++ b/app/src/composables/use-permissions/item/lib/get-fields.test.ts
+@@ -1,5 +1,5 @@
+ import { useCollection } from '@directus/composables';
+-import { Field, ItemPermissions, Permission, PermissionsAction } from '@directus/types';
++import { Field, ItemPermissions, PermissionsAction } from '@directus/types';
+ import { createTestingPinia } from '@pinia/testing';
+ import { setActivePinia } from 'pinia';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+@@ -123,8 +123,9 @@ describe('non-admin users', () => {
+ 		vi.mocked(useCollection).mockReturnValue({ fields: ref(sample.fields), info: ref({}) } as any);
+ 
+ 		const mockReadPermission = {
++			access: 'full' as const,
+ 			fields: ['*'],
+-		} as Permission;
++		};
+ 
+ 		const permissionsStore = mockedStore(usePermissionsStore());
+@@ -146,8 +147,9 @@ describe('non-admin users', () => {
+ 		const allowedFields = ['id', 'start_date', 'end_date'];
+ 
+ 		const mockReadPermission = {
++			access: 'full' as const,
+ 			fields: allowedFields,
+-		} as Permission;
++		};
+ 
+ 		const permissionsStore = mockedStore(usePermissionsStore());
+@@ -180,7 +182,7 @@ describe('non-admin users', () => {
+ 		const permissionActions: PermissionsAction[] = ['create', 'update'];
+ 
+ 		describe.each(permissionActions)('%s', (testAction) => {
+-			it('should mark all fields as read-only if user has no (fields) permission', () => {
++			it('should mark all fields as read-only if user has no update/create permission', () => {
+ 				if (collectionType === 'collection') {
+ 					const permissionsStore = mockedStore(usePermissionsStore());
+@@ -211,7 +213,7 @@ describe('non-admin users', () => {
+ 
+ 				const mockActionPermission = {
+ 					fields: allowedFields,
+-				} as Permission;
++				};
+ 
+ 				if (collectionType === 'collection') {
+ 					const permissionsStore = mockedStore(usePermissionsStore());
+@@ -247,7 +249,7 @@ describe('non-admin users', () => {
+ 			it('should not mark any fields as read-only if user has full fields permission', () => {
+ 				const mockActionPermission = {
+ 					fields: ['*'],
+-				} as Permission;
++				};
+ 
+ 				if (collectionType === 'collection') {
+ 					const permissionsStore = mockedStore(usePermissionsStore());
+@@ -283,7 +285,7 @@ describe('non-admin users', () => {
+ 
+ 				const mockActionPermission = {
+ 					presets: { name: namePreset } as Record<string, any>,
+-				} as Permission;
++				};
+ 
+ 				if (collectionType === 'collection') {
+ 					const permissionsStore = mockedStore(usePermissionsStore());
+@@ -344,6 +346,27 @@ describe('non-admin users', () => {
+ 			}
+ 		});
+ 
++		it('should not restrict fields when partial access has no field restriction and item passes custom rule', () => {
++			const permissionsStore = mockedStore(usePermissionsStore());
++
++			permissionsStore.getPermission.mockImplementation((_, action) => {
++				if (action === 'update') return { access: 'partial' };
++				return null;
++			});
++
++			fetchedItemPermissions = computed(() => ({
++				update: { access: true },
++				delete: { access: false },
++				share: { access: false },
++			}));
++
++			const fields = getFields(sample.collection, false, fetchedItemPermissions);
++
++			for (const field of fields.value) {
++				expect(!!field.meta?.readonly).toBe(false);
++			}
++		});
++
+ 		it('should use store fields when item passes custom rule', () => {
+ 			const allowedFields = ['id', 'start_date'];
+@@ -389,6 +412,50 @@ describe('non-admin users', () => {
+ 			}
+ 		});
+ 
++		it('should use store permission for versions even when main item fails custom rule', () => {
++			const permissionsStore = mockedStore(usePermissionsStore());
++
++			permissionsStore.getPermission.mockImplementation((_, action) => {
++				if (action === 'update') return { access: 'partial', fields: ['*'] };
++				return null;
++			});
++
++			fetchedItemPermissions = computed(() => ({
++				update: { access: false },
++				delete: { access: false },
++				share: { access: false },
++			}));
++
++			const fields = getFields(sample.collection, false, fetchedItemPermissions, true);
++
++			for (const field of fields.value) {
++				expect(!!field.meta?.readonly).toBe(false);
++			}
++		});
++
++		it('should not apply store field restrictions for versions regardless of field policy', () => {
++			const allowedFields = ['id', 'start_date'];
++
++			const permissionsStore = mockedStore(usePermissionsStore());
++
++			permissionsStore.getPermission.mockImplementation((_, action) => {
++				if (action === 'update') return { access: 'partial', fields: allowedFields };
++				return null;
++			});
++
++			fetchedItemPermissions = computed(() => ({
++				update: { access: false },
++				delete: { access: false },
++				share: { access: false },
++			}));
++
++			const fields = getFields(sample.collection, false, fetchedItemPermissions, true);
++
++			for (const field of fields.value) {
++				expect(!!field.meta?.readonly).toBe(false);
++			}
++		});
++
+ 		it('should use store create permission for new items regardless of partial access', () => {
+ 			const permissionsStore = mockedStore(usePermissionsStore());
+diff --git a/app/src/composables/use-permissions/item/use-item-permissions.test.ts b/app/src/composables/use-permissions/item/use-item-permissions.test.ts
+new file mode 100644
+index 000000000..a2f8dddf2
+--- /dev/null
++++ b/app/src/composables/use-permissions/item/use-item-permissions.test.ts
+@@ -0,0 +1,54 @@
++import { useCollection } from '@directus/composables';
++import { createTestingPinia } from '@pinia/testing';
++import { setActivePinia } from 'pinia';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { ref } from 'vue';
++import { useItemPermissions } from './use-item-permissions';
++import { mockedStore } from '@/__utils__/store';
++import { usePermissionsStore } from '@/stores/permissions';
++import { useUserStore } from '@/stores/user';
++
++vi.mock('@directus/composables');
++
++let sample: { collection: string; primaryKey: string };
++
++beforeEach(() => {
++	setActivePinia(createTestingPinia({ createSpy: vi.fn }));
++
++	sample = { collection: 'test_collection', primaryKey: '1' };
++
++	vi.mocked(useCollection).mockReturnValue({ fields: ref([]), info: ref({}) } as any);
++});
++
++afterEach(() => {
++	vi.clearAllMocks();
++});
++
++describe('isVersion', () => {
++	beforeEach(() => {
++		const userStore = mockedStore(useUserStore());
++		userStore.isAdmin = false;
++
++		const permissionsStore = mockedStore(usePermissionsStore());
++		permissionsStore.getPermission.mockReturnValue(null);
++	});
++
++	it('should allow update for versions regardless of store permissions', () => {
++		const { updateAllowed } = useItemPermissions(sample.collection, sample.primaryKey, false, true);
++
++		expect(updateAllowed.value).toBe(true);
++	});
++
++	it('should not bypass delete/share permissions for versions', () => {
++		const { deleteAllowed, shareAllowed } = useItemPermissions(sample.collection, sample.primaryKey, false, true);
++
++		expect(deleteAllowed.value).toBe(false);
++		expect(shareAllowed.value).toBe(false);
++	});
++
++	it('should not bypass update permission for new items even when isVersion is true', () => {
++		const { updateAllowed } = useItemPermissions(sample.collection, sample.primaryKey, true, true);
++
++		expect(updateAllowed.value).toBe(false);
++	});
++});

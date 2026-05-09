@@ -1,0 +1,59 @@
+dos2unix swarmbench_harbor_changes.diff
+git apply swarmbench_harbor_changes.diff
+
+export FIREWORKS_API_KEY=fw_fcxAa4Ds1z7Ue81Q5ynvF
+
+TASK=../swarmbench-harness/example_tasks/template-llm-judge/4c3c848bb2f9459cb908d78f02897c6f-SWARMBENCH-FANOUT-RESEARCH-MEDICALRESEARCH
+
+
+uv run harbor run -p $TASK -a oracle --ve FIREWORKS_API_KEY=$FIREWORKS_API_KEY
+
+uv run harbor run -p $TASK -a swarm-kimi-single -m fireworks_ai/accounts/fireworks/models/kimi-k2p5 -k 1 -n 1 --job-name "single-kimi-agent" --jobs-dir "$TASK/execution_logs" --ve FIREWORKS_API_KEY=$FIREWORKS_API_KEY  --ae FIREWORKS_API_KEY=$FIREWORKS_API_KEY  --quiet
+
+uv run harbor run -p $TASK -a swarm-kimi-multi -m fireworks_ai/accounts/fireworks/models/kimi-k2p5 -k 1 -n 1 --job-name "multi-kimi-agent" --jobs-dir "$TASK/execution_logs" --ve FIREWORKS_API_KEY=$FIREWORKS_API_KEY  --ae FIREWORKS_API_KEY=$FIREWORKS_API_KEY  --quiet
+
+
+### Express js task
+W:\git\tasks\express-async-errors
+
+export FIREWORKS_API_KEY=fw_fcxAa4Ds1z7Ue81Q5ynvF
+
+TASK1=../tasks/express-async-errors
+
+uv run harbor run -p $TASK1 -a oracle --job-name "oracle" --jobs-dir "$TASK1/execution_logs" --ve FIREWORKS_API_KEY=$FIREWORKS_API_KEY
+
+uv run harbor run -p $TASK1 -a swarm-kimi-single -m fireworks_ai/accounts/fireworks/models/kimi-k2p5 -k 1 -n 1 --job-name "single-kimi-agent" --jobs-dir "$TASK1/execution_logs" --ve FIREWORKS_API_KEY=$FIREWORKS_API_KEY  --ae FIREWORKS_API_KEY=$FIREWORKS_API_KEY  --quiet
+
+uv run harbor run -p $TASK1 -a swarm-kimi-multi -m fireworks_ai/accounts/fireworks/models/kimi-k2p5 -k 1 -n 1 --job-name "multi-kimi-agent" --jobs-dir "$TASK1/execution_logs" --ve FIREWORKS_API_KEY=$FIREWORKS_API_KEY  --ae FIREWORKS_API_KEY=$FIREWORKS_API_KEY  --quiet
+
+
+#### Body parser 
+W:\git\tasks\body-parser
+
+TASK2=../tasks/body-parser
+
+uv run harbor run -p $TASK2 -a oracle --job-name "oracle" --jobs-dir "$TASK2/execution_logs" --ve FIREWORKS_API_KEY=$FIREWORKS_API_KEY
+
+uv run harbor run -p $TASK2 -a swarm-kimi-single -m fireworks_ai/accounts/fireworks/models/kimi-k2p5 -k 1 -n 1 --job-name "single-kimi-agent" --jobs-dir "$TASK2/execution_logs" --ve FIREWORKS_API_KEY=$FIREWORKS_API_KEY  --ae FIREWORKS_API_KEY=$FIREWORKS_API_KEY  --quiet
+
+
+
+
+
+### fastify-v4-breaking
+
+TASK3=../tasks/fastify-v4-breaking
+
+uv run harbor run -p $TASK3 -a oracle --job-name "oracle" --jobs-dir "$TASK3/execution_logs" --ve FIREWORKS_API_KEY=$FIREWORKS_API_KEY
+
+uv run harbor run -p $TASK3 -a swarm-kimi-single -m fireworks_ai/accounts/fireworks/models/kimi-k2p5 -k 1 -n 1 --job-name "single-kimi-agent" --jobs-dir "$TASK3/execution_logs" --ve FIREWORKS_API_KEY=$FIREWORKS_API_KEY  --ae FIREWORKS_API_KEY=$FIREWORKS_API_KEY --quiet
+
+
+
+### task-STE-Code-SWE-yogeshpm89
+
+uv run harbor run -p "../tasks/task-STE-Code-SWE-yogeshpm89" -a oracle --job-name "oracle" --jobs-dir "../tasks/task-STE-Code-SWE-yogeshpm89/execution_logs" --ve FIREWORKS_API_KEY=$FIREWORKS_API_KEY
+
+uv run harbor run -p "../tasks/task-STE-Code-SWE-yogeshpm89" -a swarm-kimi-single -m fireworks_ai/accounts/fireworks/models/kimi-k2p5 -k 1 -n 1 --job-name "single-kimi-agent" --jobs-dir "../tasks/task-STE-Code-SWE-yogeshpm89/execution_logs" --ve FIREWORKS_API_KEY=$FIREWORKS_API_KEY  --ae FIREWORKS_API_KEY=$FIREWORKS_API_KEY  --quiet
+
+uv run harbor run -p "../tasks/task-STE-Code-SWE-yogeshpm89" -a swarm-kimi-multi -m fireworks_ai/accounts/fireworks/models/kimi-k2p5 -k 1 -n 1 --job-name "multi-kimi-agent" --jobs-dir "../tasks/task-STE-Code-SWE-yogeshpm89/execution_logs" --ve FIREWORKS_API_KEY=$FIREWORKS_API_KEY  --ae FIREWORKS_API_KEY=$FIREWORKS_API_KEY  --quiet

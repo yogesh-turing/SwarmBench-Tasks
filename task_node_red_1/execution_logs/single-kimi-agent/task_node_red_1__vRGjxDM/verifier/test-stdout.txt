@@ -1,0 +1,57 @@
+============================================================
+Node-RED multi-bug verifier
+============================================================
+
+[Behavioural] npm test (0.50)
+  FAIL  npm-test: exit 3
++    "fn": "file3.js"
+           "mno": "pqr"
+         }
+       ]
+      
+      at Assertion.fail (node_modules/should/cjs/should.js:275:17)
+      at Assertion.value (node_modules/should/cjs/should.js:356:19)
+      at /testbed/test/unit/@node-red/runtime/lib/storage/localfilesystem/library_spec.js:161:42
+
+
+
+Warning: Task "simplemocha:all" failed. Use --force to continue.
+
+Aborted due to warnings.
+
+=============================== Coverage summary ===============================
+Statements   : 69% ( 11555/16746 )
+Branches     : 61.85% ( 6377/10310 )
+Functions    : 64.97% ( 1619/2492 )
+Lines        : 69.12% ( 11205/16210 )
+================================================================================
+Warning: Task "nyc:all" failed. Use --force to continue.
+
+Aborted due to warnings.
+
+[Bug 1] Spacebar modifier guard (0.10)
+  FAIL  spacebar-modifier-guard: modifier guard not found in view.js
+  PASS  spacebar-cleanup-state
+  PASS  spacebar-early-return
+
+[Bug 2] Halo geometry sync (0.10)
+  PASS  halo-status-height-cache
+  PASS  halo-height-setAttribute
+  PASS  halo-width-conditional
+
+[Bug 3] Sidebar click handler (0.10)
+  PASS  sidebar-click-listener
+  FAIL  sidebar-drag-flag-reset: draggingTabButton reset not found in sidebar.js
+  FAIL  sidebar-trigger-click: trigger('click') not found in sidebar.js
+
+[Bug 4] Build path normalization (0.10)
+  PASS  build-normalize-fn
+  PASS  build-win32-guard
+  PASS  build-normalized-var
+
+[Bug 5] Accessibility attributes (0.10)
+  PASS  a11y-togglebutton-aria-pressed
+  PASS  a11y-searchbox-aria-expanded
+  PASS  a11y-palette-aria-expanded
+
+FINAL SCORE: 0.4

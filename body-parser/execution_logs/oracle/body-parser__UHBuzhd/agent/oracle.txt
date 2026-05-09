@@ -1,0 +1,361 @@
+
+up to date, audited 459 packages in 3s
+
+159 packages are looking for funding
+  run `npm fund` for details
+
+3 vulnerabilities (1 low, 2 high)
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+
+> body-parser@2.2.0 test
+> mocha --reporter spec --check-leaks test/
+
+
+
+  bodyParser()
+    ✔ should throw an error
+
+  bodyParser.json()
+    ✔ should parse JSON (63ms)
+    ✔ should handle Content-Length: 0
+    ✔ should handle empty message-body
+    ✔ should handle no message-body
+    ✔ should 400 when only whitespace
+    ✔ should 400 when invalid content-length
+    ✔ should handle consumed request
+    ✔ should handle duplicated middleware
+    when JSON is invalid
+      ✔ should 400 for bad token
+      ✔ should 400 for incomplete
+      ✔ should include original body on error object
+    with limit option
+      ✔ should 413 when over limit with Content-Length
+      ✔ should 413 when over limit with chunked encoding
+      ✔ should 413 when inflated body over limit
+      ✔ should accept number of bytes
+      ✔ should not change when options altered
+      ✔ should not hang response
+      ✔ should not error when inflating
+    with inflate option
+      when false
+        ✔ should not accept content-encoding
+      when true
+        ✔ should accept content-encoding
+    with strict option
+      when undefined
+        ✔ should 400 on primitives
+      when false
+        ✔ should parse primitives
+      when true
+        ✔ should not parse primitives
+        ✔ should not parse primitives with leading whitespaces
+        ✔ should allow leading whitespaces in JSON
+        ✔ should include correct message in stack trace
+    with type option
+      when "application/vnd.api+json"
+        ✔ should parse JSON for custom type
+        ✔ should ignore standard type
+      when ["application/json", "application/vnd.api+json"]
+        ✔ should parse JSON for "application/json"
+        ✔ should parse JSON for "application/vnd.api+json"
+        ✔ should ignore "application/x-json"
+      when a function
+        ✔ should parse when truthy value returned
+        ✔ should work without content-type
+        ✔ should not invoke without a body
+    with verify option
+      ✔ should assert value if function
+      ✔ should error from verify
+      ✔ should allow custom codes
+      ✔ should allow custom type
+      ✔ should include original body on error object
+      ✔ should allow pass-through
+      ✔ should work with different charsets
+      ✔ should 415 on unknown charset prior to verify
+    async local storage
+      ✔ should presist store
+      ✔ should presist store when unmatched content-type
+      ✔ should presist store when inflated
+      ✔ should presist store when inflate error
+      ✔ should presist store when parse error
+      ✔ should presist store when limit exceeded
+    charset
+      ✔ should parse utf-8
+      ✔ should parse utf-16
+      ✔ should parse utf-32
+      ✔ should parse when content-length != char length
+      ✔ should default to utf-8
+      ✔ should fail on unknown charset
+    encoding
+      ✔ should parse without encoding
+      ✔ should support identity encoding
+      ✔ should support gzip encoding
+      ✔ should support deflate encoding
+      ✔ should support brotli encoding
+      ✔ should be case-insensitive
+      ✔ should 415 on unknown encoding
+      ✔ should 400 on malformed encoding
+      ✔ should 413 when inflated value exceeds limit
+
+  bodyParser.raw()
+    ✔ should parse application/octet-stream
+    ✔ should 400 when invalid content-length
+    ✔ should handle Content-Length: 0
+    ✔ should handle empty message-body
+    ✔ should handle consumed stream
+    ✔ should handle duplicated middleware
+    with limit option
+      ✔ should 413 when over limit with Content-Length
+      ✔ should 413 when over limit with chunked encoding
+      ✔ should 413 when inflated body over limit
+      ✔ should accept number of bytes
+      ✔ should not change when options altered
+      ✔ should not hang response
+      ✔ should not error when inflating
+    with inflate option
+      when false
+        ✔ should not accept content-encoding
+      when true
+        ✔ should accept content-encoding
+    with type option
+      when "application/vnd+octets"
+        ✔ should parse for custom type
+        ✔ should ignore standard type
+      when ["application/octet-stream", "application/vnd+octets"]
+        ✔ should parse "application/octet-stream"
+        ✔ should parse "application/vnd+octets"
+        ✔ should ignore "application/x-foo"
+      when a function
+        ✔ should parse when truthy value returned
+        ✔ should work without content-type
+        ✔ should not invoke without a body
+    with verify option
+      ✔ should assert value is function
+      ✔ should error from verify
+      ✔ should allow custom codes
+      ✔ should allow pass-through
+    async local storage
+      ✔ should presist store
+      ✔ should presist store when unmatched content-type
+      ✔ should presist store when inflated
+      ✔ should presist store when inflate error
+      ✔ should presist store when limit exceeded
+    charset
+      ✔ should ignore charset
+    encoding
+      ✔ should parse without encoding
+      ✔ should support identity encoding
+      ✔ should support gzip encoding
+      ✔ should support deflate encoding
+      ✔ should support brotli encoding
+      ✔ should be case-insensitive
+      ✔ should 415 on unknown encoding
+
+  bodyParser.text()
+    ✔ should parse text/plain
+    ✔ should 400 when invalid content-length
+    ✔ should handle Content-Length: 0
+    ✔ should handle empty message-body
+    ✔ should handle consumed stream
+    ✔ should handle duplicated middleware
+    with defaultCharset option
+      ✔ should change default charset
+      ✔ should honor content-type charset
+    with limit option
+      ✔ should 413 when over limit with Content-Length
+      ✔ should 413 when over limit with chunked encoding
+      ✔ should 413 when inflated body over limit
+      ✔ should accept number of bytes
+      ✔ should not change when options altered
+      ✔ should not hang response
+      ✔ should not error when inflating (101ms)
+    with inflate option
+      when false
+        ✔ should not accept content-encoding
+      when true
+        ✔ should accept content-encoding
+    with type option
+      when "text/html"
+        ✔ should parse for custom type
+        ✔ should ignore standard type
+      when ["text/html", "text/plain"]
+        ✔ should parse "text/html"
+        ✔ should parse "text/plain"
+        ✔ should ignore "text/xml"
+      when a function
+        ✔ should parse when truthy value returned
+        ✔ should work without content-type
+        ✔ should not invoke without a body
+    with verify option
+      ✔ should assert value is function
+      ✔ should error from verify
+      ✔ should allow custom codes
+      ✔ should allow pass-through
+      ✔ should 415 on unknown charset prior to verify
+    async local storage
+      ✔ should presist store
+      ✔ should presist store when unmatched content-type
+      ✔ should presist store when inflated
+      ✔ should presist store when inflate error
+      ✔ should presist store when limit exceeded
+    charset
+      ✔ should parse utf-8
+      ✔ should parse codepage charsets
+      ✔ should parse when content-length != char length
+      ✔ should default to utf-8
+      ✔ should 415 on unknown charset
+    encoding
+      ✔ should parse without encoding
+      ✔ should support identity encoding
+      ✔ should support gzip encoding
+      ✔ should support deflate encoding
+      ✔ should support brotli encoding
+      ✔ should be case-insensitive
+      ✔ should 415 on unknown encoding
+
+  bodyParser.urlencoded()
+    ✔ should parse x-www-form-urlencoded
+    ✔ should 400 when invalid content-length
+    ✔ should handle Content-Length: 0
+    ✔ should handle empty message-body
+    ✔ should handle consumed stream
+    ✔ should handle duplicated middleware
+    ✔ should not parse extended syntax
+    in extended mode
+      ✔ should parse x-www-form-urlencoded with an explicit iso-8859-1 encoding
+      ✔ should parse x-www-form-urlencoded with unspecified iso-8859-1 encoding when the defaultCharset is set to iso-8859-1
+      ✔ should parse x-www-form-urlencoded with an unspecified iso-8859-1 encoding when the utf8 sentinel has a value of %26%2310003%3B
+      ✔ should parse x-www-form-urlencoded with an unspecified utf-8 encoding when the utf8 sentinel has a value of %E2%9C%93 and the defaultCharset is iso-8859-1
+      ✔ should not leave an empty string parameter when removing the utf8 sentinel from the start of the string
+      ✔ should not leave an empty string parameter when removing the utf8 sentinel from the middle of the string
+      ✔ should not leave an empty string parameter when removing the utf8 sentinel from the end of the string
+    in simple mode
+      ✔ should parse x-www-form-urlencoded with an explicit iso-8859-1 encoding
+      ✔ should parse x-www-form-urlencoded with unspecified iso-8859-1 encoding when the defaultCharset is set to iso-8859-1
+      ✔ should parse x-www-form-urlencoded with an unspecified iso-8859-1 encoding when the utf8 sentinel has a value of %26%2310003%3B
+      ✔ should parse x-www-form-urlencoded with an unspecified utf-8 encoding when the utf8 sentinel has a value of %E2%9C%93 and the defaultCharset is iso-8859-1
+      ✔ should not leave an empty string parameter when removing the utf8 sentinel from the start of the string
+      ✔ should not leave an empty string parameter when removing the utf8 sentinel from the middle of the string
+      ✔ should not leave an empty string parameter when removing the utf8 sentinel from the end of the string
+    with extended option
+      when false
+        ✔ should not parse extended syntax
+        ✔ should parse multiple key instances
+      when true
+        ✔ should parse multiple key instances
+        ✔ should parse extended syntax
+        ✔ should parse parameters with dots
+        ✔ should parse fully-encoded extended syntax
+        ✔ should parse array index notation
+        ✔ should parse array index notation with large array
+        ✔ should parse array of objects syntax
+        ✔ should parse deep object
+    with depth option
+      when custom value set
+        ✔ should reject non positive numbers
+        ✔ should parse up to the specified depth
+        ✔ should not parse beyond the specified depth
+      when default value
+        ✔ should parse deeply nested objects
+        ✔ should not parse beyond the specified depth
+    with inflate option
+      when false
+        ✔ should not accept content-encoding
+      when true
+        ✔ should accept content-encoding
+    with limit option
+      ✔ should 413 when over limit with Content-Length
+      ✔ should 413 when over limit with chunked encoding
+      ✔ should 413 when inflated body over limit
+      ✔ should accept number of bytes
+      ✔ should not change when options altered
+      ✔ should not hang response
+      ✔ should not error when inflating
+    with parameterLimit option
+      with extended: false
+        ✔ should reject 0
+        ✔ should reject string
+        ✔ should 413 if over limit
+        ✔ should work when at the limit
+        ✔ should work if number is floating point
+        ✔ should work with large limit (65ms)
+        ✔ should work with Infinity limit (125ms)
+      with extended: true
+        ✔ should reject 0
+        ✔ should reject string
+        ✔ should 413 if over limit
+        ✔ should work when at the limit
+        ✔ should work if number is floating point
+        ✔ should work with large limit (65ms)
+        ✔ should work with Infinity limit (58ms)
+    with type option
+      when "application/vnd.x-www-form-urlencoded"
+        ✔ should parse for custom type
+        ✔ should ignore standard type
+      when ["urlencoded", "application/x-pairs"]
+        ✔ should parse "application/x-www-form-urlencoded"
+        ✔ should parse "application/x-pairs"
+        ✔ should ignore application/x-foo
+      when a function
+        ✔ should parse when truthy value returned
+        ✔ should work without content-type
+        ✔ should not invoke without a body
+    with verify option
+      ✔ should assert value if function
+      ✔ should error from verify
+      ✔ should allow custom codes
+      ✔ should allow custom type
+      ✔ should allow pass-through
+      ✔ should 415 on unknown charset prior to verify
+    async local storage
+      ✔ should presist store
+      ✔ should presist store when unmatched content-type
+      ✔ should presist store when inflated
+      ✔ should presist store when inflate error
+      ✔ should presist store when limit exceeded
+    charset
+      ✔ should parse utf-8
+      ✔ should parse when content-length != char length
+      ✔ should default to utf-8
+      ✔ should fail on unknown charset
+    encoding
+      ✔ should parse without encoding
+      ✔ should support identity encoding
+      ✔ should support gzip encoding
+      ✔ should support deflate encoding
+      ✔ should support brotli encoding
+      ✔ should be case-insensitive
+      ✔ should 415 on unknown encoding
+
+  normalizeOptions(options, defaultType)
+    ✔ should return default options when no options are provided
+    ✔ should override default options with provided options
+    ✔ should remove additional options
+    options
+      verify
+        ✔ should throw an error if verify is not a function
+        ✔ should accept a verify function
+      limit
+        ✔ should return the default limit if limit is not provided
+        ✔ should accept a number limit
+        ✔ should parse a string limit
+        ✔ should return null for an invalid limit
+      type
+        ✔ should return the default type if type is not provided
+        ✔ should accept a string type
+        ✔ should accept an array of strings type
+        ✔ should accept a type checking function
+    defaultType
+      ✔ should throw an error if defaultType is not provided
+      ✔ should convert string defaultType to a request content-type checking function
+      ✔ should convert array of strings defaultType to a request content-type checking function
+      ✔ should use function defaultType directly as the request content-type checker
+
+
+  257 passing (1s)
+
+Applied deterministic body-parser fixes successfully

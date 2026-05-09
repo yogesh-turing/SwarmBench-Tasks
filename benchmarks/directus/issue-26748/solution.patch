@@ -1,0 +1,29 @@
+diff --git a/api/src/services/versions.ts b/api/src/services/versions.ts
+--- a/api/src/services/versions.ts
++++ b/api/src/services/versions.ts
+@@ -262,6 +262,22 @@ export class VersionsService extends ItemsService<ContentVersion> {
+ 
+ 		const finalVersionDelta = assign({}, existingDelta, revisionDelta);
+ 
++		if (this.accountability) {
++			try {
++				await validateAccess(
++					{
++						accountability: this.accountability,
++						action: 'update',
++						collection: this.collection,
++						primaryKeys: [key],
++					},
++					{
++						schema: this.schema,
++						knex: this.knex,
++					},
++				);
++			} catch {
++				throw new ForbiddenError();
++			}
++		}
++
+ 		const sudoService = new ItemsService(this.collection, {
+ 			knex: this.knex,
+ 			schema: this.schema,

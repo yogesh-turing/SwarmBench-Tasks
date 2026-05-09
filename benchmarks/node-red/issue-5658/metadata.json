@@ -1,0 +1,40 @@
+﻿{
+    "domain":  "swe",
+    "pattern":  "fan-out-synthesize",
+    "expected_multi_agent_advantage":  "\u003e=0.23",
+    "expected_tools":  [
+                           "rg",
+                           "git",
+                           "npm",
+                           "node",
+                           "python"
+                       ],
+    "expected_capabilities":  [
+                                  "cross-subsystem synthesis",
+                                  "event-driven debugging",
+                                  "state tracking",
+                                  "regression verification",
+                                  "long-horizon planning"
+                              ],
+    "verification_strategy":  {
+                                  "behavioral_weight":  0.7,
+                                  "static_weight":  0.3
+                              },
+    "issue_id":  "5658",
+    "issue_url":  "https://github.com/node-red/node-red/issues/5658",
+    "pr_url":  "https://github.com/node-red/node-red/pull/5670",
+    "difficulty":  "medium",
+    "technical_threads":  [
+                              "keyboard dispatch",
+                              "workspace panning state",
+                              "global/local handler precedence"
+                          ],
+    "files_expected_to_change":  [
+                                     "packages/node_modules/@node-red/editor-client/src/js/ui/view.js"
+                                 ],
+    "subsystems":  [
+                       "editor-client view",
+                       "keyboard handling"
+                   ],
+    "timeout_sec":  3600
+}

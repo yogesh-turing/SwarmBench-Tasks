@@ -1,0 +1,25 @@
+[task]
+name = "swarmbench/f3a9c12e7b4d5e6f8901234567890abc-SWARMBENCH-FANOUT-CODESWE-NODE-RED-EDITOR-MULTI-BUGFIX"
+description = "Fix five cross-subsystem bugs in the Node-RED editor: spacebar/modifier event ordering, halo/status geometry sync, sidebar drag-vs-click interaction, Windows build path normalization, and missing ARIA accessibility attributes across common UI widgets."
+
+[metadata]
+verifier_type = "executable"
+domain = "code-swe"
+coordination_pattern = "fan-out-synthesize"
+human_solving_hours_estimate = 40
+human_solving_hours_justification = "A developer must first orient in the Node-RED monorepo structure and understand five independent subsystems (~3h). Bug 1 (spacebar/modifier guard in view.js) requires tracing the keydown event pipeline, understanding the panning state machine, and identifying the correct guard placement without breaking normal spacebar behaviour (~4h). Bug 2 (status/halo geometry) requires understanding how statusHeight is computed and how halo SVG attributes are set during redraw, then adding a before/after height comparison and conditional attribute update (~5h). Bug 3 (sidebar mouseup-vs-click) requires understanding the sortable drag lifecycle, the draggingTabButton flag semantics, and testing that synthetic trigger calls are also updated (~4h). Bug 4 (Windows path normalization) requires understanding how fast-glob handles backslash paths, writing a safe normalizePath helper, and updating every call site in concat.js without breaking non-Windows builds (~4h). Bug 5 (ARIA attributes across 7 files) is the most surface-area-intensive: each widget requires a different set of attributes and event handlers, palette.js needs a full keyboard interaction, notifications.js needs focus management — across 7 files (~12h). Integration: running npm test, diagnosing any regressions, verifying all five fixes are coherent (~8h)."
+estimated_sub_agents = 5
+input_token_estimate = 85000
+reference_link = "https://github.com/node-red/node-red/issues/5653"
+why_multi_agent = "The five bugs span four structurally independent subsystems: (1) the canvas view.js event/rendering pipeline (Bugs 1 and 2), (2) the sidebar drag interaction model (Bug 3), (3) the build-tool scripts (Bug 4), and (4) the accessibility layer spanning 7 common UI widget files (Bug 5). A single agent must context-switch between JavaScript event semantics, SVG geometry, jQuery drag lifecycle, Node.js path handling, and ARIA specification — all in a large monorepo. Context saturation forces symptom-level fixes: the agent typically corrects the spacebar guard but misses the halo update, or patches one accessibility widget but forgets aria-expanded synchronisation in palette.js. Four parallel fan-out agents each own one technical thread with focused context; a fifth integration agent synthesises and verifies correctness across the whole editor."
+
+[agent]
+timeout_sec = 3600
+
+[verifier]
+timeout_sec = 600
+
+[environment]
+cpus = 2
+memory_mb = 4096
+build_timeout_sec = 900

@@ -1,0 +1,29 @@
+﻿{
+    "issue_id":  5674,
+    "issue_ref":  "https://github.com/node-red/node-red/issues/5674",
+    "task_name":  "Workspace Pointer Deadzone Near Tabs",
+    "category":  "integration",
+    "difficulty":  "Easy",
+    "estimated_minutes":  30,
+    "async_or_event_driven":  true,
+    "required_tools":  [
+                           "repo-search",
+                           "tests",
+                           "logs",
+                           "diff"
+                       ],
+    "deterministic_repro":  true,
+    "hidden_tests_count":  3,
+    "public_tests_count":  1,
+    "tags":  [
+                 "pointer-events",
+                 "layering",
+                 "hit-testing"
+             ],
+    "scoring":  {
+                    "correctness":  0.5,
+                    "verification_depth":  0.2,
+                    "regression_safety":  0.2,
+                    "process_quality":  0.1
+                }
+}

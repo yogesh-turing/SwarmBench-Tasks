@@ -1,0 +1,4 @@
+Skipping image OS validation for hb__swarmbench-task-3: docker inspect returned 1
+Running command: apt-get update && apt-get install -y curl
+Trial task_3__5535iUw cancelled
+Cleanup interrupted for task_3__5535iUw, but environment stop is shielded and will complete

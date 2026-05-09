@@ -1,0 +1,25 @@
+[task]
+name = "swarmbench/fastify-v4-breaking"
+description = "Fastify v3.29.5 to v4 breaking-change migration across routing, schema validation, reply semantics, async behavior, and error normalization"
+
+[metadata]
+verifier_type = "executable"
+domain = "code-swe"
+coordination_pattern = "fan-out-synthesize"
+human_solving_hours_estimate = 12
+human_solving_hours_justification = "The task spans 7 files and 6 independent breaking changes: route config defaults, schema-level registration errors, reply state semantics, thenable response behavior, sync handler error normalization, and hook error normalization. Correctness depends on cross-module consistency and regression-safe edits validated across 30 integration tests."
+estimated_sub_agents = 5
+input_token_estimate = 110000
+reference_link = "https://github.com/fastify/fastify/compare/v3.29.5...v4.0.0"
+why_multi_agent = "The migration decomposes naturally into routing/schema, reply/thenable, handler pipeline, and hooks pipeline workstreams. Single agents tend to miss one or more subsystems due to context spread, while specialized agents can implement each subsystem in parallel and an orchestrator can resolve integration mismatches."
+
+[agent]
+timeout_sec = 2400
+
+[verifier]
+timeout_sec = 90
+
+[environment]
+cpus = 1
+memory_mb = 2048
+build_timeout_sec = 300

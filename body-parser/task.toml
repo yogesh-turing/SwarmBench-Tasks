@@ -1,0 +1,25 @@
+[task]
+name = "swarmbench/bp-multipart-parser-consistency"
+description = "body-parser multipart and parser consistency migration"
+
+[metadata]
+verifier_type = "executable"
+domain = "code-swe"
+coordination_pattern = "fan-out-synthesize"
+human_solving_hours_estimate = 8
+human_solving_hours_justification = "Async propagation requires careful reasoning across layer.js and router/index.js, including called-once guard and app.param async flow (~3h). CRLF hardening spans response API entry points (set/header, append flow, location/redirect, cookie) plus request-side trust boundaries and shared utility design (~4h). Node.js 22 compatibility cleanup requires refactoring request internals from connection->socket and trimRight->trimEnd while preserving trust-proxy behavior (~2h). Final integration and regression validation across verifier scenarios (~1h)."
+estimated_sub_agents = 5
+input_token_estimate = 85000
+reference_link = "https://github.com/expressjs/body-parser"
+why_multi_agent = "The task combines three distinct concerns across five files: async control-flow correctness (layer.js/index.js), security validation plumbing (response.js/request.js/utils.js), and compatibility refactors in trust-proxy request code. Single agents typically over-focus on async routing and miss request/header edge-cases or perform partial compatibility migration. Parallel sub-agents can each own one concern and merge through an orchestrator that validates cross-file consistency and full verifier coverage."
+
+[agent]
+timeout_sec = 2400
+
+[verifier]
+timeout_sec = 60
+
+[environment]
+cpus = 1
+memory_mb = 2048
+build_timeout_sec = 300

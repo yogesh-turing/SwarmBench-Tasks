@@ -1,0 +1,166 @@
+diff --git a/app/src/composables/use-item/index.ts b/app/src/composables/use-item/index.ts
+index 3501d4dae..756fc6484 100644
+--- a/app/src/composables/use-item/index.ts
++++ b/app/src/composables/use-item/index.ts
+@@ -77,7 +77,8 @@ export function useItem<T extends Item>(
+ 		return item.value?.[collectionInfo.value.meta.archive_field] === collectionInfo.value.meta.archive_value;
+ 	});
+ 
+-	const permissions = usePermissions(collection, primaryKey, isNew);
++	const isVersion = computed(() => !!unref(query).version);
++	const permissions = usePermissions(collection, primaryKey, isNew, isVersion);
+ 	const fieldsWithPermissions = permissions.itemPermissions.fields;
+ 
+ 	const loading = computed(() => loadingItem.value || permissions.itemPermissions.loading.value);
+diff --git a/app/src/composables/use-permissions/index.ts b/app/src/composables/use-permissions/index.ts
+index 5cce405f4..74d21a056 100644
+--- a/app/src/composables/use-permissions/index.ts
++++ b/app/src/composables/use-permissions/index.ts
+@@ -1,4 +1,4 @@
+-import { ComputedRef } from 'vue';
++import { ComputedRef, MaybeRef } from 'vue';
+ import { UsableCollectionPermissions, useCollectionPermissions } from './collection/use-collection-permissions';
+ import { UsableItemPermissions, useItemPermissions } from './item/use-item-permissions';
+ import { isSaveAllowed } from './lib/is-save-allowed';
+@@ -9,10 +9,15 @@ export type UsablePermissions = {
+ 	itemPermissions: UsableItemPermissions & { saveAllowed: ComputedRef<boolean> };
+ };
+ 
+-export function usePermissions(collection: Collection, primaryKey: PrimaryKey, isNew: IsNew): UsablePermissions {
++export function usePermissions(
++	collection: Collection,
++	primaryKey: PrimaryKey,
++	isNew: IsNew,
++	isVersion: MaybeRef<boolean> = false,
++): UsablePermissions {
+ 	const collectionPermissions = useCollectionPermissions(collection);
+ 
+-	const itemPermissions = useItemPermissions(collection, primaryKey, isNew);
++	const itemPermissions = useItemPermissions(collection, primaryKey, isNew, isVersion);
+ 
+ 	const saveAllowed = isSaveAllowed(isNew, collectionPermissions.createAllowed, itemPermissions.updateAllowed);
+diff --git a/app/src/composables/use-permissions/item/lib/get-fields.ts b/app/src/composables/use-permissions/item/lib/get-fields.ts
+index 7e760f189..3e0127ef6 100644
+--- a/app/src/composables/use-permissions/item/lib/get-fields.ts
++++ b/app/src/composables/use-permissions/item/lib/get-fields.ts
+@@ -1,13 +1,18 @@
+ import { useCollection } from '@directus/composables';
+ import { Field, ItemPermissions } from '@directus/types';
+ import { cloneDeep } from 'lodash';
+-import { computed, ref, Ref, unref } from 'vue';
++import { computed, MaybeRef, ref, Ref, unref } from 'vue';
+ import { Collection, IsNew } from '../../types';
+ import type { FormField } from '@/components/v-form/types';
+ import { usePermissionsStore } from '@/stores/permissions';
+ import { useUserStore } from '@/stores/user';
+ 
+-export function getFields(collection: Collection, isNew: IsNew, fetchedItemPermissions: Ref<ItemPermissions>) {
++export function getFields(
++	collection: Collection,
++	isNew: IsNew,
++	fetchedItemPermissions: Ref<ItemPermissions>,
++	isVersion: MaybeRef<boolean> = false,
++) {
+ 	const userStore = useUserStore();
+ 	const { getPermission } = usePermissionsStore();
+ 	const { fields: rawFields, info: collectionInfo } = useCollection(ref(collection));
+@@ -28,6 +33,10 @@ export function getFields(collection: Collection, isNew: IsNew, fetchedItemPermi
+ 			fields = fields.filter((field) => readableFields.includes(field.field));
+ 		}
+ 
++		// Version editing bypasses underlying collection write permissions entirely.
++		// Field-level access is enforced by the backend at promote time.
++		if (unref(isVersion)) return fields;
++
+ 		let permission;
+ 
+ 		if (collectionInfo.value?.meta?.singleton) {
+@@ -39,14 +48,24 @@ export function getFields(collection: Collection, isNew: IsNew, fetchedItemPermi
+ 
+ 			if (storePermission?.access !== 'partial') {
+ 				permission = storePermission;
++			} else if (fetchedItemPermissions.value.update.access) {
++				permission = storePermission;
+ 			} else {
+-				permission = fetchedItemPermissions.value.update.access ? storePermission : null;
++				permission = null;
+ 			}
+ 		}
+ 
+-		if (!permission?.fields?.includes('*')) {
++		if (!permission || permission.access === false) {
++			for (const field of fields) {
++				(field as FormField).meta = {
++					...(field.meta || {}),
++					readonly: true,
++					non_editable: true,
++				};
++			}
++		} else if (permission.fields && !permission.fields.includes('*')) {
+ 			for (const field of fields) {
+-				if (!permission?.fields?.includes(field.field)) {
++				if (!permission.fields.includes(field.field)) {
+ 					(field as FormField).meta = {
+ 						...(field.meta || {}),
+ 						readonly: true,
+diff --git a/app/src/composables/use-permissions/item/lib/is-action-allowed.ts b/app/src/composables/use-permissions/item/lib/is-action-allowed.ts
+index eff945e58..09b4eb94d 100644
+--- a/app/src/composables/use-permissions/item/lib/is-action-allowed.ts
++++ b/app/src/composables/use-permissions/item/lib/is-action-allowed.ts
+@@ -1,5 +1,5 @@
+ import { ItemPermissions } from '@directus/types';
+-import { computed, Ref, unref } from 'vue';
++import { computed, MaybeRef, Ref, unref } from 'vue';
+ import { Collection, IsNew } from '../../types';
+ import { usePermissionsStore } from '@/stores/permissions';
+ import { useUserStore } from '@/stores/user';
+@@ -9,6 +9,7 @@ export const isActionAllowed = (
+ 	isNew: IsNew,
+ 	fetchedItemPermissions: Ref<ItemPermissions>,
+ 	action: 'update' | 'delete' | 'share',
++	isVersion: MaybeRef<boolean> = false,
+ ) => {
+ 	const userStore = useUserStore();
+ 	const { getPermission } = usePermissionsStore();
+@@ -20,6 +21,10 @@ export const isActionAllowed = (
+ 
+ 		if (unref(isNew)) return false;
+ 
++		// Version editing bypasses underlying collection write permissions.
++		// Field-level access is enforced by the backend at promote time.
++		if (action === 'update' && unref(isVersion)) return true;
++
+ 		if (userStore.isAdmin) return true;
+ 
+ 		const permission = getPermission(collectionValue, action);
+diff --git a/app/src/composables/use-permissions/item/use-item-permissions.ts b/app/src/composables/use-permissions/item/use-item-permissions.ts
+index 5475b8413..628964b4a 100644
+--- a/app/src/composables/use-permissions/item/use-item-permissions.ts
++++ b/app/src/composables/use-permissions/item/use-item-permissions.ts
+@@ -1,5 +1,5 @@
+ import { Field } from '@directus/types';
+-import { ComputedRef, Ref } from 'vue';
++import { ComputedRef, MaybeRef, Ref } from 'vue';
+ import { isArchiveAllowed } from '../lib/is-archive-allowed';
+ import { Collection, IsNew, PrimaryKey } from '../types';
+ import { getFields } from './lib/get-fields';
+@@ -21,16 +21,17 @@ export function useItemPermissions(
+ 	collection: Collection,
+ 	primaryKey: PrimaryKey,
+ 	isNew: IsNew,
++	isVersion: MaybeRef<boolean> = false,
+ ): UsableItemPermissions {
+ 	const { loading, fetchedItemPermissions, refresh } = fetchItemPermissions(collection, primaryKey);
+ 
+-	const updateAllowed = isActionAllowed(collection, isNew, fetchedItemPermissions, 'update');
++	const updateAllowed = isActionAllowed(collection, isNew, fetchedItemPermissions, 'update', isVersion);
+ 	const deleteAllowed = isActionAllowed(collection, isNew, fetchedItemPermissions, 'delete');
+ 	const shareAllowed = isActionAllowed(collection, isNew, fetchedItemPermissions, 'share');
+ 
+ 	const archiveAllowed = isArchiveAllowed(collection, updateAllowed);
+ 
+-	const fields = getFields(collection, isNew, fetchedItemPermissions);
++	const fields = getFields(collection, isNew, fetchedItemPermissions, isVersion);
+ 
+ 	return { loading, refresh, updateAllowed, deleteAllowed, shareAllowed, archiveAllowed, fields };
+ }

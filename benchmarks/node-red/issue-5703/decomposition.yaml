@@ -1,0 +1,25 @@
+﻿pattern: fan-out-synthesize
+agents:
+  - name: agent-status-redraw
+    technical_domain: render-pipeline
+    scope: Investigate status redraw path and geometry updates.
+    deliverables:
+      - Status height updates correctly reflect visual state.
+
+  - name: agent-halo-geometry
+    technical_domain: canvas-geometry
+    scope: Validate halo width/height interactions with node buttons and status overlays.
+    deliverables:
+      - Halo dimensions remain correct across node variants.
+
+  - name: agent-regression-verification
+    technical_domain: verification
+    scope: Validate dynamic update scenarios for selected nodes and status mutation.
+    deliverables:
+      - Evidence of passing dynamic-state checks.
+
+  - name: orchestrator
+    technical_domain: synthesis
+    scope: Integrate redraw and geometry updates safely.
+    deliverables:
+      - Unified patch preserving existing interaction behavior.

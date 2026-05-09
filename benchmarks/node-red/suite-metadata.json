@@ -1,0 +1,30 @@
+﻿{
+    "suite": "node-red-autonomous-benchmark",
+    "repository": "https://github.com/node-red/node-red",
+    "task_count": 18,
+    "difficulty_distribution": {
+        "Easy": 11,
+        "Medium": 6,
+        "Hard": 1
+    },
+    "category_distribution": {
+        "ux": 7,
+        "state-management": 2,
+        "async": 2,
+        "integration": 3,
+        "refactor": 2,
+        "build": 1,
+        "tooling": 1
+    },
+    "estimated_execution_minutes": {
+        "min_single_agent": 853,
+        "max_single_agent": 1365
+    },
+    "expected_tool_usage_patterns": [
+        "repository exploration and code search",
+        "event trace and state transition debugging",
+        "runtime-editor boundary validation",
+        "targeted tests plus regression sweeps",
+        "cross-platform build verification"
+    ]
+}

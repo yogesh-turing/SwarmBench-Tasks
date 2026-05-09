@@ -1,0 +1,18 @@
+diff --git a/api/scripts/assert-no-dist-node-modules.mjs b/api/scripts/assert-no-dist-node-modules.mjs
+new file mode 100644
+index 000000000..111111111
+--- /dev/null
++++ b/api/scripts/assert-no-dist-node-modules.mjs
+@@ -0,0 +1,13 @@
++import { existsSync } from 'node:fs';
++import { resolve } from 'node:path';
++
++const unexpectedPath = resolve(process.cwd(), 'api', 'dist', 'node_modules');
++
++if (existsSync(unexpectedPath)) {
++	console.error(`Unexpected build artifact present: ${unexpectedPath}`);
++	process.exit(1);
++}
++
++console.log('api/dist/node_modules is absent');
++process.exit(0);

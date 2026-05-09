@@ -1,0 +1,58 @@
+sub_tasks:
+  - id: investigate-and-fix-repository-typos
+    description: >
+      Perform a repository-wide scan to identify and correct all non-functional
+      typos listed in the instruction (occurances, acess, intance, acessible,
+      remvove, beeing, shoud, insted, agressively, overriden, comparisions,
+      seperately, delimeters). Review all affected files including test files
+      and vendor directories. Ensure corrections do not alter program behavior,
+      test expectations, or string comparisons where exact values are required.
+      Validate consistency of spelling across the codebase.
+    depends_on: []
+    parallel_group: fan-out
+
+  - id: investigate-and-fix-clone-prototype-bug
+    description: >
+      Investigate the implementation of _.clone and _.cloneDeep in lodash.js,
+      focusing on behavior when Object.prototype or other prototypes in the
+      chain are frozen. Reproduce the issue where assigning properties that
+      collide with non-writable properties on a frozen prototype results in
+      silent failure or TypeError. Implement a fix to ensure that own properties
+      are preserved during cloning even when name collisions occur. This may
+      require using property descriptors or alternative assignment strategies.
+      Add or update test cases in test/test.js to validate the fix and prevent
+      regression.
+    depends_on: []
+    parallel_group: fan-out
+
+  - id: investigate-and-fix-unescape-entity-bug
+    description: >
+      Investigate the _.unescape implementation in lodash.js and reproduce the
+      incorrect handling of the HTML decimal entity &#38;. Identify why the
+      function returns an incorrect decoded value. Implement a fix to ensure
+      correct decoding of ampersand and similar entities without introducing
+      regressions for other escape sequences. Update or add test coverage in
+      test/test.js to verify correct behavior.
+    depends_on: []
+    parallel_group: fan-out
+
+  - id: investigate-and-fix-sum-by-bug
+    description: >
+      Fix the issue where _.sumBy returns a string instead of NaN when array contains mixed types.
+    depends_on: []
+    parallel_group: fan-out
+
+  - id: verify-all-lodash-fixes
+    description: >
+      After implementing all fixes, run the full test suite and validation
+      scripts from the repository root. Ensure that all existing and newly
+      added tests pass successfully. If any failures occur, identify the root
+      cause and resolve them. Confirm that the security fix, typo corrections,
+      clone behavior, and unescape functionality all behave as expected without
+      introducing regressions.
+    depends_on:
+      - investigate-and-fix-repository-typos
+      - investigate-and-fix-clone-prototype-bug
+      - investigate-and-fix-unescape-entity-bug
+      - investigate-and-fix-sum-by-bug
+    parallel_group: synthesize

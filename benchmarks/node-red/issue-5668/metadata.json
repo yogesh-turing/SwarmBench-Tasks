@@ -1,0 +1,29 @@
+﻿{
+    "issue_id":  5668,
+    "issue_ref":  "https://github.com/node-red/node-red/issues/5668",
+    "task_name":  "Build Runner Dependency Removal",
+    "category":  "refactor",
+    "difficulty":  "Medium",
+    "estimated_minutes":  90,
+    "async_or_event_driven":  false,
+    "required_tools":  [
+                           "repo-search",
+                           "tests",
+                           "logs",
+                           "diff"
+                       ],
+    "deterministic_repro":  true,
+    "hidden_tests_count":  3,
+    "public_tests_count":  1,
+    "tags":  [
+                 "build",
+                 "scripts",
+                 "ci"
+             ],
+    "scoring":  {
+                    "correctness":  0.5,
+                    "verification_depth":  0.2,
+                    "regression_safety":  0.2,
+                    "process_quality":  0.1
+                }
+}

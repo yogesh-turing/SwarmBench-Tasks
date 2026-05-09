@@ -1,0 +1,10 @@
+﻿version: 1
+checks:
+  - id: repro-before-fails
+    type: manual-or-scripted
+  - id: repro-after-passes
+    type: manual-or-scripted
+  - id: regression-tests-pass
+    type: test-command
+  - id: no-adjacent-regression
+    type: smoke-check

@@ -1,0 +1,79 @@
+{
+    "schema_version": 1,
+    "created_at": "2026-05-09T03:07:06.888476Z",
+    "harbor": {
+        "version": "0.6.4",
+        "git_commit_hash": "e70d5f060ffeb4525f320669d50b290925b55425",
+        "is_editable": true
+    },
+    "invocation": [
+        "W:\\git\\harbor\\.venv\\Scripts\\harbor",
+        "run",
+        "-p",
+        "../tasks/task_directus_2",
+        "-a",
+        "swarm-kimi-single",
+        "-m",
+        "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+        "-k",
+        "1",
+        "-n",
+        "1",
+        "--job-name",
+        "single-kimi-agent",
+        "--jobs-dir",
+        "../tasks/task_directus_2/execution_logs",
+        "--ve",
+        "FIREWORKS_API_KEY=${FIREWORKS_API_KEY}",
+        "--ae",
+        "FIREWORKS_API_KEY=${FIREWORKS_API_KEY}",
+        "--quiet"
+    ],
+    "n_concurrent_trials": 1,
+    "retry": {
+        "max_retries": 0,
+        "exclude_exceptions": [
+            "RewardFileNotFoundError",
+            "VerifierOutputParseError",
+            "RewardFileEmptyError",
+            "VerifierTimeoutError",
+            "AgentTimeoutError"
+        ],
+        "wait_multiplier": 1.0,
+        "min_wait_sec": 1.0,
+        "max_wait_sec": 60.0
+    },
+    "trials": [
+        {
+            "task": {
+                "name": "task_directus_2",
+                "type": "local",
+                "digest": "sha256:193d1d6e9a7f19c06e805a82e1511b7179cca1b07e8f288837b3fe1f26b4558f",
+                "path": "..\\tasks\\task_directus_2"
+            },
+            "timeout_multiplier": 1.0,
+            "agent": {
+                "name": "swarm-kimi-single",
+                "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+                "kwargs": {},
+                "env": {
+                    "FIREWORKS_API_KEY": "${FIREWORKS_API_KEY}"
+                }
+            },
+            "environment": {
+                "type": "docker",
+                "force_build": false,
+                "delete": true,
+                "suppress_override_warnings": false,
+                "env": {},
+                "kwargs": {}
+            },
+            "verifier": {
+                "env": {
+                    "FIREWORKS_API_KEY": "${FIREWORKS_API_KEY}"
+                },
+                "disable": false
+            }
+        }
+    ]
+}

@@ -1,0 +1,6 @@
+Running command: apt-get update && apt-get install -y curl
+Command outputs captured
+Running command: set -euo pipefail; curl -LsSf https://astral.sh/uv/install.sh | bash && export PATH="$HOME/.local/bin:$PATH" && uv tool install --python 3.13 kimi-cli && kimi --version
+Command outputs captured
+Trial fastify-v4-breaking__WYvtxhn failed: Unsupported provider 'fireworks_ai' for kimi-cli. Supported: ['anthropic', 'gemini', 'google', 'kimi', 'moonshot', 'openai']
+Not retrying trial because the maximum number of retries has been reached

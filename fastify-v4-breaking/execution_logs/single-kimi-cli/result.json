@@ -1,0 +1,28 @@
+{
+    "id": "c342077e-46dc-4eb9-98f6-086c09cf033c",
+    "started_at": "2026-05-07T23:14:48.336804",
+    "finished_at": "2026-05-07T23:15:39.168970",
+    "n_total_trials": 1,
+    "stats": {
+        "n_trials": 1,
+        "n_errors": 1,
+        "evals": {
+            "kimi-cli__accounts/fireworks/models/kimi-k2p5__adhoc": {
+                "n_trials": 0,
+                "n_errors": 1,
+                "metrics": [
+                    {
+                        "mean": 0.0
+                    }
+                ],
+                "pass_at_k": {},
+                "reward_stats": {},
+                "exception_stats": {
+                    "ValueError": [
+                        "fastify-v4-breaking__WYvtxhn"
+                    ]
+                }
+            }
+        }
+    }
+}

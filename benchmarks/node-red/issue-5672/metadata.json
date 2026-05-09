@@ -1,0 +1,29 @@
+﻿{
+    "issue_id":  5672,
+    "issue_ref":  "https://github.com/node-red/node-red/issues/5672",
+    "task_name":  "Lint Pipeline Modernization",
+    "category":  "tooling",
+    "difficulty":  "Easy",
+    "estimated_minutes":  45,
+    "async_or_event_driven":  false,
+    "required_tools":  [
+                           "repo-search",
+                           "tests",
+                           "logs",
+                           "diff"
+                       ],
+    "deterministic_repro":  true,
+    "hidden_tests_count":  3,
+    "public_tests_count":  1,
+    "tags":  [
+                 "lint",
+                 "ci",
+                 "migration"
+             ],
+    "scoring":  {
+                    "correctness":  0.5,
+                    "verification_depth":  0.2,
+                    "regression_safety":  0.2,
+                    "process_quality":  0.1
+                }
+}

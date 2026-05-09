@@ -1,0 +1,52 @@
+﻿{
+    "domain":  "swe",
+    "pattern":  "fan-out-synthesize",
+    "expected_multi_agent_advantage":  "\u003e=0.23",
+    "expected_tools":  [
+                           "rg",
+                           "git",
+                           "npm",
+                           "node",
+                           "python"
+                       ],
+    "expected_capabilities":  [
+                                  "cross-subsystem synthesis",
+                                  "event-driven debugging",
+                                  "state tracking",
+                                  "regression verification",
+                                  "long-horizon planning"
+                              ],
+    "verification_strategy":  {
+                                  "behavioral_weight":  0.7,
+                                  "static_weight":  0.3
+                              },
+    "issue_id":  "5653",
+    "issue_url":  "https://github.com/node-red/node-red/issues/5653",
+    "pr_url":  "https://github.com/node-red/node-red/pull/5655",
+    "difficulty":  "hard",
+    "technical_threads":  [
+                              "widget semantics",
+                              "focus management",
+                              "sidebar/palette interaction",
+                              "transient vs modal notification behavior"
+                          ],
+    "files_expected_to_change":  [
+                                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/editableList.js",
+                                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/searchBox.js",
+                                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/toggleButton.js",
+                                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/treeList.js",
+                                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/typedInput.js",
+                                     "packages/node_modules/@node-red/editor-client/src/js/ui/notifications.js",
+                                     "packages/node_modules/@node-red/editor-client/src/js/ui/palette.js",
+                                     "packages/node_modules/@node-red/editor-client/src/js/ui/sidebar.js",
+                                     "packages/node_modules/@node-red/editor-client/src/js/ui/tray.js"
+                                 ],
+    "subsystems":  [
+                       "editor-client/common widgets",
+                       "sidebar",
+                       "palette",
+                       "tray",
+                       "notifications"
+                   ],
+    "timeout_sec":  7200
+}

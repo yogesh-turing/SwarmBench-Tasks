@@ -1,0 +1,101 @@
+{
+  "score": 0.9375,
+  "checks": [
+    {
+      "id": "R1.1-no-top-level-listener",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R1.2-helper-exists",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R1.3-onmounted-invocation",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R1.4-idempotent-attach",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R1.5-keydown-keyup-in-helper",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R2.1-tsdown-exclusions-present",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R2.2-tsconfig-exclude-test-utils",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R2.3-entry-behavior-simulation",
+      "passed": false,
+      "detail": "unable to parse tsdown entry list: Expecting value: line 9 column 2 (char 175)"
+    },
+    {
+      "id": "R2.4-build-mode-preserved",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R3.1-slash-check",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R3.2-invalid-payload-error",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R3.3-validation-order",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R4.1-read-accountability",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R4.2-non-null-guard",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R4.3-activity-gated",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R4.4-all-guard",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R4.5-revision-gated",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "id": "R4.6-no-unconditional-side-effects",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "bug_scores": {
+    "bug1": 1.0,
+    "bug2": 0.75,
+    "bug3": 1.0,
+    "bug4": 1.0
+  }
+}

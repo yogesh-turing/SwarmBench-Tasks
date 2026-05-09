@@ -1,0 +1,25 @@
+﻿pattern: fan-out-synthesize
+agents:
+  - name: agent-keymap-investigation
+    technical_domain: keyboard-events
+    scope: Analyze global shortcut dispatch vs workspace-local key handlers.
+    deliverables:
+      - Identified interaction conflicts between modifier-based shortcuts and panning controls.
+
+  - name: agent-state-machine
+    technical_domain: ui-state
+    scope: Validate panning-related transient state transitions under modifier changes.
+    deliverables:
+      - Correct state cleanup logic for mixed key sequences.
+
+  - name: agent-regression-verification
+    technical_domain: verification
+    scope: Ensure shortcut and panning behaviors both remain correct after integration.
+    deliverables:
+      - Passing behavioral checks for both shortcut and panning paths.
+
+  - name: orchestrator
+    technical_domain: synthesis
+    scope: Integrate findings and produce a coherent fix with no interaction regressions.
+    deliverables:
+      - Final integrated patch and verification evidence.

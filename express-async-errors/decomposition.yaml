@@ -1,0 +1,83 @@
+task_id: express-async-errors
+pattern: fan-out-synthesize
+description: >
+  Express 4.x comprehensive hardening sweep with primary focus on CRLF injection
+  prevention across request/response pipelines, supported by async error propagation
+  reliability and Node.js 22 compatibility cleanup. Three concurrent workstreams
+  with deep specialization: CRLF security, async reliability, and compatibility.
+
+agents:
+  - id: agent-crlf-utils
+    assignment: Design and implement the shared CRLF validation utility
+    context_budget: small
+    description: |
+      Own lib/utils.js.
+      Deliver: A reusable exports.containsInvalidHeaderChar function that detects
+      both literal CR/LF characters and escaped sequences (\r, \n) in any value type.
+      The utility must be robust to arrays, nulls, booleans, and numbers.
+      This utility becomes the single source of truth for CRLF validation across
+      both request and response paths. Export it clearly so other modules can import it.
+
+  - id: agent-crlf-response
+    assignment: Harden all response-side header/cookie/redirect entry points
+    context_budget: medium
+    description: |
+      Own lib/response.js.
+      Deliver: Import the shared CRLF utility and wire it into every response API
+      that sets headers: res.set(), res.append(), res.cookie(), res.location(), res.redirect().
+      Any attempt to set a header (name or value), cookie (name or value), or redirect URL
+      that contains CRLF must be rejected with a TypeError before reaching the native
+      setHeader call. Valid inputs must pass through unchanged.
+      This agent ensures the response pipeline is locked down against header injection.
+
+  - id: agent-crlf-request
+    assignment: Harden request-side trust boundaries and header access
+    context_budget: medium
+    description: |
+      Own lib/request.js.
+      Deliver: Import the shared CRLF utility and sanitize all request header access
+      methods (req.get(), req.header(), req.referer). Any read of a CRLF-tainted header
+      value must return undefined, not the tainted value. Additionally, enforce the critical
+      trust boundary in req.hostname: when X-Forwarded-Host is trusted but contains CRLF,
+      reject it immediately — do not fall through to the Host header. This prevents
+      a trusted-but-tainted header from bypassing the security check and compromising hostname resolution.
+
+  - id: agent-async-errors
+    assignment: Fix async error propagation in routing and param handling
+    context_budget: medium
+    description: |
+      Own lib/router/layer.js and lib/router/index.js.
+      Deliver: Both layer.js handle_request() and handle_error() must detect when a handler
+      returns a Promise and attach appropriate error handlers. A called-once guard prevents
+      double-invocation if the handler both calls next(err) synchronously and returns a rejected
+      promise. Similarly, the param pipeline in router/index.js must wrap app.param() callbacks
+      with the same guard, as those bypass the normal layer.handle_request flow.
+      Ensure async handlers throw, async middleware throw, and async param callbacks all
+      propagate errors to the error handler exactly once.
+
+  - id: agent-compat-request
+    assignment: Modernize request internals for Node.js 22
+    context_budget: small
+    description: |
+      Own lib/request.js (in conjunction with agent-crlf-request for CRLF work).
+      Deliver: Replace deprecated request internals throughout lib/request.js:
+      this.connection -> this.socket, trimRight() -> trimEnd().
+      Preserve all existing behavior while removing legacy patterns.
+      This work is independent of CRLF hardening but shares the same file;
+      ensure CRLF and compat changes do not conflict.
+
+  - id: agent-orchestrator
+    assignment: Integrate all workstreams, validate consistency, pass full test suite
+    context_budget: large
+    depends_on: [agent-crlf-utils, agent-crlf-response, agent-crlf-request, agent-async-errors, agent-compat-request]
+    description: |
+      Receive deliverables from all specialist agents. Integrate changes across
+      lib/utils.js, lib/response.js, lib/request.js, lib/router/layer.js, and lib/router/index.js.
+      Verify: (1) CRLF utility is correctly exported and imported by both response and request modules.
+      (2) All response APIs (set, append, cookie, location, redirect) use the utility consistently.
+      (3) All request read paths (get, header, referer) and trust boundaries (hostname)
+      use the utility consistently. (4) Async guards in layer.js and router/index.js don't
+      conflict with each other. (5) No legacy connection or trimRight remains. Run the full
+      verifier (43 tests: 32 runtime + 11 static). Do not deliver until all tests pass.
+      CRLF consistency is critical — if one module forgets to import the utility,
+      the security posture is broken.

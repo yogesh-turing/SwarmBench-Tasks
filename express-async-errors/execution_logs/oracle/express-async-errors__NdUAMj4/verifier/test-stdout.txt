@@ -1,0 +1,48 @@
+  PASS  async route throw reaches error handler
+  PASS  rejected promise from route reaches error handler
+  PASS  async middleware throw reaches error handler
+  PASS  async error handler propagates its own throw
+  PASS  multiple async handlers execute in order with error propagation
+  PASS  async handler calling next("route") skips to next matching route
+  PASS  async app.param() handler throw reaches error handler
+  PASS  async handler that resolves sends response correctly
+  PASS  array of async route handlers — error from second handler propagates
+  PASS  mixed sync and async handler array — async handler throw propagates
+  PASS  async middleware mounted at sub-path throw propagates to parent error handler
+  PASS  async error handler that calls next() after await passes to next normal middleware
+  PASS  async handler with multiple awaits before throw propagates error correctly
+  PASS  app.all() with async handler throw reaches error handler
+  PASS  async middleware that enriches req and async route error preserves req data
+  PASS  async app.param() handler that resolves sets req property and route reads it
+  PASS  req.get sanitizes CRLF-tainted header values
+  PASS  req.hostname rejects CRLF-tainted X-Forwarded-Host
+  PASS  res.set rejects CRLF header values
+  PASS  res.redirect rejects CRLF-tainted URLs
+  PASS  res.append rejects CRLF header values
+  PASS  res.cookie rejects CRLF in cookie name
+  PASS  res.cookie rejects CRLF in cookie value
+  PASS  res.location rejects CRLF in URL
+  PASS  res.set rejects CRLF in header name
+  PASS  req.header() sanitizes CRLF-tainted header values
+  PASS  req.referer property sanitizes CRLF-tainted values
+  PASS  Multiple CRLF sequences rejected in header value
+  PASS  async error in express.Router() propagates to parent error handler
+  PASS  async handler calling next("router") exits sub-router and app fallback handles request
+  PASS  async error in deeply nested router propagates to outermost error handler
+  PASS  next(err) and rejected promise invokes error handler exactly once
+
+32 passing, 0 failing
+
+  PASS  utils exports containsInvalidHeaderChar
+  PASS  response uses containsInvalidHeaderChar
+  PASS  request uses containsInvalidHeaderChar
+  PASS  request uses socket.encrypted
+  PASS  request uses socket.remoteAddress
+  PASS  request does not use connection.encrypted
+  PASS  request does not use connection.remoteAddress
+  PASS  request uses trimEnd and not trimRight
+  PASS  response validates res.set headers with CRLF check
+  PASS  response validates res.cookie with CRLF check
+  PASS  response validates res.location/redirect with CRLF check
+
+Reward: 1.00  (43/43 tests passed)

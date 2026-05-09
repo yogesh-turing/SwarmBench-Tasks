@@ -1,0 +1,29 @@
+============================================================
+Directus Four-Fix Verifier
+============================================================
+  PASS  R1.1-no-top-level-listener
+  PASS  R1.2-helper-exists
+  PASS  R1.3-onmounted-invocation
+  PASS  R1.4-idempotent-attach
+  PASS  R1.5-keydown-keyup-in-helper
+  PASS  R2.1-tsdown-exclusions-present
+  PASS  R2.2-tsconfig-exclude-test-utils
+  FAIL  R2.3-entry-behavior-simulation: unable to parse tsdown entry list: Expecting value: line 9 column 2 (char 175)
+  PASS  R2.4-build-mode-preserved
+  PASS  R3.1-slash-check
+  PASS  R3.2-invalid-payload-error
+  PASS  R3.3-validation-order
+  PASS  R4.1-read-accountability
+  PASS  R4.2-non-null-guard
+  PASS  R4.3-activity-gated
+  PASS  R4.4-all-guard
+  PASS  R4.5-revision-gated
+  PASS  R4.6-no-unconditional-side-effects
+
+Per-bug completion:
+  bug1: 1.000
+  bug2: 0.750
+  bug3: 1.000
+  bug4: 1.000
+
+Reward: 0.937500

@@ -1,0 +1,39 @@
+{
+  "issue_id": "26721",
+  "issue_url": "https://github.com/directus/directus/issues/26721",
+  "pr_url": "https://github.com/directus/directus/pull/26815",
+  "difficulty": "Hard",
+  "category": "permission regression",
+  "expected_tools": [
+    "git",
+    "pnpm",
+    "node",
+    "ripgrep"
+  ],
+  "expected_capabilities": [
+    "repo exploration",
+    "state tracking",
+    "debugging",
+    "long-horizon planning",
+    "verification"
+  ],
+  "files_expected_to_change": [
+    "app/src/composables/use-item/index.ts",
+    "app/src/composables/use-permissions/index.ts",
+    "app/src/composables/use-permissions/item/lib/get-fields.ts",
+    "app/src/composables/use-permissions/item/lib/is-action-allowed.ts",
+    "app/src/composables/use-permissions/item/use-item-permissions.ts"
+  ],
+  "estimated_steps": 10,
+  "verification_command": "bash benchmarks/directus/issue-26721/verification.sh",
+  "failure_signals": [
+    "get-fields version tests fail",
+    "use-item-permissions version test fails or type-checks fail",
+    "fields remain readonly for version edits"
+  ],
+  "success_signals": [
+    "targeted app permission tests pass",
+    "version edits bypass main-item update gating in the app permission layer",
+    "delete/share behavior remains unchanged"
+  ]
+}

@@ -1,0 +1,60 @@
+sub_tasks:
+  - id: fix-use-shortcut-ssr-crash
+    description: >
+      Own /testbed/packages/composables/src/use-shortcut.ts. Remove the SSR
+      failure caused by accessing document at module scope. After your changes,
+      the module must be safe to import in non-browser contexts and global key
+      listeners must be attached only after component mount in a real browser.
+      Preserve the existing shortcut behavior for mounted components.
+      Do not modify API files, build configuration, or tests.
+    depends_on: []
+    parallel_group: fan-out
+
+  - id: fix-api-build-entry-exclusions
+    description: >
+      Own /testbed/api/tsdown.config.ts and /testbed/api/tsconfig.prod.json.
+      Stop production API builds from including test-only helpers and mocks in
+      the compiled output. Add negative glob exclusions for src/test-utils/,
+      src/__utils__/, src/__setup__/, and the standalone mock file
+      src/database/run-ast/lib/apply-query/mock.ts to tsdown.config.ts. Also
+      add src/test-utils to the exclude list in tsconfig.prod.json. After your
+      changes, none of those test-only paths may appear in the production entry
+      set or compilation scope.
+      Do not modify runtime service logic or frontend composables.
+    depends_on: []
+    parallel_group: fan-out
+
+  - id: fix-collection-name-slash-validation
+    description: >
+      Own /testbed/api/src/services/collections.ts. Prevent creation of
+      collection names that contain '/'. After your changes, invalid names must
+      be rejected at validation time with an InvalidPayloadError so REST routes
+      remain reachable and unambiguous.
+      Do not modify unrelated collection rules or other service files.
+    depends_on: []
+    parallel_group: fan-out
+
+  - id: fix-version-save-accountability-handling
+    description: >
+      Own /testbed/api/src/services/versions.ts. Make version-save side effects
+      respect the collection accountability mode from schema metadata. After
+      your changes, collections with null accountability must not create
+      activity or revision records, collections with activity-only tracking
+      must avoid revision creation, and collections with full tracking must
+      retain existing behavior.
+      Do not change unrelated versioning behavior or other API services.
+    depends_on: []
+    parallel_group: fan-out
+
+  - id: synthesize-and-verify-directus-fixes
+    description: >
+      After the four fix slices are complete, validate the integrated task from
+      /testbed by running the task verifier and checking that all required
+      behaviors hold together without regressions. If validation fails,
+      identify which slice is incomplete and repair only the affected area.
+    depends_on:
+      - fix-use-shortcut-ssr-crash
+      - fix-api-build-entry-exclusions
+      - fix-collection-name-slash-validation
+      - fix-version-save-accountability-handling
+    parallel_group: synthesize

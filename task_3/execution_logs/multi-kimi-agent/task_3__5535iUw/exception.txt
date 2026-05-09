@@ -1,0 +1,53 @@
+Traceback (most recent call last):
+  File "W:\git\harbor\src\harbor\trial\trial.py", line 956, in run
+    await self._setup_agent()
+  File "W:\git\harbor\src\harbor\trial\trial.py", line 353, in _setup_agent
+    await asyncio.wait_for(
+    ...<2 lines>...
+    )
+  File "C:\Users\yoges\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\tasks.py", line 507, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "W:\git\harbor\src\harbor\agents\installed\base.py", line 392, in setup
+    await self.install(environment)
+  File "W:\git\harbor\src\harbor\agents\installed\swarmbench\multi_kimi.py", line 157, in install
+    await self.exec_as_root(
+    ...<3 lines>...
+    )
+  File "W:\git\harbor\src\harbor\agents\installed\base.py", line 353, in exec_as_root
+    return await self._exec(
+           ^^^^^^^^^^^^^^^^^
+        environment, command, user="root", env=env, cwd=cwd, timeout_sec=timeout_sec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "W:\git\harbor\src\harbor\agents\installed\base.py", line 313, in _exec
+    result = await environment.exec(
+             ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    )
+    ^
+  File "W:\git\harbor\src\harbor\environments\docker\docker.py", line 599, in exec
+    return await self._run_docker_compose_command(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        exec_command, check=False, timeout_sec=timeout_sec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "W:\git\harbor\src\harbor\environments\docker\docker.py", line 360, in _run_docker_compose_command
+    stdout_bytes, stderr_bytes = await process.communicate()
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\yoges\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\subprocess.py", line 201, in communicate
+    stdin, stdout, stderr = await tasks.gather(stdin, stdout, stderr)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\yoges\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\subprocess.py", line 181, in _read_stream
+    output = await stream.read()
+             ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\yoges\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\streams.py", line 723, in read
+    block = await self.read(self._limit)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\yoges\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\streams.py", line 730, in read
+    await self._wait_for_data('read')
+  File "C:\Users\yoges\AppData\Roaming\uv\python\cpython-3.13-windows-x86_64-none\Lib\asyncio\streams.py", line 539, in _wait_for_data
+    await self._waiter
+asyncio.exceptions.CancelledError

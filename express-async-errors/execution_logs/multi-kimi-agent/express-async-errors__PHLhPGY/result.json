@@ -1,0 +1,112 @@
+{
+    "id": "14800f64-09f9-44c1-8e7b-c38a91c92e10",
+    "task_name": "swarmbench/express-async-errors",
+    "trial_name": "express-async-errors__PHLhPGY",
+    "trial_uri": "file:///W:/git/tasks/express-async-errors/execution_logs/multi-kimi-agent/express-async-errors__PHLhPGY",
+    "task_id": {
+        "path": "..\\tasks\\express-async-errors"
+    },
+    "source": null,
+    "task_checksum": "060665c33a1ffb930295a509e70805c4bc50fe43e73b9f57543b6ac0e9302341",
+    "config": {
+        "task": {
+            "path": "..\\tasks\\express-async-errors",
+            "git_url": null,
+            "git_commit_id": null,
+            "name": null,
+            "ref": null,
+            "overwrite": false,
+            "download_dir": null,
+            "source": null
+        },
+        "trial_name": "express-async-errors__PHLhPGY",
+        "trials_dir": "..\\tasks\\express-async-errors\\execution_logs\\multi-kimi-agent",
+        "timeout_multiplier": 1.0,
+        "agent_timeout_multiplier": null,
+        "verifier_timeout_multiplier": null,
+        "agent_setup_timeout_multiplier": null,
+        "environment_build_timeout_multiplier": null,
+        "agent": {
+            "name": "swarm-kimi-multi",
+            "import_path": null,
+            "model_name": "fireworks_ai/accounts/fireworks/models/kimi-k2p5",
+            "override_timeout_sec": null,
+            "override_setup_timeout_sec": null,
+            "max_timeout_sec": null,
+            "kwargs": {},
+            "env": {
+                "FIREWORKS_API_KEY": "${FIREWORKS_API_KEY}"
+            }
+        },
+        "environment": {
+            "type": "docker",
+            "import_path": null,
+            "force_build": false,
+            "delete": true,
+            "override_cpus": null,
+            "override_memory_mb": null,
+            "override_storage_mb": null,
+            "override_gpus": null,
+            "suppress_override_warnings": false,
+            "mounts_json": null,
+            "env": {},
+            "kwargs": {}
+        },
+        "verifier": {
+            "override_timeout_sec": null,
+            "max_timeout_sec": null,
+            "env": {
+                "FIREWORKS_API_KEY": "${FIREWORKS_API_KEY}"
+            },
+            "disable": false
+        },
+        "artifacts": [],
+        "job_id": "ed845bd4-1610-44fe-bcc9-4630cc5ea4bf"
+    },
+    "agent_info": {
+        "name": "swarm-kimi-multi",
+        "version": "unknown",
+        "model_info": {
+            "name": "accounts/fireworks/models/kimi-k2p5",
+            "provider": "fireworks_ai"
+        }
+    },
+    "agent_result": {
+        "n_input_tokens": 13152,
+        "n_cache_tokens": 8933,
+        "n_output_tokens": 1891,
+        "cost_usd": null,
+        "rollout_details": null,
+        "metadata": null
+    },
+    "verifier_result": {
+        "rewards": {
+            "reward": 0.9767
+        }
+    },
+    "exception_info": {
+        "exception_type": "AgentTimeoutError",
+        "exception_message": "Agent execution timed out after 1200.0 seconds",
+        "exception_traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\yoges\\AppData\\Roaming\\uv\\python\\cpython-3.13-windows-x86_64-none\\Lib\\asyncio\\tasks.py\", line 507, in wait_for\n    return await fut\n           ^^^^^^^^^\n  File \"W:\\git\\harbor\\src\\harbor\\agents\\installed\\swarmbench\\multi_kimi.py\", line 400, in run\n    await self.exec_as_agent(environment, command=run_command, env=env)\n  File \"W:\\git\\harbor\\src\\harbor\\agents\\installed\\base.py\", line 366, in exec_as_agent\n    return await self._exec(\n           ^^^^^^^^^^^^^^^^^\n        environment, command, env=env, cwd=cwd, timeout_sec=timeout_sec\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"W:\\git\\harbor\\src\\harbor\\agents\\installed\\base.py\", line 313, in _exec\n    result = await environment.exec(\n             ^^^^^^^^^^^^^^^^^^^^^^^\n    ...<5 lines>...\n    )\n    ^\n  File \"W:\\git\\harbor\\src\\harbor\\environments\\docker\\docker.py\", line 599, in exec\n    return await self._run_docker_compose_command(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        exec_command, check=False, timeout_sec=timeout_sec\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"W:\\git\\harbor\\src\\harbor\\environments\\docker\\docker.py\", line 360, in _run_docker_compose_command\n    stdout_bytes, stderr_bytes = await process.communicate()\n                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\yoges\\AppData\\Roaming\\uv\\python\\cpython-3.13-windows-x86_64-none\\Lib\\asyncio\\subprocess.py\", line 201, in communicate\n    stdin, stdout, stderr = await tasks.gather(stdin, stdout, stderr)\n                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\yoges\\AppData\\Roaming\\uv\\python\\cpython-3.13-windows-x86_64-none\\Lib\\asyncio\\subprocess.py\", line 181, in _read_stream\n    output = await stream.read()\n             ^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\yoges\\AppData\\Roaming\\uv\\python\\cpython-3.13-windows-x86_64-none\\Lib\\asyncio\\streams.py\", line 723, in read\n    block = await self.read(self._limit)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\yoges\\AppData\\Roaming\\uv\\python\\cpython-3.13-windows-x86_64-none\\Lib\\asyncio\\streams.py\", line 730, in read\n    await self._wait_for_data('read')\n  File \"C:\\Users\\yoges\\AppData\\Roaming\\uv\\python\\cpython-3.13-windows-x86_64-none\\Lib\\asyncio\\streams.py\", line 539, in _wait_for_data\n    await self._waiter\nasyncio.exceptions.CancelledError\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"W:\\git\\harbor\\src\\harbor\\trial\\trial.py\", line 372, in _execute_agent\n    await asyncio.wait_for(\n    ...<6 lines>...\n    )\n  File \"C:\\Users\\yoges\\AppData\\Roaming\\uv\\python\\cpython-3.13-windows-x86_64-none\\Lib\\asyncio\\tasks.py\", line 506, in wait_for\n    async with timeouts.timeout(timeout):\n               ~~~~~~~~~~~~~~~~^^^^^^^^^\n  File \"C:\\Users\\yoges\\AppData\\Roaming\\uv\\python\\cpython-3.13-windows-x86_64-none\\Lib\\asyncio\\timeouts.py\", line 116, in __aexit__\n    raise TimeoutError from exc_val\nTimeoutError\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"W:\\git\\harbor\\src\\harbor\\trial\\trial.py\", line 963, in run\n    await self._execute_agent()\n  File \"W:\\git\\harbor\\src\\harbor\\trial\\trial.py\", line 381, in _execute_agent\n    raise AgentTimeoutError(\n        f\"Agent execution timed out after {self._agent_timeout_sec} seconds\"\n    ) from e\nharbor.trial.trial.AgentTimeoutError: Agent execution timed out after 1200.0 seconds\n",
+        "occurred_at": "2026-05-07T21:36:57.049180"
+    },
+    "started_at": "2026-05-07T15:46:06.022308Z",
+    "finished_at": "2026-05-07T16:07:01.206197Z",
+    "environment_setup": {
+        "started_at": "2026-05-07T15:46:06.557054Z",
+        "finished_at": "2026-05-07T15:46:22.408768Z"
+    },
+    "agent_setup": {
+        "started_at": "2026-05-07T15:46:22.408828Z",
+        "finished_at": "2026-05-07T15:46:57.040952Z"
+    },
+    "agent_execution": {
+        "started_at": "2026-05-07T15:46:57.041100Z",
+        "finished_at": "2026-05-07T16:06:57.042979Z"
+    },
+    "verifier": {
+        "started_at": "2026-05-07T16:06:57.071425Z",
+        "finished_at": "2026-05-07T16:06:58.292392Z"
+    },
+    "step_results": null
+}

@@ -1,0 +1,91 @@
+diff --git a/api/src/services/versions.permission-regression.test.ts b/api/src/services/versions.permission-regression.test.ts
+new file mode 100644
+index 000000000..111111111
+--- /dev/null
++++ b/api/src/services/versions.permission-regression.test.ts
+@@ -0,0 +1,85 @@
++import { SchemaBuilder } from '@directus/schema-builder';
++import { ForbiddenError } from '@directus/errors';
++import { afterEach, describe, expect, test, vi } from 'vitest';
++import { validateAccess } from '../permissions/modules/validate-access/validate-access.js';
++import { createMockKnex, resetKnexMocks } from '../test-utils/knex.js';
++import { ItemsService } from './items.js';
++import { VersionsService } from './versions.js';
++
++vi.mock('../../src/database/index', async () => {
++	const { mockDatabase } = await import('../test-utils/database.js');
++	return mockDatabase();
++});
++
++vi.mock('../database/helpers/index.js', () => ({
++	getHelpers: vi.fn(() => ({
++		date: {
++			writeTimestamp: vi.fn((value: string) => value),
++		},
++	})),
++}));
++
++vi.mock('../cache.js', async () => {
++	const { mockCache } = await import('../test-utils/cache.js');
++	return mockCache();
++});
++
++vi.mock('../utils/should-clear-cache.js', () => ({
++	shouldClearCache: vi.fn(() => false),
++}));
++
++vi.mock('../permissions/modules/validate-access/validate-access.js', () => ({
++	validateAccess: vi.fn(async () => {
++		throw new Error('forbidden');
++	}),
++}));
++
++vi.mock('./payload.js', () => {
++	const PayloadService = vi.fn();
++	PayloadService.prototype.prepareDelta = vi.fn().mockImplementation(async (delta: unknown) => delta);
++	return { PayloadService };
++});
++
++vi.mock('./activity.js', () => ({
++	ActivityService: vi.fn().mockImplementation(() => ({ createOne: vi.fn().mockResolvedValue(1) })),
++}));
++
++vi.mock('./revisions.js', () => ({
++	RevisionsService: vi.fn().mockImplementation(() => ({ createOne: vi.fn().mockResolvedValue(1) })),
++}));
++
++const schema = new SchemaBuilder()
++	.collection('articles', (collection) => {
++		collection.field('id').id();
++		collection.field('title').string();
++	})
++	.build();
++
++describe('VersionsService.save permission regression', () => {
++	const { db, tracker, mockSchemaBuilder } = createMockKnex();
++
++	afterEach(() => {
++		resetKnexMocks(tracker, mockSchemaBuilder);
++		vi.clearAllMocks();
++	});
++
++	test('rejects save when caller lacks update access on directus_versions', async () => {
++		vi.spyOn(ItemsService.prototype, 'readOne').mockResolvedValue({
++			collection: 'articles',
++			item: 1,
++			delta: {},
++		} as any);
++
++		const updateSpy = vi.spyOn(ItemsService.prototype, 'updateOne').mockResolvedValue(1 as any);
++
++		const service = new VersionsService({
++			knex: db,
++			schema,
++			accountability: { user: 'user-1', role: 'role-1' } as any,
++		});
++
++		await expect(service.save(1, { title: 'Blocked' })).rejects.toBeInstanceOf(ForbiddenError);
++		expect(validateAccess).toHaveBeenCalled();
++		expect(updateSpy).not.toHaveBeenCalled();
++	});
++});

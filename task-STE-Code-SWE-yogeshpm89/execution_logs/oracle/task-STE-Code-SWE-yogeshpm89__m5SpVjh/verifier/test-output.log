@@ -1,0 +1,22 @@
+Running npm run build in /lodash …
+  PASS  Decimal entity &#38; decoded correctly
+  PASS  Standard entities still work
+  PASS  Mixed string decoding works
+  PASS  No over-decoding occurs
+  PASS  escape/unescape roundtrip works
+  PASS  clone preserves shadowed property
+  PASS  cloneDeep preserves shadowed property
+  PASS  clone works with frozen prototype
+  PASS  cloneDeep nested + frozen prototype
+  PASS  no TypeError in strict mode
+  PASS  regression: normal clone works
+  PASS  No known typos remain
+  PASS  No typos (case insensitive)
+  PASS  dist/lodash.js exists after build
+  PASS  Lodash execution works
+  PASS  No keyword corruption
+  PASS  _.sumBy works
+  PASS  _.sumBy with mixed entities works
+
+Result: 18/18 checks passed
+Reward: 1.0000

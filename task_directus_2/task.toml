@@ -1,0 +1,25 @@
+[task]
+name = "swarmbench/8836d4b7ec4248fe8074265d17910ac3-SWARMBENCH-FANOUT-CODESWE-DIRECTUS-BUG-FIXES"
+description = "Directus v11.17.2: fix 4 upstream regressions across app/api/composables"
+
+[metadata]
+verifier_type = "executable"
+domain = "code-swe"
+coordination_pattern = "fan-out-synthesize"
+human_solving_hours_estimate = 6
+human_solving_hours_justification = "4 issue investigations × 0.5 h = 2 h; 4 code changes × 0.5 h = 2 h; validation and iteration = 2 h. Total: ~6 h. Reasoning spans two subsystems (frontend composables, backend API/services) across a large pnpm monorepo structure."
+estimated_sub_agents = 4
+input_token_estimate = 12000
+why_multi_agent = "One agent must track four independent bug classes across frontend composables, backend API build config, collection validation, and version service accountability. This raises the risk of fixing only a subset or introducing regressions across subsystems due to context fragmentation—multi-agent decomposition mitigates this by isolating subsystem expertise."
+reference_link = "https://github.com/directus/directus"
+
+[agent]
+timeout_sec = 3600
+
+[verifier]
+timeout_sec = 600
+
+[environment]
+cpus = 2
+memory_mb = 4096
+build_timeout_sec = 600
