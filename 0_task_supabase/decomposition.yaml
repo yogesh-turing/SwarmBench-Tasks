@@ -7,82 +7,42 @@ sub_tasks:
       /testbed/apps/studio/components/interfaces/Auth/ProtectionAuthSettingsForm/ProtectionAuthSettingsForm.tsx
       and
       /testbed/apps/studio/components/interfaces/Auth/SessionsAuthSettingsForm/SessionsAuthSettingsForm.tsx.
-      Fix the sessions timeout/timebox UX so values shown in forms are human-readable
-      hours while payloads sent to backend remain in seconds. Keep behavior consistent
-      across reset/default state and submit path. Acceptance criteria:
-      both files define secondsToHours and hoursToSeconds,
-      reset/default uses secondsToHours for SESSIONS_TIMEBOX,
-      submit payload uses hoursToSeconds for SESSIONS_TIMEBOX and
-      SESSIONS_INACTIVITY_TIMEOUT. Do not modify other files.
+      Implement Bug 1 by showing session timeout values in human-readable units in the UI,
+      while preserving backend contract values in seconds on submit.
+      Keep reset/default and submit behavior consistent across both forms.
     depends_on: []
     parallel_group: fix
 
-  - id: fix-vercel-github-status-auth
+  - id: fix-vercel-github-status-auth-and-resilience
     description: >
       Own only /testbed/scripts/authorizeVercelDeploys.ts.
-      Ensure GitHub statuses API calls support authenticated requests via GITHUB_TOKEN,
-      while preserving existing status-fetch and failure behavior. Keep the change
-      focused to request configuration and related error-safe handling in this script.
-      Acceptance criteria: header object is initialized, Authorization uses
-      `token ${process.env.GITHUB_TOKEN}`, and header is applied only when
-      GITHUB_TOKEN is present. Do not modify other files.
+      Implement Bug 2 and Bug 4 in one cohesive edit:
+      authenticate GitHub status requests using GITHUB_TOKEN, add timeout protection,
+      add bounded retries for transient 429/5xx failures, and keep non-retriable
+      failure behavior explicit and safe. Skip statuses missing target_url.
     depends_on: []
     parallel_group: fix
 
-  - id: fix-magnified-products-vector-link
+  - id: fix-magnified-products-vector-link-and-label
     description: >
       Own only /testbed/apps/www/components/MagnifiedProducts.tsx.
-      Fix the Vector product URL so it points to the valid modules route.
-      Keep all other product metadata unchanged. Acceptance criteria:
-      vector URL is /modules/vector and vector label is non-empty.
+      Implement Bug 3 and Bug 5 together:
+      fix the Vector product URL to the valid modules route and set a non-empty
+      visible label while keeping existing product intent and metadata fields intact.
     depends_on: []
     parallel_group: fix
 
-  - id: add-design-system-color-palette
+  - id: add-design-system-color-palette-with-accessibility
     description: >
       Own only these files:
       /testbed/apps/design-system/components/color-palette.tsx,
       /testbed/apps/design-system/components/mdx-components.tsx,
       /testbed/apps/design-system/content/docs/color-usage.mdx.
-      Add a ColorPalette docs component and wire it into MDX component mapping and
-      color usage docs so it can be rendered from documentation pages.
+      Implement Feature 1 and Feature 2 together:
+      add the ColorPalette docs component, register it in MDX component mapping,
+      render it in docs, and include accessibility labels plus copy-feedback guidance.
       Keep implementation lightweight and consistent with existing design-system style.
-      Acceptance criteria: docs contain `## Color palette` and `<ColorPalette />`,
-      mdx-components imports ColorPalette and registers it in components map.
     depends_on: []
-    parallel_group: fix
-
-  - id: harden-vercel-status-fetch
-    description: >
-      Own only /testbed/scripts/authorizeVercelDeploys.ts.
-      Add resilience to GitHub status fetching for CI reliability:
-      timeout protection and bounded retries for transient failures.
-      Preserve existing behavior for non-retriable errors.
-      Acceptance criteria: includes AbortController timeout path,
-      bounded retry loop using MAX_RETRIES, retries for 429/5xx,
-      and filters out statuses without target_url.
-    depends_on: [fix-vercel-github-status-auth]
-    parallel_group: fix
-
-  - id: add-vector-card-label
-    description: >
-      Own only /testbed/apps/www/components/MagnifiedProducts.tsx.
-      Add a non-empty label for the Vector product card while keeping its
-      URL and description fields unchanged.
-    depends_on: [fix-magnified-products-vector-link]
-    parallel_group: fix
-
-  - id: improve-color-palette-accessibility
-    description: >
-      Own only these files:
-      /testbed/apps/design-system/components/color-palette.tsx and
-      /testbed/apps/design-system/content/docs/color-usage.mdx.
-      Add accessibility labels for swatch buttons and add a short docs note
-      describing copy feedback behavior.
-      Acceptance criteria: swatch buttons include aria-label,
-      data-copy-variable and copied-state attribute,
-      and docs mention accessible label plus copied state feedback.
-    depends_on: [add-design-system-color-palette]
     parallel_group: fix
 
   - id: verify-and-stabilize
@@ -96,10 +56,7 @@ sub_tasks:
       final integration edits.
     depends_on:
       - fix-auth-session-time-units
-      - fix-vercel-github-status-auth
-      - fix-magnified-products-vector-link
-      - add-design-system-color-palette
-      - harden-vercel-status-fetch
-      - add-vector-card-label
-      - improve-color-palette-accessibility
+      - fix-vercel-github-status-auth-and-resilience
+      - fix-magnified-products-vector-link-and-label
+      - add-design-system-color-palette-with-accessibility
     parallel_group: synthesize

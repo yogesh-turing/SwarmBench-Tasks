@@ -7,11 +7,11 @@ verifier_type = "executable"
 domain = "code-swe"
 coordination_pattern = "fan-out-synthesize"
 human_solving_hours_estimate = 2
-human_solving_hours_justification = "<TBA>"
-estimated_sub_agents = 1
+human_solving_hours_justification = "0.45h repository reading and requirement extraction + 0.75h multi-file implementation (auth forms + CI status fetch + product card + design-system docs/components) + 0.40h verifier alignment and decomposition cleanup + 0.40h iterative validation (oracle/single/multi reruns and failure triage) = 2.00h"
+estimated_sub_agents = 4
 input_token_estimate = 10000
 reference_link = "https://github.com/supabase/supabase"
-why_multi_agent = ""
+why_multi_agent = "Single-agent failure mode: cross-file regressions and missed requirement coverage when editing auth forms, CI script, product card, and docs/component wiring in one pass. Multi-agent mechanism: split by file ownership (auth, CI script, product card, design-system) for parallel focused edits, then synthesize with verifier-driven integration to reduce omissions and improve reliability."
 
 [agent]
 timeout_sec = 3600

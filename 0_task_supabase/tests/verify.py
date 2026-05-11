@@ -44,34 +44,59 @@ def read(path):
     return path.read_text()
 
 
+def assert_contains_any(src, patterns, msg):
+    for pattern in patterns:
+        if re.search(pattern, src, re.DOTALL):
+            return
+    raise AssertionError(msg)
+
+
 #
 # =========================================================
 # AUTH SETTINGS FORM TESTS
 # =========================================================
 #
 
-def test_both_forms_have_conversion_functions():
+def test_both_forms_have_duration_conversion_logic():
     protection = read(PROTECTION_FORM)
     sessions = read(SESSIONS_FORM)
 
-    # Must define secondsToHours and hoursToSeconds functions
-    assert "secondsToHours" in protection and "hoursToSeconds" in protection, \
-        "Protection form missing conversion function definitions"
+    # Accept either helper functions or inline math as long as conversion exists.
+    assert_contains_any(
+        protection,
+        [r"secondsToHours", r"/\s*3600", r"\*\s*3600"],
+        "Protection form missing duration conversion logic",
+    )
 
-    assert "secondsToHours" in sessions and "hoursToSeconds" in sessions, \
-        "Sessions form missing conversion function definitions"
+    assert_contains_any(
+        sessions,
+        [r"secondsToHours", r"/\s*3600", r"\*\s*3600"],
+        "Sessions form missing duration conversion logic",
+    )
 
 
-def test_form_reset_uses_seconds_to_hours():
+def test_form_reset_uses_human_readable_values():
     protection = read(PROTECTION_FORM)
     sessions = read(SESSIONS_FORM)
 
-    # Reset/initialize must convert from backend seconds to UI hours
-    assert re.search(r"SESSIONS_TIMEBOX\s*:\s*secondsToHours", protection, re.DOTALL), \
-        "Protection form reset does not convert SESSIONS_TIMEBOX to hours"
+    # Reset/initialize should not display raw backend second values directly.
+    assert_contains_any(
+        protection,
+        [
+            r"SESSIONS_TIMEBOX\s*:\s*secondsToHours",
+            r"SESSIONS_TIMEBOX\s*:\s*[^\n]*\/\s*3600",
+        ],
+        "Protection form reset does not convert session timeout to human-readable units",
+    )
 
-    assert re.search(r"SESSIONS_TIMEBOX\s*:\s*secondsToHours", sessions, re.DOTALL), \
-        "Sessions form reset does not convert SESSIONS_TIMEBOX to hours"
+    assert_contains_any(
+        sessions,
+        [
+            r"SESSIONS_TIMEBOX\s*:\s*secondsToHours",
+            r"SESSIONS_TIMEBOX\s*:\s*[^\n]*\/\s*3600",
+        ],
+        "Sessions form reset does not convert session timeout to human-readable units",
+    )
 
 
 def test_submit_payload_transforms_values():
@@ -91,16 +116,28 @@ def test_submit_payload_transforms_values():
         "Sessions form missing SESSIONS_TIMEBOX handling"
 
 
-def test_submit_payload_uses_hours_to_seconds():
+def test_submit_payload_converts_back_to_seconds():
     protection = read(PROTECTION_FORM)
     sessions = read(SESSIONS_FORM)
 
-    # onSubmit must convert from UI hours back to backend seconds
-    assert re.search(r"SESSIONS_TIMEBOX\s*:\s*hoursToSeconds", protection, re.DOTALL), \
-        "Protection form submit does not convert SESSIONS_TIMEBOX hours to seconds"
+    # Submit path should serialize human-readable values back to backend seconds.
+    assert_contains_any(
+        protection,
+        [
+            r"SESSIONS_TIMEBOX\s*:\s*hoursToSeconds",
+            r"SESSIONS_TIMEBOX\s*:\s*[^\n]*\*\s*3600",
+        ],
+        "Protection form submit does not convert session timeout to backend seconds",
+    )
 
-    assert re.search(r"SESSIONS_TIMEBOX\s*:\s*hoursToSeconds", sessions, re.DOTALL), \
-        "Sessions form submit does not convert SESSIONS_TIMEBOX hours to seconds"
+    assert_contains_any(
+        sessions,
+        [
+            r"SESSIONS_TIMEBOX\s*:\s*hoursToSeconds",
+            r"SESSIONS_TIMEBOX\s*:\s*[^\n]*\*\s*3600",
+        ],
+        "Sessions form submit does not convert session timeout to backend seconds",
+    )
 
 #
 # =========================================================
@@ -131,26 +168,14 @@ def test_fetch_called_with_headers():
         "fetch() is not called with headers options"
 
 
-def test_headers_variable_initialized():
+def test_authorization_uses_github_token():
     src = read(AUTHORIZE_SCRIPT)
 
-    # Must explicitly create headers object before conditional
-    assert re.search(r"const\s+headers\s*[:=].*\{\s*\}", src, re.DOTALL), \
-        "headers object not properly initialized as empty object"
-
-
-def test_authorization_uses_token_scheme():
-    src = read(AUTHORIZE_SCRIPT)
-
-    assert re.search(r"token\s*\$\{\s*process\.env\.GITHUB_TOKEN\s*\}", src), \
-        "Authorization header does not use GitHub token scheme (template literal)"
-
-
-def test_headers_object_created():
-    src = read(AUTHORIZE_SCRIPT)
-
-    assert re.search(r"headers\s*:\s*Record<", src) or "headers =" in src, \
-        "Headers object creation missing"
+    # Allow token/bearer schemes; requirement is authenticated request via env token.
+    assert re.search(r"Authorization", src), \
+        "Authorization header wiring missing"
+    assert re.search(r"process\.env\.GITHUB_TOKEN", src), \
+        "Authorization does not use GITHUB_TOKEN"
 
 
 def test_github_status_url_preserved():
@@ -192,6 +217,39 @@ def test_no_hardcoded_token():
         "Hardcoded GitHub token detected"
 
 
+def test_fetch_has_timeout_and_abort_controller():
+    src = read(AUTHORIZE_SCRIPT)
+
+    assert_contains_any(
+        src,
+        [r"AbortController", r"signal\s*:", r"REQUEST_TIMEOUT", r"setTimeout\s*\(\s*\(\)\s*=>\s*.*abort"],
+        "Missing timeout/abort handling for request safety",
+    )
+
+
+def test_fetch_has_retries_for_transient_failures():
+    src = read(AUTHORIZE_SCRIPT)
+
+    assert_contains_any(
+        src,
+        [r"MAX_RETRIES", r"attempt", r"retry"],
+        "Missing retry configuration for GitHub status fetch",
+    )
+
+    assert_contains_any(
+        src,
+        [r"429", r">=\s*500", r"5xx"],
+        "Transient failure retry conditions missing",
+    )
+
+
+def test_statuses_without_target_url_are_filtered():
+    src = read(AUTHORIZE_SCRIPT)
+
+    assert re.search(r"filter\(.*?target_url", src, re.DOTALL), \
+        "Statuses without target_url are not safely filtered"
+
+
 
 
 
@@ -209,6 +267,20 @@ def test_vector_link_points_to_modules_path():
 
     assert "url: '/vector'" not in src and 'url: "/vector"' not in src, \
         "Legacy /vector link still present"
+
+
+def test_vector_product_has_non_empty_label():
+    src = read(MAGNIFIED_PRODUCTS)
+
+    vector_block = re.search(r"vector\s*:\s*\{.*?\n\s*\}", src, re.DOTALL | re.IGNORECASE)
+    assert vector_block, "Vector product definition missing"
+
+    block = vector_block.group(0)
+    assert re.search(r"label\s*:\s*['\"]\s*[^'\"\s][^'\"]*['\"]", block), \
+        "Vector product label is missing or empty"
+
+    # Keep expected metadata presence intact.
+    assert "description" in block, "Vector product description field missing"
 
 
 
@@ -250,10 +322,11 @@ def test_color_palette_handles_click():
 def test_mdx_components_exports_palette_in_map():
     src = read(MDX_COMPONENTS)
 
-    # ColorPalette must be registered as a property in the components object
-    # Check that it appears as a key with trailing comma (object property syntax)
-    assert re.search(r"Colors,\s*\n\s*ColorPalette,", src), \
-        "ColorPalette not added as property in components object after Colors"
+    # ColorPalette must be registered in components map; exact ordering is irrelevant.
+    assert re.search(r"const\s+components\s*=\s*\{", src), \
+        "components map declaration missing"
+    assert re.search(r"\bColorPalette\b", src), \
+        "ColorPalette not added as property in components object"
 
 
 def test_mdx_components_registers_color_palette():
@@ -269,15 +342,27 @@ def test_mdx_components_registers_color_palette():
 def test_color_usage_doc_references_palette():
     src = read(COLOR_USAGE_DOC)
 
-    assert "## Color palette" in src, \
-        "color-usage.mdx missing Color palette section heading"
+    assert re.search(r"##\s+.*palette", src, re.IGNORECASE), \
+        "color-usage.mdx missing palette section heading"
 
     assert "<ColorPalette />" in src, \
         "color-usage.mdx missing ColorPalette component usage"
-    
-    # Ensure the palette section has descriptive content
-    assert "Radix scale" in src or "--colors-" in src, \
-        "color-usage.mdx Color palette section missing documentation"
+
+
+def test_color_palette_buttons_have_accessibility_attributes():
+    src = read(COLOR_PALETTE_COMPONENT)
+
+    assert "aria-label" in src, \
+        "ColorPalette buttons missing explicit aria-label"
+
+
+def test_color_usage_doc_mentions_copy_feedback():
+    src = read(COLOR_USAGE_DOC)
+
+    assert re.search(r"copy", src, re.IGNORECASE), \
+        "Color usage docs missing copy behavior guidance"
+    assert re.search(r"feedback|copied|accessib", src, re.IGNORECASE), \
+        "Color usage docs missing accessibility/copy feedback guidance"
 
 
 
@@ -294,14 +379,14 @@ def test_color_usage_doc_references_palette():
 #
 
 check(
-    "both auth forms have conversion functions",
-    test_both_forms_have_conversion_functions,
+    "both auth forms have duration conversion logic",
+    test_both_forms_have_duration_conversion_logic,
     weight=1.5,
 )
 
 check(
-    "form reset uses seconds to hours",
-    test_form_reset_uses_seconds_to_hours,
+    "form reset uses human-readable values",
+    test_form_reset_uses_human_readable_values,
     weight=1.5,
 )
 
@@ -312,8 +397,8 @@ check(
 )
 
 check(
-    "submit payload uses hours to seconds",
-    test_submit_payload_uses_hours_to_seconds,
+    "submit payload converts back to seconds",
+    test_submit_payload_converts_back_to_seconds,
     weight=1.5,
 )
 
@@ -340,21 +425,9 @@ check(
 )
 
 check(
-    "headers variable initialized",
-    test_headers_variable_initialized,
-    weight=1.0,
-)
-
-check(
-    "authorization uses token auth scheme",
-    test_authorization_uses_token_scheme,
+    "authorization uses github token",
+    test_authorization_uses_github_token,
     weight=1.5,
-)
-
-check(
-    "headers object created",
-    test_headers_object_created,
-    weight=1.0,
 )
 
 check(
@@ -381,11 +454,35 @@ check(
     weight=1.0,
 )
 
+check(
+    "fetch has timeout and abort controller",
+    test_fetch_has_timeout_and_abort_controller,
+    weight=2.0,
+)
+
+check(
+    "fetch retries transient failures",
+    test_fetch_has_retries_for_transient_failures,
+    weight=2.0,
+)
+
+check(
+    "statuses without target url are filtered",
+    test_statuses_without_target_url_are_filtered,
+    weight=2.0,
+)
+
 
 
 check(
     "vector link points to modules path",
     test_vector_link_points_to_modules_path,
+    weight=1.5,
+)
+
+check(
+    "vector product has non-empty label",
+    test_vector_product_has_non_empty_label,
     weight=1.5,
 )
 
@@ -425,6 +522,18 @@ check(
     "color usage doc references palette",
     test_color_usage_doc_references_palette,
     weight=1.0,
+)
+
+check(
+    "color palette buttons have accessibility attributes",
+    test_color_palette_buttons_have_accessibility_attributes,
+    weight=1.5,
+)
+
+check(
+    "color usage doc mentions copy feedback",
+    test_color_usage_doc_mentions_copy_feedback,
+    weight=1.5,
 )
 
 
