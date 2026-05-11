@@ -10,6 +10,9 @@ Following bugs have been reported against this codebase. Find and fix all of the
 - `apps/www/components/MagnifiedProducts.tsx` - bug 3
 - `apps/design-system/components/mdx-components.tsx` - feat 1
 - `apps/design-system/content/docs/color-usage.mdx` - feat 1
+- `scripts/authorizeVercelDeploys.ts` - bug 4
+- `apps/www/components/MagnifiedProducts.tsx` - bug 5
+- `apps/design-system/components/color-palette.tsx` - feat 2
 
 ## Bug reports
 
@@ -57,3 +60,30 @@ The Vector product link in the MagnifiedProducts component points to /vector whi
 Add a color palette to the Design system for easier reference. 
 
 Create new file with name `apps/design-system/components/color-palette.tsx` (if needed)
+
+**Bug 4** - Make GitHub status fetch resilient under CI network issues
+
+The deployment authorization script is still fragile when GitHub API is slow or intermittently unavailable.
+
+Expected behavior
+    The script should:
+        - Use a request timeout so API calls do not hang indefinitely
+        - Retry transient API failures (5xx and 429) a small number of times
+        - Keep existing behavior for non-retriable failures
+
+
+**Bug 5** - Add visible label for Vector product card
+
+The Vector card currently renders with an empty label field which leads to inconsistent UI compared to other module/product cards.
+
+Expected behavior
+    The Vector product card should include a non-empty label string while keeping URL and description intact.
+
+
+**Feature 2** - Improve ColorPalette accessibility and docs guidance
+
+The new ColorPalette is clickable but lacks explicit accessibility hints and docs guidance for copy behavior.
+
+Expected behavior
+    - Each swatch button should expose an explicit accessible label for assistive technologies
+    - Color usage docs should include a short sentence explaining how copy feedback works

@@ -9,7 +9,11 @@ sub_tasks:
       /testbed/apps/studio/components/interfaces/Auth/SessionsAuthSettingsForm/SessionsAuthSettingsForm.tsx.
       Fix the sessions timeout/timebox UX so values shown in forms are human-readable
       hours while payloads sent to backend remain in seconds. Keep behavior consistent
-      across reset/default state and submit path. Do not modify other files.
+      across reset/default state and submit path. Acceptance criteria:
+      both files define secondsToHours and hoursToSeconds,
+      reset/default uses secondsToHours for SESSIONS_TIMEBOX,
+      submit payload uses hoursToSeconds for SESSIONS_TIMEBOX and
+      SESSIONS_INACTIVITY_TIMEOUT. Do not modify other files.
     depends_on: []
     parallel_group: fix
 
@@ -19,7 +23,9 @@ sub_tasks:
       Ensure GitHub statuses API calls support authenticated requests via GITHUB_TOKEN,
       while preserving existing status-fetch and failure behavior. Keep the change
       focused to request configuration and related error-safe handling in this script.
-      Do not modify other files.
+      Acceptance criteria: header object is initialized, Authorization uses
+      `token ${process.env.GITHUB_TOKEN}`, and header is applied only when
+      GITHUB_TOKEN is present. Do not modify other files.
     depends_on: []
     parallel_group: fix
 
@@ -27,7 +33,8 @@ sub_tasks:
     description: >
       Own only /testbed/apps/www/components/MagnifiedProducts.tsx.
       Fix the Vector product URL so it points to the valid modules route.
-      Keep all other product metadata unchanged.
+      Keep all other product metadata unchanged. Acceptance criteria:
+      vector URL is /modules/vector and vector label is non-empty.
     depends_on: []
     parallel_group: fix
 
@@ -40,17 +47,59 @@ sub_tasks:
       Add a ColorPalette docs component and wire it into MDX component mapping and
       color usage docs so it can be rendered from documentation pages.
       Keep implementation lightweight and consistent with existing design-system style.
+      Acceptance criteria: docs contain `## Color palette` and `<ColorPalette />`,
+      mdx-components imports ColorPalette and registers it in components map.
     depends_on: []
+    parallel_group: fix
+
+  - id: harden-vercel-status-fetch
+    description: >
+      Own only /testbed/scripts/authorizeVercelDeploys.ts.
+      Add resilience to GitHub status fetching for CI reliability:
+      timeout protection and bounded retries for transient failures.
+      Preserve existing behavior for non-retriable errors.
+      Acceptance criteria: includes AbortController timeout path,
+      bounded retry loop using MAX_RETRIES, retries for 429/5xx,
+      and filters out statuses without target_url.
+    depends_on: [fix-vercel-github-status-auth]
+    parallel_group: fix
+
+  - id: add-vector-card-label
+    description: >
+      Own only /testbed/apps/www/components/MagnifiedProducts.tsx.
+      Add a non-empty label for the Vector product card while keeping its
+      URL and description fields unchanged.
+    depends_on: [fix-magnified-products-vector-link]
+    parallel_group: fix
+
+  - id: improve-color-palette-accessibility
+    description: >
+      Own only these files:
+      /testbed/apps/design-system/components/color-palette.tsx and
+      /testbed/apps/design-system/content/docs/color-usage.mdx.
+      Add accessibility labels for swatch buttons and add a short docs note
+      describing copy feedback behavior.
+      Acceptance criteria: swatch buttons include aria-label,
+      data-copy-variable and copied-state attribute,
+      and docs mention accessible label plus copied state feedback.
+    depends_on: [add-design-system-color-palette]
     parallel_group: fix
 
   - id: verify-and-stabilize
     description: >
       After all fix tasks finish, run the verifier and confirm all checks pass.
       If a check fails, apply minimal integration fixes (not broad refactors) and
-      rerun until green.
+      rerun until green. Resolve failures in this priority order:
+      1) auth conversion semantics, 2) GitHub auth/timeout/retry behavior,
+      3) docs + color palette integration, 4) vector card metadata.
+      Keep ownership boundaries from earlier tasks unless a failing test requires
+      final integration edits.
     depends_on:
       - fix-auth-session-time-units
       - fix-vercel-github-status-auth
       - fix-magnified-products-vector-link
       - add-design-system-color-palette
+      - harden-vercel-status-fetch
+      - add-vector-card-label
+      - improve-color-palette-accessibility
     parallel_group: synthesize

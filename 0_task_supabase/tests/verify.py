@@ -192,6 +192,9 @@ def test_no_hardcoded_token():
         "Hardcoded GitHub token detected"
 
 
+
+
+
 #
 # =========================================================
 # MagnifiedProducts.tsx TESTS (bug 3)
@@ -206,6 +209,9 @@ def test_vector_link_points_to_modules_path():
 
     assert "url: '/vector'" not in src and 'url: "/vector"' not in src, \
         "Legacy /vector link still present"
+
+
+
 
 
 #
@@ -272,6 +278,9 @@ def test_color_usage_doc_references_palette():
     # Ensure the palette section has descriptive content
     assert "Radix scale" in src or "--colors-" in src, \
         "color-usage.mdx Color palette section missing documentation"
+
+
+
 
 
 #
@@ -372,11 +381,15 @@ check(
     weight=1.0,
 )
 
+
+
 check(
     "vector link points to modules path",
     test_vector_link_points_to_modules_path,
     weight=1.5,
 )
+
+
 
 check(
     "color palette component file exists",
@@ -413,6 +426,8 @@ check(
     test_color_usage_doc_references_palette,
     weight=1.0,
 )
+
+
 
 reward = PASSED_WEIGHT / TOTAL_WEIGHT if TOTAL_WEIGHT else 0.0
 

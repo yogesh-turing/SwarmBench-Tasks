@@ -273,8 +273,128 @@ index e4635a07a70fc..b8f5f16b55567 100644
 +<ColorPalette />
 __FEAT1__
 
+
+
+cat > /testbed/solution_patch_5.diff << '__BUGFIX4__'
+diff --git a/scripts/authorizeVercelDeploys.ts b/scripts/authorizeVercelDeploys.ts
+index 2b4305949e24b..d8a2a0b6f1c8e 100644
+--- a/scripts/authorizeVercelDeploys.ts
++++ b/scripts/authorizeVercelDeploys.ts
+@@ -1,6 +1,9 @@
+ import { exec } from 'child_process'
+ import { promisify } from 'util'
+ 
++const MAX_RETRIES = 2
++const REQUEST_TIMEOUT_MS = 10_000
++
+ interface GitHubStatus {
+   state: 'success' | 'pending' | 'failure'
+   description: string
+@@ -38,14 +41,41 @@ async function fetchGitHubStatuses(sha: string): Promise<GitHubStatus[]> {
+   const url = `https://api.github.com/repos/supabase/supabase/statuses/${sha}`
+   console.log(`Fetching GitHub statuses for SHA: ${sha}`)
+ 
+-  const headers: Record<string, string> = {}
+-  
+-  if (process.env.GITHUB_TOKEN) {
+-    headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`
+-  }
+-
+-  const response = await fetch(url, { headers })
+-  if (!response.ok) {
+-    throw new Error(`Failed to fetch GitHub statuses: ${response.status} ${response.statusText}`)
++  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
++    try {
++      const controller = new AbortController()
++      const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
++
++      const headers: Record<string, string> = {}
++      if (process.env.GITHUB_TOKEN) {
++        headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`
++      }
++
++      const response = await fetch(url, { headers, signal: controller.signal })
++      clearTimeout(timeoutId)
++
++      if (!response.ok) {
++        const isTransient = response.status === 429 || response.status >= 500
++        if (isTransient && attempt < MAX_RETRIES) {
++          console.log(`Transient failure (${response.status}), retrying... (attempt ${attempt + 1}/${MAX_RETRIES})`)
++          await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)))
++          continue
++        }
++        throw new Error(`Failed to fetch GitHub statuses: ${response.status} ${response.statusText}`)
++      }
++
++      const data = await response.json()
++      return data.filter((status: GitHubStatus) => status.target_url)
++    } catch (error) {
++      if (attempt === MAX_RETRIES) throw error
++      console.log(`Request failed (${error}), retrying...`)
++      await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)))
++    }
+   }
++
++  throw new Error('Failed to fetch GitHub statuses after retries')
+ }
+__BUGFIX4__
+
+cat > /testbed/solution_patch_6.diff << '__BUGFIX5__'
+diff --git a/apps/www/components/MagnifiedProducts.tsx b/apps/www/components/MagnifiedProducts.tsx
+index fdd3e8e74875b..8d3c4e6f9b2f7 100644
+--- a/apps/www/components/MagnifiedProducts.tsx
++++ b/apps/www/components/MagnifiedProducts.tsx
+@@ -174,7 +174,7 @@ const products = {
+     description: 'Integrate your favorite ML-models to store, index and search vector embeddings.',
+     description_short: '',
+-    label: '',
++    label: 'Beta',
+     url: '/modules/vector',
+   },
+ }
+__BUGFIX5__
+
+cat > /testbed/solution_patch_7.diff << '__FEAT2__'
+diff --git a/apps/design-system/components/color-palette.tsx b/apps/design-system/components/color-palette.tsx
+index 2f8f3012bd7ec..4a1c2e1a8f3e2 100644
+--- a/apps/design-system/components/color-palette.tsx
++++ b/apps/design-system/components/color-palette.tsx
+@@ -61,13 +61,16 @@ const ColorPalette = () => {
+                   <button
+                     key={step}
+                     type="button"
+                     onClick={() => handleCopy(reference)}
+                     className="group relative flex aspect-square w-full items-center justify-center rounded-sm border border-overlay/40 transition hover:scale-[1.05] focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground"
+                     style={{ backgroundColor: reference }}
+                     title={reference}
++                    aria-label={`Copy ${name} color ${step} CSS variable`}
++                    data-copy-variable={reference}
++                    data-copied={isCopied}
+                   >
+                     <span className="rounded-xs bg-surface-100/90 px-1 font-mono text-[10px] text-foreground-light opacity-0 transition group-hover:opacity-100">
+                       {isCopied ? 'Copied!' : step}
+                     </span>
+diff --git a/apps/design-system/content/docs/color-usage.mdx b/apps/design-system/content/docs/color-usage.mdx
+index b8f5f16b55567..e4c3e08a1b08e 100644
+--- a/apps/design-system/content/docs/color-usage.mdx
++++ b/apps/design-system/content/docs/color-usage.mdx
+@@ -72,8 +72,9 @@ These can also be accessed with `foreground`. Like `text-foreground-light`.
+ 
+ ## Color palette
+ 
+-Every Radix scale exposed via `--colors-{name}{1..12}`. Click a swatch to copy the CSS variable reference. The colors are taken
+-from `@radix-ui/colors` v0.1.9 except the `Brand` and `Scale` colors.
++Every Radix scale exposed via `--colors-{name}{1..12}`. Click a swatch to copy the CSS variable reference. Accessible labels indicate the copied state and provide clear feedback on interaction. The colors are taken
++from `@radix-ui/colors` v0.1.9 except the `Brand` and `Scale` colors.
+ 
+ <ColorPalette />
+__FEAT2__
+
 cd /testbed
 patch --fuzz=5 -p1 -i /testbed/solution_patch_1.diff
 patch --fuzz=5 -p1 -i /testbed/solution_patch_2.diff
 patch --fuzz=5 -p1 -i /testbed/solution_patch_3.diff
 patch --fuzz=5 -p1 -i /testbed/solution_patch_4.diff
+patch --fuzz=5 -p1 -i /testbed/solution_patch_5.diff
+patch --fuzz=5 -p1 -i /testbed/solution_patch_6.diff
+patch --fuzz=5 -p1 -i /testbed/solution_patch_7.diff
