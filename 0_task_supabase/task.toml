@@ -6,12 +6,12 @@ description = "Fixing bugs in SUPABASE"
 verifier_type = "executable"
 domain = "code-swe"
 coordination_pattern = "fan-out-synthesize"
-human_solving_hours_estimate = 2
-human_solving_hours_justification = "0.45h repository reading and requirement extraction + 0.75h multi-file implementation (auth forms + CI status fetch + product card + design-system docs/components) + 0.40h verifier alignment and decomposition cleanup + 0.40h iterative validation (oracle/single/multi reruns and failure triage) = 2.00h"
-estimated_sub_agents = 4
+human_solving_hours_estimate = 3
+human_solving_hours_justification = "0.60h repository reading and requirement extraction + 1.10h implementation across auth, CI script, product card, design-system component, shared copy utility, and docs surfaces + 0.55h decomposition/verifier alignment + 0.75h iterative oracle/single/multi validation and failure triage = 3.00h"
+estimated_sub_agents = 7
 input_token_estimate = 10000
 reference_link = "https://github.com/supabase/supabase"
-why_multi_agent = "Single-agent failure mode: cross-file regressions and missed requirement coverage when editing auth forms, CI script, product card, and docs/component wiring in one pass. Multi-agent mechanism: split by file ownership (auth, CI script, product card, design-system) for parallel focused edits, then synthesize with verifier-driven integration to reduce omissions and improve reliability."
+why_multi_agent = "Single-agent failure mode: losing coverage across multiple independent surfaces under a fixed budget, especially when the task now spans auth display semantics, auth submit semantics, CI auth, CI retry/backoff semantics, product metadata, a design-system component, a shared copy utility, and two separate docs surfaces that must stay consistent. Multi-agent mechanism: assign independent technical workstreams in parallel, then use dedicated reconciliation for design-system docs/component consistency before final verifier-driven synthesis."
 
 [agent]
 timeout_sec = 3600

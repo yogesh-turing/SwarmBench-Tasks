@@ -1,25 +1,41 @@
 coordination_pattern: fan-out-synthesize
 
 sub_tasks:
-  - id: fix-auth-session-time-units
+  - id: auth-display-semantics
     description: >
-      Own only these files:
+      Audit only these files:
       /testbed/apps/studio/components/interfaces/Auth/ProtectionAuthSettingsForm/ProtectionAuthSettingsForm.tsx
       and
       /testbed/apps/studio/components/interfaces/Auth/SessionsAuthSettingsForm/SessionsAuthSettingsForm.tsx.
-      Implement Bug 1 by showing session timeout values in human-readable units in the UI,
-      while preserving backend contract values in seconds on submit.
-      Keep reset/default and submit behavior consistent across both forms.
+      Implement the UI-display side of Bug 1 only: both forms must show
+      SESSIONS_INACTIVITY_TIMEOUT in hours, not raw seconds, when loading/resetting defaults.
+      Confirm both forms use the same conversion direction and do not diverge in naming or display logic.
     depends_on: []
     parallel_group: fix
 
-  - id: fix-vercel-github-status-auth-and-resilience
+  - id: auth-submit-semantics
+    description: >
+      Continue owning the same two auth settings forms, but only the submit-path behavior.
+      Implement the write-back side of Bug 1: both forms must convert hours back to seconds
+      before sending config to the backend. Reconcile any mismatch between the two forms so
+      display logic and submit logic stay symmetric.
+    depends_on: []
+    parallel_group: fix
+
+  - id: vercel-github-auth
     description: >
       Own only /testbed/scripts/authorizeVercelDeploys.ts.
-      Implement Bug 2 and Bug 4 in one cohesive edit:
-      authenticate GitHub status requests using GITHUB_TOKEN, add timeout protection,
-      add bounded retries for transient 429/5xx failures, and keep non-retriable
-      failure behavior explicit and safe. Skip statuses missing target_url.
+      Implement the authentication and failure-contract part of Bug 2:
+      authenticate GitHub status requests using GITHUB_TOKEN, preserve explicit non-zero failure
+      behavior, and safely skip statuses missing target_url.
+    depends_on: []
+    parallel_group: fix
+
+  - id: vercel-network-resilience
+    description: >
+      Own only /testbed/scripts/authorizeVercelDeploys.ts, but focus only on network resilience.
+      Add a named timeout constant, a named retry-count constant, and bounded retry/backoff behavior
+      for transient 429/5xx failures without changing non-retriable behavior.
     depends_on: []
     parallel_group: fix
 
@@ -32,18 +48,41 @@ sub_tasks:
     depends_on: []
     parallel_group: fix
 
-  - id: add-design-system-color-palette-with-accessibility
+  - id: design-system-palette-component
     description: >
       Own only these files:
       /testbed/apps/design-system/components/color-palette.tsx,
-      /testbed/apps/design-system/components/mdx-components.tsx,
-      /testbed/apps/design-system/content/docs/color-usage.mdx.
-      Implement Feature 1 and Feature 2 together:
-      add the ColorPalette docs component, register it in MDX component mapping,
-      render it in docs, and include accessibility labels plus copy-feedback guidance.
-      Keep implementation lightweight and consistent with existing design-system style.
+      /testbed/apps/design-system/components/copy-button.tsx.
+      Implement the component-side work for Feature 1 and Feature 2:
+      create the interactive ColorPalette, reuse a shared copy-feedback duration constant from
+      copy-button, preserve copied-state feedback, and ensure swatches are keyboard focusable with
+      descriptive aria-labels.
     depends_on: []
     parallel_group: fix
+
+  - id: design-system-docs-and-mapping
+    description: >
+      Own only these files:
+      /testbed/apps/design-system/components/mdx-components.tsx,
+      /testbed/apps/design-system/content/docs/color-usage.mdx,
+      /testbed/apps/design-system/content/docs/accessibility.mdx.
+      Implement the docs/integration side of Feature 1 and Feature 2:
+      register ColorPalette in the MDX component map, render it in the color usage docs,
+      explain copy feedback there, and add a short accessibility note about descriptive aria-labels
+      plus keyboard focus support for interactive color swatches.
+    depends_on: []
+    parallel_group: fix
+
+  - id: reconcile-design-system-surfaces
+    description: >
+      Reconcile the design-system component and docs workstreams.
+      Verify that the component API, MDX registration, color usage docs, and accessibility guidance
+      all agree on the same interaction model: copy feedback, descriptive aria-labels, and keyboard focus.
+      Apply only minimal integration fixes needed to keep those surfaces internally consistent.
+    depends_on:
+      - design-system-palette-component
+      - design-system-docs-and-mapping
+    parallel_group: synthesize
 
   - id: verify-and-stabilize
     description: >
@@ -51,12 +90,13 @@ sub_tasks:
       If a check fails, apply minimal integration fixes (not broad refactors) and
       rerun until green. Resolve failures in this priority order:
       1) auth conversion semantics, 2) GitHub auth/timeout/retry behavior,
-      3) docs + color palette integration, 4) vector card metadata.
-      Keep ownership boundaries from earlier tasks unless a failing test requires
-      final integration edits.
+      3) design-system docs/component reconciliation, 4) vector card metadata.
+      Keep ownership boundaries from earlier tasks unless a failing test requires final integration edits.
     depends_on:
-      - fix-auth-session-time-units
-      - fix-vercel-github-status-auth-and-resilience
+      - auth-display-semantics
+      - auth-submit-semantics
+      - vercel-github-auth
+      - vercel-network-resilience
       - fix-magnified-products-vector-link-and-label
-      - add-design-system-color-palette-with-accessibility
+      - reconcile-design-system-surfaces
     parallel_group: synthesize
