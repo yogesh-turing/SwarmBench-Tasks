@@ -1,23 +1,56 @@
+coordination_pattern: fan-out-synthesize
+
 sub_tasks:
-  - id: investigate-and-fix-bug-1
+  - id: fix-auth-session-time-units
     description: >
-      Investigate the code responsible for displaying the `auth.sessions.inactivity_timeout` value in the Supabase Dashboard/Auth Sessions UI. 
-      Identify where the conversion from duration format to seconds is happening and why the UI is showing the raw seconds value instead of the original duration format. 
-      Implement a fix to display the value in a more user-friendly format (e.g., "10h0m0s" or "10 hours") while ensuring that the underlying functionality remains intact. Do not modify any other unrelated functionality or tests.
-
+      Own only these files:
+      /testbed/apps/studio/components/interfaces/Auth/ProtectionAuthSettingsForm/ProtectionAuthSettingsForm.tsx
+      and
+      /testbed/apps/studio/components/interfaces/Auth/SessionsAuthSettingsForm/SessionsAuthSettingsForm.tsx.
+      Fix the sessions timeout/timebox UX so values shown in forms are human-readable
+      hours while payloads sent to backend remain in seconds. Keep behavior consistent
+      across reset/default state and submit path. Do not modify other files.
     depends_on: []
-    parallel_group: fan-out
+    parallel_group: fix
 
-  - id: investigate-and-fix-bug-2
+  - id: fix-vercel-github-status-auth
     description: >
-      Investigate the Vercel deployment authorization script to identify where it calls the GitHub Status API without authentication. 
-      Implement a fix to ensure that all GitHub API requests are authenticated using a provided GITHUB_TOKEN. 
-      The fix should include error handling for cases where the token is missing or invalid, and should ensure that the script exits with an appropriate error message and non-zero code when authorization fails. Do not modify any other unrelated functionality or tests.
+      Own only /testbed/scripts/authorizeVercelDeploys.ts.
+      Ensure GitHub statuses API calls support authenticated requests via GITHUB_TOKEN,
+      while preserving existing status-fetch and failure behavior. Keep the change
+      focused to request configuration and related error-safe handling in this script.
+      Do not modify other files.
+    depends_on: []
+    parallel_group: fix
 
-  - id: verify-all-fixes
+  - id: fix-magnified-products-vector-link
     description: >
-      After the fix for Bug 1 and Bug 2 is applied, run the verification script
-      from the repository root to confirm all checks pass. If any check
-      fails, report which check failed and why.
-    depends_on: [investigate-and-fix-bug-1, investigate-and-fix-bug-2]
+      Own only /testbed/apps/www/components/MagnifiedProducts.tsx.
+      Fix the Vector product URL so it points to the valid modules route.
+      Keep all other product metadata unchanged.
+    depends_on: []
+    parallel_group: fix
+
+  - id: add-design-system-color-palette
+    description: >
+      Own only these files:
+      /testbed/apps/design-system/components/color-palette.tsx,
+      /testbed/apps/design-system/components/mdx-components.tsx,
+      /testbed/apps/design-system/content/docs/color-usage.mdx.
+      Add a ColorPalette docs component and wire it into MDX component mapping and
+      color usage docs so it can be rendered from documentation pages.
+      Keep implementation lightweight and consistent with existing design-system style.
+    depends_on: []
+    parallel_group: fix
+
+  - id: verify-and-stabilize
+    description: >
+      After all fix tasks finish, run the verifier and confirm all checks pass.
+      If a check fails, apply minimal integration fixes (not broad refactors) and
+      rerun until green.
+    depends_on:
+      - fix-auth-session-time-units
+      - fix-vercel-github-status-auth
+      - fix-magnified-products-vector-link
+      - add-design-system-color-palette
     parallel_group: synthesize

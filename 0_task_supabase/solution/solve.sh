@@ -130,6 +130,151 @@ index 8a068193d5144..2b4305949e24b 100644
    }
 __BUGFIX2__
 
+cat > /testbed/solution_patch_3.diff << '__BUGFIX3__'
+diff --git a/apps/www/components/MagnifiedProducts.tsx b/apps/www/components/MagnifiedProducts.tsx
+index 685dabbcc10d5..fdd3e8e74875b 100644
+--- a/apps/www/components/MagnifiedProducts.tsx
++++ b/apps/www/components/MagnifiedProducts.tsx
+@@ -174,7 +174,7 @@ const products = {
+     description: 'Integrate your favorite ML-models to store, index and search vector embeddings.',
+     description_short: '',
+     label: '',
+-    url: '/vector',
++    url: '/modules/vector',
+   },
+ }
+__BUGFIX3__
+
+cat > /testbed/solution_patch_4.diff << '__FEAT1__'
+diff --git a/apps/design-system/components/color-palette.tsx b/apps/design-system/components/color-palette.tsx
+new file mode 100644
+index 0000000000000..2f8f3012bd7ec
+--- /dev/null
++++ b/apps/design-system/components/color-palette.tsx
+@@ -0,0 +1,84 @@
++'use client'
++
++import { useState } from 'react'
++
++const colorNames = [
++  'Amber',
++  'Blue',
++  'Brand',
++  'Crimson',
++  'Gold',
++  'Gray',
++  'Green',
++  'Indigo',
++  'Orange',
++  'Pink',
++  'Purple',
++  'Red',
++  'Scale',
++  'Slate',
++  'Tomato',
++  'Violet',
++  'Yellow',
++]
++
++const SCALE_STEPS = Array.from({ length: 12 }, (_, i) => i + 1)
++
++const GRID_COLS = 'grid-cols-[6rem_repeat(12,minmax(0,1fr))]'
++
++const ColorPalette = () => {
++  const [copied, setCopied] = useState<string | null>(null)
++
++  const handleCopy = async (value: string) => {
++    try {
++      await navigator.clipboard.writeText(value)
++      setCopied(value)
++      setTimeout(() => setCopied(null), 1500)
++    } catch (err) {
++      console.error('Failed to copy text: ', err)
++    }
++  }
++
++  return (
++    <div className="my-6 w-full">
++      <div className="flex min-w-[640px] flex-col gap-1">
++        <div className={`grid gap-1 ${GRID_COLS}`}>
++          <div />
++          {SCALE_STEPS.map((step) => (
++            <div key={step} className="text-center font-mono text-[10px] text-foreground-lighter">
++              {step}
++            </div>
++          ))}
++        </div>
++        {colorNames.map((name) => {
++          const slug = name.toLowerCase()
++          return (
++            <div key={slug} className={`grid items-center gap-1 ${GRID_COLS}`}>
++              <div className="pr-2 text-sm font-medium text-foreground">{name}</div>
++              {SCALE_STEPS.map((step) => {
++                const reference = `var(--colors-${slug}${step})`
++                const isCopied = copied === reference
++                return (
++                  <button
++                    key={step}
++                    type="button"
++                    onClick={() => handleCopy(reference)}
++                    className="group relative flex aspect-square w-full items-center justify-center rounded-sm border border-overlay/40 transition hover:scale-[1.05] focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground"
++                    style={{ backgroundColor: reference }}
++                    title={reference}
++                  >
++                    <span className="rounded-xs bg-surface-100/90 px-1 font-mono text-[10px] text-foreground-light opacity-0 transition group-hover:opacity-100">
++                      {isCopied ? 'Copied!' : step}
++                    </span>
++                  </button>
++                )
++              })}
++            </div>
++          )
++        })}
++      </div>
++    </div>
++  )
++}
++
++export { ColorPalette }
+diff --git a/apps/design-system/components/mdx-components.tsx b/apps/design-system/components/mdx-components.tsx
+index 6d260d75c57b6..d753761ad1516 100644
+--- a/apps/design-system/components/mdx-components.tsx
++++ b/apps/design-system/components/mdx-components.tsx
+@@ -31,6 +31,7 @@ import { StyleWrapper } from './style-wrapper'
+ import { Callout } from '@/components/callout'
+ import { CodeBlockWrapper } from '@/components/code-block-wrapper'
+ import { CodeFragment } from '@/components/code-fragment'
++import { ColorPalette } from '@/components/color-palette'
+ import { Colors } from '@/components/colors'
+ import { ComponentExample } from '@/components/component-example'
+ import { ComponentPreview } from '@/components/component-preview'
+@@ -265,6 +266,7 @@ const components = {
+     />
+   ),
+   Colors,
++  ColorPalette,
+   Icons,
+   ThemeSettings,
+   CodeFragment,
+diff --git a/apps/design-system/content/docs/color-usage.mdx b/apps/design-system/content/docs/color-usage.mdx
+index e4635a07a70fc..b8f5f16b55567 100644
+--- a/apps/design-system/content/docs/color-usage.mdx
++++ b/apps/design-system/content/docs/color-usage.mdx
+@@ -69,3 +69,10 @@ This is not to be confused with `Dialogs`, they require to use the same app back
+ These can also be accessed with `foreground`. Like `text-foreground-light`.
+ 
+ <Colors definition={'colors'} />
++
++## Color palette
++
++Every Radix scale exposed via `--colors-{name}{1..12}`. Click a swatch to copy the CSS variable reference. The colors are taken
++from `@radix-ui/colors` v0.1.9 except the `Brand` and `Scale` colors.
++
++<ColorPalette />
+__FEAT1__
+
 cd /testbed
 patch --fuzz=5 -p1 -i /testbed/solution_patch_1.diff
 patch --fuzz=5 -p1 -i /testbed/solution_patch_2.diff
+patch --fuzz=5 -p1 -i /testbed/solution_patch_3.diff
+patch --fuzz=5 -p1 -i /testbed/solution_patch_4.diff
