@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-cat > /testbed/solution_patch.diff << '__BUGFIX1__'
+cat > /testbed/solution_patch_1.diff << '__BUGFIX1__'
 diff --git a/apps/studio/components/interfaces/Auth/ProtectionAuthSettingsForm/ProtectionAuthSettingsForm.tsx b/apps/studio/components/interfaces/Auth/ProtectionAuthSettingsForm/ProtectionAuthSettingsForm.tsx
 index f1d8f94d48117..074a988811ad5 100644
 --- a/apps/studio/components/interfaces/Auth/ProtectionAuthSettingsForm/ProtectionAuthSettingsForm.tsx
@@ -108,7 +108,7 @@ index 03b333ed17a84..36064088cecb5 100644
 __BUGFIX1__
 
 
-cat > /testbed/solution_patch.diff << '__BUGFIX2__'
+cat > /testbed/solution_patch_2.diff << '__BUGFIX2__'
 diff --git a/scripts/authorizeVercelDeploys.ts b/scripts/authorizeVercelDeploys.ts
 index 8a068193d5144..2b4305949e24b 100644
 --- a/scripts/authorizeVercelDeploys.ts
@@ -131,4 +131,5 @@ index 8a068193d5144..2b4305949e24b 100644
 __BUGFIX2__
 
 cd /testbed
-patch --fuzz=5 -p1 -i /testbed/solution_patch.diff
+patch --fuzz=5 -p1 -i /testbed/solution_patch_1.diff
+patch --fuzz=5 -p1 -i /testbed/solution_patch_2.diff
