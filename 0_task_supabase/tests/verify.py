@@ -7,15 +7,40 @@ from pathlib import Path
 
 ROOT = Path("/testbed")
 
-PROTECTION_FORM = ROOT / "apps/studio/components/interfaces/Auth/ProtectionAuthSettingsForm/ProtectionAuthSettingsForm.tsx"
-SESSIONS_FORM = ROOT / "apps/studio/components/interfaces/Auth/SessionsAuthSettingsForm/SessionsAuthSettingsForm.tsx"
-AUTHORIZE_SCRIPT = ROOT / "scripts/authorizeVercelDeploys.ts"
-MAGNIFIED_PRODUCTS = ROOT / "apps/www/components/MagnifiedProducts.tsx"
-COLOR_PALETTE_COMPONENT = ROOT / "apps/design-system/components/color-palette.tsx"
-COPY_BUTTON_COMPONENT = ROOT / "apps/design-system/components/copy-button.tsx"
-MDX_COMPONENTS = ROOT / "apps/design-system/components/mdx-components.tsx"
-COLOR_USAGE_DOC = ROOT / "apps/design-system/content/docs/color-usage.mdx"
-ACCESSIBILITY_DOC = ROOT / "apps/design-system/content/docs/accessibility.mdx"
+APP_LAYOUT = ROOT / "apps/www/app/layout.tsx"
+APP_PARTNERS_PAGE = ROOT / "apps/www/app/partners/page.tsx"
+APP_PARTNERS_CONTENT = ROOT / "apps/www/app/partners/PartnersContent.tsx"
+APP_PARTNERS_INTEGRATIONS_PAGE = ROOT / "apps/www/app/partners/integrations/page.tsx"
+APP_PARTNERS_INTEGRATIONS_CONTENT = ROOT / "apps/www/app/partners/integrations/IntegrationsContent.tsx"
+PAGES_APP = ROOT / "apps/www/pages/_app.tsx"
+PAGES_PARTNERS_INDEX = ROOT / "apps/www/pages/partners/index.tsx"
+PAGES_PARTNERS_INTEGRATIONS_INDEX = ROOT / "apps/www/pages/partners/integrations/index.tsx"
+
+BECOME_A_PARTNER = ROOT / "apps/www/components/Partners/BecomeAPartner.tsx"
+PARTNER_INTAKE_FORM = ROOT / "apps/www/components/Partners/PartnerIntakeForm.tsx"
+PARTNER_DATA = ROOT / "apps/www/data/partners/index.tsx"
+
+MARKETING_INDEX = ROOT / "packages/marketing/index.ts"
+FORMS_INDEX = ROOT / "packages/marketing/src/forms/index.ts"
+MARKETING_FORM = ROOT / "packages/marketing/src/forms/MarketingForm.tsx"
+HUBSPOT_FORM_EMBED = ROOT / "packages/marketing/src/forms/HubSpotFormEmbed.tsx"
+GO_SCHEMAS = ROOT / "packages/marketing/src/go/schemas.ts"
+FORM_SECTION = ROOT / "packages/marketing/src/go/sections/FormSection.tsx"
+SHOW_WHEN = ROOT / "packages/marketing/src/go/showWhen.ts"
+SUBMIT_FORM = ROOT / "packages/marketing/src/go/actions/submitForm.ts"
+
+DOCS_APP_LAYOUT = ROOT / "apps/docs/app/layout.tsx"
+DOCS_BREADCRUMBS_COMPONENT = ROOT / "apps/docs/components/Breadcrumbs.tsx"
+DOCS_BREADCRUMBS_LIB = ROOT / "apps/docs/lib/breadcrumbs.ts"
+DOCS_JSON_LD = ROOT / "apps/docs/lib/json-ld.ts"
+DOCS_GLOBALS_CSS = ROOT / "apps/docs/styles/globals.css"
+DOCS_TAILWIND = ROOT / "apps/docs/tailwind.config.cjs"
+DS_GLOBALS_CSS = ROOT / "apps/design-system/styles/globals.css"
+DS_TAILWIND = ROOT / "apps/design-system/tailwind.config.js"
+STUDIO_DOCS_DESCRIPTION = ROOT / "apps/studio/components/interfaces/Docs/Description.tsx"
+STUDIO_PROJECT_API_INTRO = ROOT / "apps/studio/components/interfaces/ProjectAPIDocs/Content/Introduction.tsx"
+STUDIO_NOTICE_BANNER = ROOT / "apps/studio/components/layouts/AppLayout/NoticeBanner.tsx"
+STUDIO_DB_SHORTCUTS = ROOT / "apps/studio/components/interfaces/DatabaseNavShortcuts.tsx"
 
 TOTAL_WEIGHT = 0.0
 PASSED_WEIGHT = 0.0
@@ -47,408 +72,396 @@ def assert_contains_any(src: str, patterns, message: str):
     raise AssertionError(message)
 
 
-# =========================================================
-# Bug 1: auth inactivity timeout should be human-readable in UI,
-# then converted back to seconds on submit.
-# =========================================================
-
-def test_auth_forms_exist():
-    assert PROTECTION_FORM.exists(), "Protection auth form file missing"
-    assert SESSIONS_FORM.exists(), "Sessions auth form file missing"
-
-
-def test_auth_forms_display_human_readable_inactivity_timeout():
-    protection = read(PROTECTION_FORM)
-    sessions = read(SESSIONS_FORM)
-
-    assert_contains_any(
-        protection,
-        [
-            r"SESSIONS_INACTIVITY_TIMEOUT\s*:\s*[^\n]*/\s*3600",
-            r"SESSIONS_INACTIVITY_TIMEOUT\s*:\s*secondsToHours",
-        ],
-        "Protection form does not convert inactivity timeout to human-readable units",
-    )
-
-    assert_contains_any(
-        sessions,
-        [
-            r"SESSIONS_INACTIVITY_TIMEOUT\s*:\s*[^\n]*/\s*3600",
-            r"SESSIONS_INACTIVITY_TIMEOUT\s*:\s*secondsToHours",
-        ],
-        "Sessions form does not convert inactivity timeout to human-readable units",
-    )
-
-
-def test_auth_forms_convert_inactivity_timeout_back_on_submit():
-    protection = read(PROTECTION_FORM)
-    sessions = read(SESSIONS_FORM)
-
-    assert_contains_any(
-        protection,
-        [
-            r"SESSIONS_INACTIVITY_TIMEOUT\s*=\s*[^\n]*\*\s*3600",
-            r"SESSIONS_INACTIVITY_TIMEOUT\s*:\s*hoursToSeconds",
-        ],
-        "Protection form does not convert inactivity timeout back to seconds on submit",
-    )
-
-    assert_contains_any(
-        sessions,
-        [
-            r"SESSIONS_INACTIVITY_TIMEOUT\s*=\s*[^\n]*\*\s*3600",
-            r"SESSIONS_INACTIVITY_TIMEOUT\s*:\s*hoursToSeconds",
-        ],
-        "Sessions form does not convert inactivity timeout back to seconds on submit",
-    )
+def assert_not_contains_any(src: str, patterns, message: str):
+    for pattern in patterns:
+        if re.search(pattern, src, re.DOTALL | re.IGNORECASE):
+            raise AssertionError(message)
 
 
 # =========================================================
-# Bug 2 + Bug 4: GitHub status fetch auth + resilience.
+# Workstream 1: routing and CTA anchor integration
 # =========================================================
 
-def test_authorize_script_exists_and_targets_github_statuses():
-    src = read(AUTHORIZE_SCRIPT)
-    assert "api.github.com/repos/supabase/supabase/statuses" in src, "GitHub statuses URL missing/changed"
+def test_routing_surfaces_exist():
+    paths = [
+        APP_LAYOUT,
+        APP_PARTNERS_PAGE,
+        APP_PARTNERS_CONTENT,
+        APP_PARTNERS_INTEGRATIONS_PAGE,
+        APP_PARTNERS_INTEGRATIONS_CONTENT,
+        PAGES_APP,
+        PAGES_PARTNERS_INDEX,
+        PAGES_PARTNERS_INTEGRATIONS_INDEX,
+    ]
+    missing = [str(p) for p in paths if not p.exists()]
+    assert not missing, f"Missing routing artifacts: {', '.join(missing)}"
 
 
-def test_authorize_uses_github_token_auth_header():
-    src = read(AUTHORIZE_SCRIPT)
+def test_app_router_partner_routes_present():
+    page_src = read(APP_PARTNERS_PAGE)
+    integrations_src = read(APP_PARTNERS_INTEGRATIONS_PAGE)
 
-    assert "GITHUB_TOKEN" in src, "GITHUB_TOKEN handling missing"
-    assert re.search(r"Authorization", src), "Authorization header handling missing"
+    assert_contains_any(
+        page_src,
+        [r"PartnersContent", r"/partners"],
+        "App Router /partners page does not appear wired",
+    )
+    assert_contains_any(
+        integrations_src,
+        [r"IntegrationsContent", r"/partners/integrations"],
+        "App Router /partners/integrations page does not appear wired",
+    )
 
 
-def test_authorize_has_timeout_handling():
-    src = read(AUTHORIZE_SCRIPT)
+def test_become_partner_cta_points_to_anchor_not_external_forms_host():
+    become = read(BECOME_A_PARTNER)
+    partner_data = read(PARTNER_DATA)
+
+    combined = "\n".join([become, partner_data])
+
+    assert_contains_any(
+        combined,
+        [
+            r"/partners#become-a-partner",
+            r"#become-a-partner",
+            r"become-a-partner",
+        ],
+        "Partner CTA does not reference #become-a-partner anchor",
+    )
+
+    assert_not_contains_any(
+        combined,
+        [r"forms\.supabase\.com", r"https?://[^\s'\"]*forms[^\s'\"]*"],
+        "Partner CTA still appears to use external forms host URL",
+    )
+
+
+# =========================================================
+# Workstream 2: inline intake and conditional sections
+# =========================================================
+
+def test_inline_partner_intake_anchor_and_section_present():
+    src = read(PARTNER_INTAKE_FORM)
 
     assert_contains_any(
         src,
         [
-            r"AbortController",
-            r"signal\s*:",
-            r"setTimeout\s*\(\s*\(\)\s*=>\s*.*abort",
-            r"timeout",
+            r"become-a-partner",
+            r"id\s*=\s*['\"]become-a-partner['\"]",
         ],
-        "Request timeout/abort handling missing",
+        "Partner intake form is missing #become-a-partner anchor/section hook",
     )
 
 
-def test_authorize_retries_transient_failures():
-    src = read(AUTHORIZE_SCRIPT)
+def test_partner_intake_uses_conditional_visibility_semantics():
+    src = read(PARTNER_INTAKE_FORM)
 
     assert_contains_any(
         src,
-        [r"retry", r"MAX_RETRIES", r"attempt", r"backoff"],
-        "Retry mechanism not detected",
+        [r"showWhen", r"sendWhen", r"partner[_-]?type", r"conditional"],
+        "Partner intake form is missing partner-type conditional section behavior",
+    )
+
+
+def test_checkbox_group_support_visible_in_schema_and_rendering():
+    schemas = read(GO_SCHEMAS)
+    form_section = read(FORM_SECTION)
+
+    assert_contains_any(
+        schemas,
+        [r"checkbox-group", r"checkbox_group"],
+        "Schema does not include checkbox-group field support",
+    )
+    assert_contains_any(
+        form_section,
+        [r"checkbox-group", r"checkbox_group"],
+        "Form section renderer does not handle checkbox-group fields",
+    )
+
+
+# =========================================================
+# Workstream 3: shared marketing showWhen behavior
+# =========================================================
+
+def test_showwhen_module_exists_and_exports_logic():
+    src = read(SHOW_WHEN)
+
+    assert_contains_any(
+        src,
+        [r"export", r"showWhen", r"evaluate"],
+        "showWhen module is missing exports/evaluator logic",
+    )
+
+
+def test_showwhen_is_reused_in_renderer_and_submission():
+    form_section = read(FORM_SECTION)
+    submit_form = read(SUBMIT_FORM)
+
+    assert_contains_any(
+        form_section,
+        [r"showWhen", r"from\s+['\"].*showWhen['\"]"],
+        "Renderer does not appear to use shared showWhen logic",
+    )
+    assert_contains_any(
+        submit_form,
+        [r"showWhen", r"from\s+['\"].*showWhen['\"]", r"sendWhen"],
+        "Submission fan-out does not appear to use shared conditional semantics",
+    )
+
+
+def test_marketing_exports_are_wired_consistently():
+    root_index = read(MARKETING_INDEX)
+    forms_index = read(FORMS_INDEX)
+    marketing_form = read(MARKETING_FORM)
+    hubspot_embed = read(HUBSPOT_FORM_EMBED)
+
+    assert_contains_any(
+        forms_index,
+        [r"MarketingForm", r"HubSpotFormEmbed"],
+        "forms/index.ts does not export expected form modules",
+    )
+    assert_contains_any(
+        root_index,
+        [r"from\s+['\"].*forms['\"]", r"MarketingForm", r"HubSpotFormEmbed"],
+        "packages/marketing/index.ts is not wiring form exports consistently",
+    )
+    assert_contains_any(
+        marketing_form,
+        [r"showWhen", r"form", r"field"],
+        "MarketingForm.tsx appears to miss shared form semantics",
+    )
+    assert_contains_any(
+        hubspot_embed,
+        [r"HubSpot", r"submit", r"form"],
+        "HubSpotFormEmbed.tsx appears incomplete for form integration",
+    )
+
+
+# =========================================================
+# Workstream 4: provider fan-out and sendWhen gating
+# =========================================================
+
+def test_submit_form_mentions_hubspot_and_notion_providers():
+    src = read(SUBMIT_FORM)
+
+    assert_contains_any(
+        src,
+        [r"HubSpot", r"hubspot"],
+        "submitForm.ts is missing HubSpot provider handling",
     )
     assert_contains_any(
         src,
-        [r"429", r">=\s*500", r"5xx", r"isTransient"],
-        "Transient error condition for 429/5xx not detected",
+        [r"Notion", r"notion"],
+        "submitForm.ts is missing Notion provider handling",
     )
 
 
-def test_authorize_skips_statuses_without_target_url():
-    src = read(AUTHORIZE_SCRIPT)
+def test_submit_form_uses_sendwhen_or_conditional_provider_gating():
+    src = read(SUBMIT_FORM)
 
-    # Accept either explicit continue/if checks or filtered array forms.
+    assert_contains_any(
+        src,
+        [r"sendWhen", r"showWhen", r"if\s*\(.*notion", r"partner[_-]?type"],
+        "submitForm.ts is missing conditional provider gating for fan-out",
+    )
+
+
+def test_notion_gating_references_qualifying_partner_types():
+    src = read(SUBMIT_FORM)
+
     assert_contains_any(
         src,
         [
-            r"if\s*\(\s*!status\.target_url\s*\)",
-            r"filter\(.*target_url",
-            r"status\.target_url\s*\?",
+            r"Technology\s+Partner",
+            r"technology[_ -]?partner",
+            r"partner[_-]?type",
+            r"qualif",
         ],
-        "Statuses without target_url are not safely handled",
-    )
-
-
-def test_authorize_has_nonzero_exit_on_failure():
-    src = read(AUTHORIZE_SCRIPT)
-
-    assert_contains_any(
-        src,
-        [r"process\.exit\s*\(\s*1\s*\)", r"throw new Error"],
-        "Authorization failure does not clearly lead to non-zero/error path",
+        "Notion gating does not reference partner-type qualification criteria",
     )
 
 
 # =========================================================
-# Bug 3 + Bug 5: MagnifiedProducts vector link + visible label.
+# Cross-artifact consistency checks
 # =========================================================
 
-def _extract_vector_block(src: str) -> str:
-    m = re.search(r"vector\s*:\s*\{.*?\n\s*\}", src, re.DOTALL | re.IGNORECASE)
-    assert m, "Vector product definition missing"
-    return m.group(0)
+def test_partner_type_key_is_used_across_schema_ui_and_submit():
+    schema_src = read(GO_SCHEMAS)
+    intake_src = read(PARTNER_INTAKE_FORM)
+    submit_src = read(SUBMIT_FORM)
 
-
-def test_vector_link_points_to_modules_vector():
-    src = read(MAGNIFIED_PRODUCTS)
-    block = _extract_vector_block(src)
-
+    combined = "\n".join([schema_src, intake_src, submit_src])
     assert_contains_any(
-        block,
-        [r"url\s*:\s*['\"]\/modules\/vector['\"]"],
-        "Vector product URL is not /modules/vector",
+        combined,
+        [r"partner[_-]?type", r"partnerType"],
+        "partner type key is not consistently visible across schema/UI/submission",
     )
 
 
-def test_vector_label_is_non_empty():
-    src = read(MAGNIFIED_PRODUCTS)
-    block = _extract_vector_block(src)
-
-    assert re.search(r"label\s*:\s*['\"]\s*[^'\"\s][^'\"]*['\"]", block), \
-        "Vector product label is empty or missing"
-
-
-# =========================================================
-# Feature 1 + Feature 2: color palette component + docs + a11y.
-# =========================================================
-
-def test_color_palette_component_exists_and_is_interactive():
-    src = read(COLOR_PALETTE_COMPONENT)
-
-    assert "useState" in src, "ColorPalette should manage copy state"
-    assert_contains_any(
-        src,
-        [r"onClick", r"handleCopy"],
-        "ColorPalette click/copy behavior missing",
-    )
-    assert_contains_any(
-        src,
-        [r"navigator\.clipboard", r"copyToClipboardWithMeta"],
-        "Clipboard copy behavior missing",
-    )
-
-
-def test_color_palette_has_explicit_accessibility_label():
-    src = read(COLOR_PALETTE_COMPONENT)
+def test_integrations_route_linkage_is_preserved():
+    app_content = read(APP_PARTNERS_CONTENT)
+    integrations_content = read(APP_PARTNERS_INTEGRATIONS_CONTENT)
 
     assert_contains_any(
-        src,
-        [r"aria-label", r"ariaLabel"],
-        "ColorPalette swatches are missing explicit accessible labels",
-    )
-
-
-def test_mdx_components_registers_color_palette():
-    src = read(MDX_COMPONENTS)
-
-    assert_contains_any(
-        src,
-        [r"import\s*\{\s*ColorPalette\s*\}\s*from\s*['\"]@/components/color-palette['\"]"],
-        "mdx-components is missing ColorPalette import",
-    )
-    assert_contains_any(
-        src,
-        [r"\bColorPalette\b"],
-        "mdx-components does not reference ColorPalette in component map",
-    )
-
-
-def test_color_usage_doc_mentions_palette_and_copy_feedback():
-    src = read(COLOR_USAGE_DOC)
-
-    assert re.search(r"##\s+.*palette", src, re.IGNORECASE), "Color usage docs missing palette section"
-    assert "<ColorPalette />" in src, "Color usage docs missing ColorPalette usage"
-    assert_contains_any(
-        src,
-        [r"copy", r"copied", r"feedback"],
-        "Color usage docs missing copy feedback guidance",
+        app_content + "\n" + integrations_content,
+        [r"integrations", r"/partners/integrations"],
+        "Integrations listing/navigation linkage appears broken",
     )
 
 
 # =========================================================
-# Execute checks with weighted scoring.
+# Instruction clause: existing partner listing reachable after routing
 # =========================================================
 
-check("auth forms exist", test_auth_forms_exist, weight=0.5)
+def test_partner_listing_content_remains_reachable():
+    # The partners content and integrations content components must still render
+    # partner/integration listing data — not be empty stubs or redirect-only.
+    partners_content = read(APP_PARTNERS_CONTENT)
+    integrations_content = read(APP_PARTNERS_INTEGRATIONS_CONTENT)
+
+    assert_contains_any(
+        partners_content,
+        [r"partner", r"data", r"map\s*\(", r"Partner"],
+        "PartnersContent appears to be a stub with no listing content",
+    )
+    assert_contains_any(
+        integrations_content,
+        [r"integration", r"data", r"map\s*\(", r"Integration"],
+        "IntegrationsContent appears to be a stub with no listing content",
+    )
+
+
+# =========================================================
+# Instruction clause: no placeholder-only behavior in core gating logic
+# =========================================================
+
+def test_gating_logic_is_not_placeholder_only():
+    submit_src = read(SUBMIT_FORM)
+    show_when_src = read(SHOW_WHEN)
+
+    # submitForm.ts must not be a TODO/stub — it must contain real logic
+    assert_not_contains_any(
+        submit_src,
+        [r"TODO\s*:.*notion", r"throw new Error\(['\"]not implemented"],
+        "submitForm.ts appears to use placeholder/not-implemented gating for Notion",
+    )
+
+    # showWhen.ts must have an actual conditional expression, not just an export stub
+    assert_contains_any(
+        show_when_src,
+        [r"if\s*\(", r"===", r"includes\s*\(", r"return\s+(true|false|\w)"],
+        "showWhen.ts contains no conditional evaluation logic (placeholder only)",
+    )
+
+
+# =========================================================
+# Secondary breadth surfaces: docs/design-system/studio
+# =========================================================
+
+def test_secondary_surfaces_exist():
+    paths = [
+        DOCS_APP_LAYOUT,
+        DOCS_BREADCRUMBS_COMPONENT,
+        DOCS_BREADCRUMBS_LIB,
+        DOCS_JSON_LD,
+        DOCS_GLOBALS_CSS,
+        DOCS_TAILWIND,
+        DS_GLOBALS_CSS,
+        DS_TAILWIND,
+        STUDIO_DOCS_DESCRIPTION,
+        STUDIO_PROJECT_API_INTRO,
+        STUDIO_NOTICE_BANNER,
+        STUDIO_DB_SHORTCUTS,
+    ]
+    missing = [str(p) for p in paths if not p.exists()]
+    assert not missing, f"Missing secondary artifacts: {', '.join(missing)}"
+
+
+def test_docs_navigation_and_meta_wiring_signals():
+    docs_layout = read(DOCS_APP_LAYOUT)
+    docs_breadcrumbs_component = read(DOCS_BREADCRUMBS_COMPONENT)
+    docs_breadcrumbs_lib = read(DOCS_BREADCRUMBS_LIB)
+    docs_json_ld = read(DOCS_JSON_LD)
+
+    assert_contains_any(
+        docs_layout,
+        [r"metadata", r"layout", r"json-ld", r"breadcrumb"],
+        "apps/docs/app/layout.tsx appears to miss docs metadata/navigation wiring",
+    )
+    assert_contains_any(
+        docs_breadcrumbs_component + "\n" + docs_breadcrumbs_lib,
+        [r"breadcrumb", r"crumb", r"path", r"guide"],
+        "Docs breadcrumbs component/lib appears disconnected or placeholder-only",
+    )
+    assert_contains_any(
+        docs_json_ld,
+        [r"json", r"ld", r"schema", r"BreadcrumbList", r"@type"],
+        "apps/docs/lib/json-ld.ts appears to miss structured metadata semantics",
+    )
+
+
+def test_design_system_and_studio_surface_signals():
+    docs_css = read(DOCS_GLOBALS_CSS)
+    docs_tailwind = read(DOCS_TAILWIND)
+    ds_css = read(DS_GLOBALS_CSS)
+    ds_tailwind = read(DS_TAILWIND)
+    studio_combined = "\n".join(
+        [
+            read(STUDIO_DOCS_DESCRIPTION),
+            read(STUDIO_PROJECT_API_INTRO),
+            read(STUDIO_NOTICE_BANNER),
+            read(STUDIO_DB_SHORTCUTS),
+        ]
+    )
+
+    assert_contains_any(
+        docs_css + "\n" + ds_css,
+        [r"--", r":root", r"font", r"color", r"background"],
+        "Docs/design-system global styles appear incomplete or disconnected",
+    )
+    assert_contains_any(
+        docs_tailwind + "\n" + ds_tailwind,
+        [r"tailwind", r"theme", r"content", r"extend"],
+        "Docs/design-system tailwind configs appear incomplete",
+    )
+    assert_contains_any(
+        studio_combined,
+        [r"docs", r"api", r"notice", r"database", r"description"],
+        "Studio secondary docs/navigation surfaces appear missing expected semantics",
+    )
+
+
+# =========================================================
+# Execute checks with weighted scoring
+# =========================================================
+
+check("routing surfaces exist", test_routing_surfaces_exist, weight=1.0)
+check("app router partner routes present", test_app_router_partner_routes_present, weight=2.0)
 check(
-    "auth forms display human-readable inactivity timeout",
-    test_auth_forms_display_human_readable_inactivity_timeout,
+    "become-a-partner CTA uses anchor and not external forms host",
+    test_become_partner_cta_points_to_anchor_not_external_forms_host,
     weight=2.0,
 )
-check(
-    "auth forms convert inactivity timeout to seconds on submit",
-    test_auth_forms_convert_inactivity_timeout_back_on_submit,
-    weight=2.0,
-)
 
-check(
-    "authorize script exists and targets github statuses",
-    test_authorize_script_exists_and_targets_github_statuses,
-    weight=1.0,
-)
-check("authorize uses github token auth", test_authorize_uses_github_token_auth_header, weight=1.5)
-check("authorize has timeout handling", test_authorize_has_timeout_handling, weight=2.0)
-check("authorize retries transient failures", test_authorize_retries_transient_failures, weight=2.0)
-check("authorize skips statuses without target_url", test_authorize_skips_statuses_without_target_url, weight=2.0)
-check("authorize has nonzero exit on failure", test_authorize_has_nonzero_exit_on_failure, weight=1.5)
+check("inline intake anchor/section present", test_inline_partner_intake_anchor_and_section_present, weight=1.5)
+check("partner intake conditional visibility semantics", test_partner_intake_uses_conditional_visibility_semantics, weight=2.0)
+check("checkbox-group support in schema and renderer", test_checkbox_group_support_visible_in_schema_and_rendering, weight=2.0)
 
-check("vector link points to /modules/vector", test_vector_link_points_to_modules_vector, weight=1.5)
-check("vector label is non-empty", test_vector_label_is_non_empty, weight=1.5)
+check("showWhen module exists with exports", test_showwhen_module_exists_and_exports_logic, weight=1.5)
+check("showWhen reused in renderer and submission", test_showwhen_is_reused_in_renderer_and_submission, weight=2.0)
+check("marketing exports wiring consistency", test_marketing_exports_are_wired_consistently, weight=2.0)
 
-check(
-    "color palette component exists and is interactive",
-    test_color_palette_component_exists_and_is_interactive,
-    weight=1.5,
-)
-check(
-    "color palette has explicit accessibility label",
-    test_color_palette_has_explicit_accessibility_label,
-    weight=1.5,
-)
-check("mdx components registers color palette", test_mdx_components_registers_color_palette, weight=1.5)
-check(
-    "color usage docs mention palette and copy feedback",
-    test_color_usage_doc_mentions_palette_and_copy_feedback,
-    weight=1.5,
-)
+check("submit form includes HubSpot and Notion", test_submit_form_mentions_hubspot_and_notion_providers, weight=1.5)
+check("submit form uses conditional provider gating", test_submit_form_uses_sendwhen_or_conditional_provider_gating, weight=2.0)
+check("notion gating references qualifying partner types", test_notion_gating_references_qualifying_partner_types, weight=1.5)
 
-
-# =========================================================
-# Feature 1 detail: copied feedback text + auto-clear timeout
-# =========================================================
-
-def test_color_palette_copied_feedback_with_timeout():
-    src = read(COLOR_PALETTE_COMPONENT)
-    assert re.search(r"['\"]Copied[!\.]?['\"]", src), \
-        "color-palette.tsx missing 'Copied!' feedback text"
-    assert re.search(r"setTimeout\s*\(", src), \
-        "color-palette.tsx missing setTimeout to auto-clear copied state"
-    assert_contains_any(
-        src,
-        [r"setTimeout\s*\([^,]+,\s*\d{3,}", r"setTimeout\s*\([^,]+,\s*COPY_FEEDBACK_DURATION_MS"],
-        "color-palette.tsx setTimeout missing numeric delay or shared timeout constant",
-    )
-
-
-# =========================================================
-# Feature 2 detail: aria-label must be descriptive/dynamic
-# =========================================================
-
-def test_color_palette_aria_label_is_descriptive():
-    src = read(COLOR_PALETTE_COMPONENT)
-    # The aria-label should include a dynamic reference to the color name and/or step
-    assert_contains_any(
-        src,
-        [
-            r"aria-label=\{`[^`]*\$\{[^}]+\}[^`]*`\}",  # template literal
-            r"aria-label=\{`Copy[^`]*\$\{",              # "Copy ${name} ..."
-        ],
-        "color-palette.tsx aria-label is not dynamic/descriptive (must include color name/step via template literal)",
-    )
-
-
-def test_color_palette_is_keyboard_focusable():
-    src = read(COLOR_PALETTE_COMPONENT)
-    assert_contains_any(
-        src,
-        [r"tabIndex\s*=\s*\{\s*0\s*\}", r"tabIndex\s*=\s*['\"]0['\"]"],
-        "color-palette.tsx swatches are missing explicit keyboard focusability via tabIndex={0}",
-    )
-
-
-def test_copy_button_exports_shared_feedback_duration_constant():
-    src = read(COPY_BUTTON_COMPONENT)
-    assert_contains_any(
-        src,
-        [r"export\s+const\s+COPY_FEEDBACK_DURATION_MS\s*=\s*1500", r"export\s*\{\s*COPY_FEEDBACK_DURATION_MS\s*\}"],
-        "copy-button.tsx missing exported COPY_FEEDBACK_DURATION_MS constant",
-    )
-
-
-def test_color_palette_reuses_shared_feedback_duration_constant():
-    src = read(COLOR_PALETTE_COMPONENT)
-    assert_contains_any(
-        src,
-        [
-            r"COPY_FEEDBACK_DURATION_MS",
-            r"from\s*['\"].*copy-button['\"]",
-        ],
-        "color-palette.tsx does not reuse shared copy-button feedback duration constant",
-    )
-
-
-def test_accessibility_doc_mentions_palette_swatch_a11y():
-    src = read(ACCESSIBILITY_DOC)
-    assert_contains_any(
-        src,
-        [r"color swatches", r"palette swatches", r"interactive color swatches"],
-        "accessibility.mdx missing color swatch accessibility guidance",
-    )
-    assert_contains_any(
-        src,
-        [r"aria-label", r"keyboard focus", r"tabIndex"],
-        "accessibility.mdx missing aria-label or keyboard-focus guidance for color swatches",
-    )
-
-
-# =========================================================
-# Bug 4 detail: named constants for retry and timeout
-# =========================================================
-
-def test_authorize_has_named_max_retries_constant():
-    src = read(AUTHORIZE_SCRIPT)
-    assert re.search(r"\bMAX_RETRIES\b", src), \
-        "authorizeVercelDeploys.ts missing MAX_RETRIES named constant"
-    assert re.search(r"MAX_RETRIES\s*=\s*\d+", src), \
-        "authorizeVercelDeploys.ts MAX_RETRIES is not assigned a numeric value"
-
-
-def test_authorize_has_named_timeout_ms_constant():
-    src = read(AUTHORIZE_SCRIPT)
-    assert_contains_any(
-        src,
-        [r"\bREQUEST_TIMEOUT_MS\b", r"\bTIMEOUT_MS\b", r"\bFETCH_TIMEOUT\b"],
-        "authorizeVercelDeploys.ts missing named timeout constant (e.g. REQUEST_TIMEOUT_MS)",
-    )
-
-
-def test_authorize_waits_between_retries():
-    src = read(AUTHORIZE_SCRIPT)
-    # Must have actual delay between retries (not just immediate retry)
-    assert_contains_any(
-        src,
-        [
-            r"waitForRetry",
-            r"await new Promise[^;]*setTimeout",
-            r"await.*sleep",
-            r"backoff",
-        ],
-        "authorizeVercelDeploys.ts retry logic has no delay/backoff between attempts",
-    )
-
-
-# =========================================================
-# Bug 1 detail: Sessions form submit conversion (separate from Protection)
-# =========================================================
-
-def test_sessions_form_converts_inactivity_timeout_on_submit():
-    sessions = read(SESSIONS_FORM)
-    assert_contains_any(
-        sessions,
-        [
-            r"SESSIONS_INACTIVITY_TIMEOUT\s*=\s*[^\n]*\*\s*3600",
-            r"SESSIONS_INACTIVITY_TIMEOUT\s*:\s*hoursToSeconds",
-            r"Math\.round\([^)]*SESSIONS_INACTIVITY_TIMEOUT[^)]*3600\)",
-        ],
-        "Sessions form does not convert inactivity timeout back to seconds on submit",
-    )
-
-
-check("color palette copied feedback with timeout", test_color_palette_copied_feedback_with_timeout, weight=1.5)
-check("color palette aria-label is dynamic/descriptive", test_color_palette_aria_label_is_descriptive, weight=1.5)
-check("color palette swatches are explicitly keyboard focusable", test_color_palette_is_keyboard_focusable, weight=1.5)
-check("copy-button exports shared feedback duration constant", test_copy_button_exports_shared_feedback_duration_constant, weight=1.5)
-check("color palette reuses shared feedback duration constant", test_color_palette_reuses_shared_feedback_duration_constant, weight=2.0)
-check("accessibility docs mention palette swatch a11y", test_accessibility_doc_mentions_palette_swatch_a11y, weight=2.0)
-check("authorize has named MAX_RETRIES constant", test_authorize_has_named_max_retries_constant, weight=1.5)
-check("authorize has named timeout-ms constant", test_authorize_has_named_timeout_ms_constant, weight=1.5)
-check("authorize waits between retries (backoff)", test_authorize_waits_between_retries, weight=2.0)
-check("sessions form converts inactivity timeout on submit", test_sessions_form_converts_inactivity_timeout_on_submit, weight=2.0)
+check("partner type key consistency across surfaces", test_partner_type_key_is_used_across_schema_ui_and_submit, weight=1.5)
+check("integrations route linkage preserved", test_integrations_route_linkage_is_preserved, weight=1.0)
+check("partner listing content reachable after routing", test_partner_listing_content_remains_reachable, weight=1.5)
+check("gating logic is not placeholder-only", test_gating_logic_is_not_placeholder_only, weight=2.0)
+check("secondary surfaces exist", test_secondary_surfaces_exist, weight=1.5)
+check("docs navigation/meta wiring signals", test_docs_navigation_and_meta_wiring_signals, weight=1.5)
+check("design-system and studio surface signals", test_design_system_and_studio_surface_signals, weight=1.5)
 
 reward = PASSED_WEIGHT / TOTAL_WEIGHT if TOTAL_WEIGHT else 0.0
 print(f"\nReward: {reward:.4f}")
@@ -457,4 +470,5 @@ os.makedirs("/logs/verifier", exist_ok=True)
 with open("/logs/verifier/reward.txt", "w", encoding="utf-8") as f:
     f.write(str(reward))
 
+# Keep verifier non-terminating for partial-credit scoring workflows.
 sys.exit(0)

@@ -1,23 +1,24 @@
 [task]
 name = "swarmbench/CODESWE-SUPABASE-BUGFIX"
-description = "Fixing bugs in SUPABASE"
+description = "PR45722 partner-intake breadth benchmark in SUPABASE"
 
 [metadata]
 verifier_type = "executable"
 domain = "code-swe"
 coordination_pattern = "fan-out-synthesize"
-human_solving_hours_estimate = 3
-human_solving_hours_justification = "0.60h repository reading and requirement extraction + 1.10h implementation across auth, CI script, product card, design-system component, shared copy utility, and docs surfaces + 0.55h decomposition/verifier alignment + 0.75h iterative oracle/single/multi validation and failure triage = 3.00h"
-estimated_sub_agents = 7
-input_token_estimate = 10000
-reference_link = "https://github.com/supabase/supabase"
-why_multi_agent = "Single-agent failure mode: losing coverage across multiple independent surfaces under a fixed budget, especially when the task now spans auth display semantics, auth submit semantics, CI auth, CI retry/backoff semantics, product metadata, a design-system component, a shared copy utility, and two separate docs surfaces that must stay consistent. Multi-agent mechanism: assign independent technical workstreams in parallel, then use dedicated reconciliation for design-system docs/component consistency before final verifier-driven synthesis."
+human_solving_hours_estimate = 5
+human_solving_hours_justification = "0.90h repository/PR extraction + 1.80h implementation across routing, intake UI, shared marketing form engine, and provider fan-out + 0.90h secondary docs/design-system/studio audit + 0.60h cross-surface reconciliation + 0.80h verifier-driven stabilization under constrained runtime = 5.00h"
+estimated_sub_agents = 8
+input_token_estimate = 70000
+reference_link = "https://github.com/supabase/supabase/pull/45722"
+why_multi_agent = "This task now spans a primary implementation core plus secondary docs/design-system/studio surfaces (about 30 files total) across 5 independent workstreams. A single agent must context-switch between routing migration, partner intake UX, TypeScript schema/renderer semantics, provider fan-out gating, and cross-app documentation/styling integration checks under a fixed runtime budget, which causes coverage collapse and inconsistent edge handling. Multi-agent execution enables parallel focused ownership per workstream and a reconciliation pass that enforces cross-surface invariants (anchors, showWhen semantics, provider routing, and secondary surface consistency) that single-agent runs frequently miss."
+
 
 [agent]
-timeout_sec = 3600
+timeout_sec = 1200
 
 [verifier]
-timeout_sec = 600
+timeout_sec = 400
 
 [environment]
 cpus = 2

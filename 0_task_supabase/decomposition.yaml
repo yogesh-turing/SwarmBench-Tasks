@@ -1,102 +1,108 @@
 coordination_pattern: fan-out-synthesize
 
 sub_tasks:
-  - id: auth-display-semantics
+  - id: partners-routing-and-app-router
     description: >
-      Audit only these files:
-      /testbed/apps/studio/components/interfaces/Auth/ProtectionAuthSettingsForm/ProtectionAuthSettingsForm.tsx
-      and
-      /testbed/apps/studio/components/interfaces/Auth/SessionsAuthSettingsForm/SessionsAuthSettingsForm.tsx.
-      Implement the UI-display side of Bug 1 only: both forms must show
-      SESSIONS_INACTIVITY_TIMEOUT in hours, not raw seconds, when loading/resetting defaults.
-      Confirm both forms use the same conversion direction and do not diverge in naming or display logic.
+      Own the routing migration and page wiring surfaces for partner pages.
+      Scope:
+      /testbed/apps/www/app/layout.tsx
+      /testbed/apps/www/app/partners/page.tsx
+      /testbed/apps/www/app/partners/PartnersContent.tsx
+      /testbed/apps/www/app/partners/integrations/page.tsx
+      /testbed/apps/www/app/partners/integrations/IntegrationsContent.tsx
+      /testbed/apps/www/pages/_app.tsx
+      /testbed/apps/www/pages/partners/index.tsx
+      /testbed/apps/www/pages/partners/integrations/index.tsx
+      Ensure /partners and /partners/integrations are App Router-first, and legacy pages-router links/entrypoints do not break expected navigation behavior.
     depends_on: []
-    parallel_group: fix
+    parallel_group: build
 
-  - id: auth-submit-semantics
+  - id: partner-intake-ui-and-cta
     description: >
-      Continue owning the same two auth settings forms, but only the submit-path behavior.
-      Implement the write-back side of Bug 1: both forms must convert hours back to seconds
-      before sending config to the backend. Reconcile any mismatch between the two forms so
-      display logic and submit logic stay symmetric.
+      Own partner intake user-facing integration and CTA behavior.
+      Scope:
+      /testbed/apps/www/components/Partners/BecomeAPartner.tsx
+      /testbed/apps/www/components/Partners/PartnerIntakeForm.tsx
+      /testbed/apps/www/data/partners/index.tsx
+      Implement inline intake form at #become-a-partner, ensure CTA links anchor correctly,
+      and support partner-type driven conditional section visibility in the UI.
     depends_on: []
-    parallel_group: fix
+    parallel_group: build
 
-  - id: vercel-github-auth
+  - id: marketing-form-engine-and-showwhen
     description: >
-      Own only /testbed/scripts/authorizeVercelDeploys.ts.
-      Implement the authentication and failure-contract part of Bug 2:
-      authenticate GitHub status requests using GITHUB_TOKEN, preserve explicit non-zero failure
-      behavior, and safely skip statuses missing target_url.
+      Own shared form engine semantics and field rendering consistency.
+      Scope:
+      /testbed/packages/marketing/index.ts
+      /testbed/packages/marketing/src/forms/index.ts
+      /testbed/packages/marketing/src/forms/MarketingForm.tsx
+      /testbed/packages/marketing/src/forms/HubSpotFormEmbed.tsx
+      /testbed/packages/marketing/src/go/schemas.ts
+      /testbed/packages/marketing/src/go/sections/FormSection.tsx
+      /testbed/packages/marketing/src/go/showWhen.ts
+      Keep showWhen semantics centralized and consistent across schema + renderer,
+      including checkbox-group behavior for solutions-style multi-select questions.
     depends_on: []
-    parallel_group: fix
+    parallel_group: build
 
-  - id: vercel-network-resilience
+  - id: submission-fanout-and-provider-gating
     description: >
-      Own only /testbed/scripts/authorizeVercelDeploys.ts, but focus only on network resilience.
-      Add a named timeout constant, a named retry-count constant, and bounded retry/backoff behavior
-      for transient 429/5xx failures without changing non-retriable behavior.
+      Own submission fan-out logic and provider-specific delivery rules.
+      Scope:
+      /testbed/packages/marketing/src/go/actions/submitForm.ts
+      /testbed/packages/marketing/src/go/showWhen.ts
+      Note: PartnerIntakeForm.tsx is owned exclusively by partner-intake-ui-and-cta.
+      Implement sendWhen-style provider gating so all qualifying submissions still reach HubSpot,
+      while Notion receives only intended partner categories.
+      Preserve non-qualifying behavior (no accidental Notion fan-out).
     depends_on: []
-    parallel_group: fix
+    parallel_group: build
 
-  - id: fix-magnified-products-vector-link-and-label
+  - id: secondary-docs-design-system-and-studio-audit
     description: >
-      Own only /testbed/apps/www/components/MagnifiedProducts.tsx.
-      Implement Bug 3 and Bug 5 together:
-      fix the Vector product URL to the valid modules route and set a non-empty
-      visible label while keeping existing product intent and metadata fields intact.
+      Own secondary breadth surfaces that must remain integration-consistent while
+      partner routing/intake/form changes land.
+      Scope:
+      /testbed/apps/docs/app/layout.tsx
+      /testbed/apps/docs/components/Breadcrumbs.tsx
+      /testbed/apps/docs/lib/breadcrumbs.ts
+      /testbed/apps/docs/lib/json-ld.ts
+      /testbed/apps/docs/styles/globals.css
+      /testbed/apps/docs/tailwind.config.cjs
+      /testbed/apps/design-system/styles/globals.css
+      /testbed/apps/design-system/tailwind.config.js
+      /testbed/apps/studio/components/interfaces/Docs/Description.tsx
+      /testbed/apps/studio/components/interfaces/ProjectAPIDocs/Content/Introduction.tsx
+      /testbed/apps/studio/components/layouts/AppLayout/NoticeBanner.tsx
+      /testbed/apps/studio/components/interfaces/DatabaseNavShortcuts.tsx
+      Audit and reconcile side effects (layout exports, shared styling assumptions,
+      docs navigation/meta wiring, and cross-app UI consistency) without broad refactors.
     depends_on: []
-    parallel_group: fix
+    parallel_group: build
 
-  - id: design-system-palette-component
+  - id: cross-surface-reconciliation
     description: >
-      Own only these files:
-      /testbed/apps/design-system/components/color-palette.tsx,
-      /testbed/apps/design-system/components/copy-button.tsx.
-      Implement the component-side work for Feature 1 and Feature 2:
-      create the interactive ColorPalette, reuse a shared copy-feedback duration constant from
-      copy-button, preserve copied-state feedback, and ensure swatches are keyboard focusable with
-      descriptive aria-labels.
-    depends_on: []
-    parallel_group: fix
-
-  - id: design-system-docs-and-mapping
-    description: >
-      Own only these files:
-      /testbed/apps/design-system/components/mdx-components.tsx,
-      /testbed/apps/design-system/content/docs/color-usage.mdx,
-      /testbed/apps/design-system/content/docs/accessibility.mdx.
-      Implement the docs/integration side of Feature 1 and Feature 2:
-      register ColorPalette in the MDX component map, render it in the color usage docs,
-      explain copy feedback there, and add a short accessibility note about descriptive aria-labels
-      plus keyboard focus support for interactive color swatches.
-    depends_on: []
-    parallel_group: fix
-
-  - id: reconcile-design-system-surfaces
-    description: >
-      Reconcile the design-system component and docs workstreams.
-      Verify that the component API, MDX registration, color usage docs, and accessibility guidance
-      all agree on the same interaction model: copy feedback, descriptive aria-labels, and keyboard focus.
-      Apply only minimal integration fixes needed to keep those surfaces internally consistent.
+      Reconcile outputs from all five workstreams.
+      Validate consistency across routing, CTA anchors, inline form rendering,
+      shared showWhen semantics, provider fan-out rules, and secondary docs/design-system/studio surfaces.
+      Apply minimal integration fixes only where cross-surface behavior diverges.
     depends_on:
-      - design-system-palette-component
-      - design-system-docs-and-mapping
+      - partners-routing-and-app-router
+      - partner-intake-ui-and-cta
+      - marketing-form-engine-and-showwhen
+      - submission-fanout-and-provider-gating
+      - secondary-docs-design-system-and-studio-audit
     parallel_group: synthesize
 
-  - id: verify-and-stabilize
+  - id: verifier-driven-stabilization
     description: >
-      After all fix tasks finish, run the verifier and confirm all checks pass.
-      If a check fails, apply minimal integration fixes (not broad refactors) and
-      rerun until green. Resolve failures in this priority order:
-      1) auth conversion semantics, 2) GitHub auth/timeout/retry behavior,
-      3) design-system docs/component reconciliation, 4) vector card metadata.
-      Keep ownership boundaries from earlier tasks unless a failing test requires final integration edits.
+      Run verifier, triage failures, and stabilize until green.
+      Priority order:
+      1) routing + anchors,
+      2) conditional rendering and field-type support,
+      3) shared showWhen semantics,
+      4) provider fan-out gating.
+      Avoid broad refactors after synthesis; prefer targeted reconciliations.
     depends_on:
-      - auth-display-semantics
-      - auth-submit-semantics
-      - vercel-github-auth
-      - vercel-network-resilience
-      - fix-magnified-products-vector-link-and-label
-      - reconcile-design-system-surfaces
+      - cross-surface-reconciliation
     parallel_group: synthesize
